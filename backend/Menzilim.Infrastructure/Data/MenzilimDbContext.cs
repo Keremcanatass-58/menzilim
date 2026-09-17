@@ -28,6 +28,7 @@ public class MenzilimDbContext : DbContext
     public DbSet<DailyTask> DailyTasks => Set<DailyTask>();
     public DbSet<UserProgress> UserProgresses => Set<UserProgress>();
     public DbSet<UserActivity> UserActivities => Set<UserActivity>();
+    public DbSet<UserContentProgress> UserContentProgresses => Set<UserContentProgress>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

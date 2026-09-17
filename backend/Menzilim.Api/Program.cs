@@ -1,27 +1,87 @@
+using System.Security.Claims;
+using System.Text;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Menzilim.Application.Interfaces.Content;
+using Menzilim.Application.DTOs.Content;
+using Menzilim.Application.Services.Content;
+using Menzilim.Application.Services;
+using Menzilim.Application.Interfaces.ContentProfession;
+using Menzilim.Application.Services.ContentProfession;
+using Menzilim.Application.DTOs.Auth;
+using Menzilim.Application.DTOs.Dashboard;
+using Menzilim.Application.DTOs.Onboarding;
 using Menzilim.Application.Interfaces;
+using Menzilim.Application.Interfaces.Dashboard;
+using Menzilim.Application.Interfaces.DailyPlan;
+using Menzilim.Application.Interfaces.Onboarding;
 using Menzilim.Application.Interfaces.Repositories;
 using Menzilim.Application.Services.Auth;
-using Menzilim.Application.DTOs.Auth;
+using Menzilim.Application.Services.Dashboard;
+using Menzilim.Application.Services.DailyPlan;
+using Menzilim.Application.Services.Onboarding;
+using Menzilim.Application.DTOs.Quiz;
+using Menzilim.Application.Interfaces.Quiz;
+using Menzilim.Application.Services.Quiz;
 using Menzilim.Infrastructure.Data;
+using Menzilim.Infrastructure.Data.Seed;
 using Menzilim.Infrastructure.Repositories;
 using Menzilim.Infrastructure.Services;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+
+
+// ==============================
+// DATABASE
+// ==============================
 
 builder.Services.AddDbContext<MenzilimDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 
+
+// ==============================
+// APPLICATION SERVICES
+// ==============================
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IOnboardingService, OnboardingService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IDailyPlanService, DailyPlanService>();
+builder.Services.AddScoped<IDailyPlanRepository, DailyPlanRepository>();
+builder.Services.AddScoped<IContentService, ContentService>();
+builder.Services.AddScoped<IContentRepository, ContentRepository>();
+builder.Services.AddScoped<IContentProfessionService, ContentProfessionService>();
+builder.Services.AddScoped<IContentProfessionRepository, ContentProfessionRepository>();
+builder.Services.AddScoped<IContentProgressService, ContentProgressService>();
+builder.Services.AddScoped<IUserContentProgressRepository, UserContentProgressRepository>();
+builder.Services.AddScoped<IQuizService, QuizService>();
+builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+
+
+// ==============================
+// REPOSITORIES
+// ==============================
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IDailyPlanRepository, DailyPlanRepository>();
+
+
+// ==============================
+// INFRASTRUCTURE SERVICES
+// ==============================
+
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+
+
+// ==============================
+// JWT AUTHENTICATION
+// ==============================
 
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("JWT Key bulunamadı.");
@@ -32,6 +92,7 @@ builder.Services.AddAuthentication("Bearer")
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
+
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtKey)),
 
@@ -42,23 +103,74 @@ builder.Services.AddAuthentication("Bearer")
             ValidAudience = builder.Configuration["Jwt:Audience"],
 
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
+
+            ClockSkew = TimeSpan.Zero,
+
+            NameClaimType = ClaimTypes.NameIdentifier
         };
     });
 
 builder.Services.AddAuthorization();
 
+
+// ==============================
+// CORS
+// ==============================
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FlutterWeb", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+
 var app = builder.Build();
+
+
+// ==============================
+// DATABASE SEED
+// ==============================
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider
+        .GetRequiredService<MenzilimDbContext>();
+
+    await DatabaseSeeder.SeedAsync(db);
+}
+
+
+// ==============================
+// DEVELOPMENT
+// ==============================
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
+
+// ==============================
+// MIDDLEWARE
+// ==============================
+
 app.UseHttpsRedirection();
 
+app.UseCors("FlutterWeb");
+
 app.UseAuthentication();
+
 app.UseAuthorization();
+
+
+// ==============================
+// HEALTH CHECK
+// ==============================
 
 app.MapGet("/", () => new
 {
@@ -66,36 +178,594 @@ app.MapGet("/", () => new
     status = "online",
     version = "1.0.0"
 });
-app.MapPost("/api/auth/register", async (
-    RegisterRequest request,
-    IAuthService authService) =>
+
+
+// ==============================
+// PROFESSIONS
+// ==============================
+
+app.MapGet("/api/professions", async (MenzilimDbContext db) =>
 {
-    try
-    {
-        var response = await authService.RegisterAsync(request);
-        return Results.Ok(response);
-    }
-    catch (InvalidOperationException ex)
-    {
-        return Results.BadRequest(new
+    var professions = await db.Professions
+        .Where(x => x.IsActive)
+        .OrderBy(x => x.Name)
+        .Select(x => new
         {
-            message = ex.Message
-        });
-    }
+            x.Id,
+            x.Name,
+            x.Description
+        })
+        .ToListAsync();
+
+    return Results.Ok(professions);
 });
 
-app.MapPost("/api/auth/login", async (
-    LoginRequest request,
-    IAuthService authService) =>
-{
-    var response = await authService.LoginAsync(request);
 
-    if (response is null)
+// ==============================
+// SPECIALIZATIONS
+// ==============================
+
+app.MapGet(
+    "/api/professions/{professionId:guid}/specializations",
+    async (
+        Guid professionId,
+        MenzilimDbContext db) =>
     {
-        return Results.Unauthorized();
-    }
+        var professionExists = await db.Professions
+            .AnyAsync(x =>
+                x.Id == professionId &&
+                x.IsActive);
 
-    return Results.Ok(response);
-});
+        if (!professionExists)
+        {
+            return Results.NotFound(new
+            {
+                message = "Meslek bulunamadı."
+            });
+        }
+
+        var specializations = await db.Specializations
+            .Where(x =>
+                x.ProfessionId == professionId &&
+                x.IsActive)
+            .OrderBy(x => x.Name)
+            .Select(x => new
+            {
+                x.Id,
+                x.Name,
+                x.Description
+            })
+            .ToListAsync();
+
+        return Results.Ok(specializations);
+    });
+
+
+// ==============================
+// AUTH - REGISTER
+// ==============================
+
+app.MapPost(
+    "/api/auth/register",
+    async (
+        RegisterRequest request,
+        IAuthService authService) =>
+    {
+        try
+        {
+            var response = await authService.RegisterAsync(request);
+
+            return Results.Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new
+            {
+                message = ex.Message
+            });
+        }
+    });
+
+
+// ==============================
+// AUTH - LOGIN
+// ==============================
+
+app.MapPost(
+    "/api/auth/login",
+    async (
+        LoginRequest request,
+        IAuthService authService) =>
+    {
+        var response = await authService.LoginAsync(request);
+
+        if (response is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        return Results.Ok(response);
+    });
+
+
+// ==============================
+// ONBOARDING - GET ME
+// ==============================
+
+app.MapGet(
+    "/api/onboarding/me",
+    async (
+        ClaimsPrincipal user,
+        IOnboardingService onboardingService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var response =
+            await onboardingService.GetAsync(userId);
+
+        return response is null
+            ? Results.NotFound(new
+            {
+                message = "Onboarding profili bulunamadı."
+            })
+            : Results.Ok(response);
+    })
+    .RequireAuthorization();
+
+
+// ==============================
+// ONBOARDING - SAVE
+// ==============================
+
+app.MapPost(
+    "/api/onboarding",
+    async (
+        OnboardingRequest request,
+        ClaimsPrincipal user,
+        IOnboardingService onboardingService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        try
+        {
+            var response =
+                await onboardingService.SaveAsync(
+                    userId,
+                    request);
+
+            return Results.Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new
+            {
+                message = ex.Message
+            });
+        }
+    })
+    .RequireAuthorization();
+
+
+// ==============================
+// DASHBOARD - GET ME
+// ==============================
+
+app.MapGet(
+    "/api/dashboard/me",
+    async (
+        ClaimsPrincipal user,
+        IDashboardService dashboardService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var response =
+            await dashboardService.GetAsync(userId);
+
+        return response is null
+            ? Results.NotFound(new
+            {
+                message = "Dashboard profili bulunamadı."
+            })
+            : Results.Ok(response);
+    })
+    .RequireAuthorization();
+
+
+// ==============================
+// DAILY PLAN - GET ME
+// ==============================
+
+app.MapGet(
+    "/api/daily-plan/me",
+    async (
+        ClaimsPrincipal user,
+        IDailyPlanService dailyPlanService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var response =
+            await dailyPlanService.GetTodayAsync(userId);
+
+        return Results.Ok(response);
+    })
+    .RequireAuthorization();
+
+
+// ==============================
+// DAILY PLAN - COMPLETE TASK
+// ==============================
+
+app.MapPost(
+    "/api/daily-plan/tasks/{taskId:guid}/complete",
+    async (
+        Guid taskId,
+        ClaimsPrincipal user,
+        IDailyPlanService dailyPlanService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        try
+        {
+            var response =
+                await dailyPlanService.CompleteTaskAsync(
+                    userId,
+                    taskId);
+
+            return Results.Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.NotFound(new
+            {
+                message = ex.Message
+            });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Results.Forbid();
+        }
+    })
+    .RequireAuthorization();
+
+// ==============================
+// CONTENT - GET ALL
+// ==============================
+
+app.MapGet(
+    "/api/content",
+    async (
+        IContentService contentService) =>
+    {
+        var response =
+            await contentService.GetAllAsync();
+
+        return Results.Ok(response);
+    });
+
+
+// ==============================
+// CONTENT - GET BY ID
+// ==============================
+
+app.MapGet(
+    "/api/content/{contentId:guid}",
+    async (
+        Guid contentId,
+        IContentService contentService) =>
+    {
+        var response =
+            await contentService.GetByIdAsync(contentId);
+
+        return response is null
+            ? Results.NotFound(new
+            {
+                message = "İçerik bulunamadı."
+            })
+            : Results.Ok(response);
+    });
+
+ // CONTENT - CREATE
+app.MapPost(
+    "/api/content",
+    async (
+        CreateContentRequest request,
+        IContentService contentService) =>
+    {
+        var response = await contentService.CreateAsync(request);
+
+        return Results.Created(
+            $"/api/content/{response.Id}",
+            response);
+    });
+
+// ==============================
+// CONTENT - PROFESSION ASSIGN
+// ==============================
+
+app.MapPost(
+    "/api/content/profession",
+    async (
+        CreateContentProfessionRequest request,
+        IContentProfessionService contentProfessionService) =>
+    {
+        var created = await contentProfessionService.AddAsync(request);
+
+        return created
+            ? Results.Ok(new
+            {
+                message = "İçerik meslek ile eşleştirildi."
+            })
+            : Results.Conflict(new
+            {
+                message = "Bu içerik zaten bu meslek ile eşleştirilmiş."
+            });
+    });
+
+// ==============================
+// CONTENT - GET ME
+// ==============================
+
+app.MapGet(
+    "/api/content/me",
+    async (
+        ClaimsPrincipal user,
+        IUserRepository userRepository,
+        IContentService contentService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var currentUser =
+            await userRepository.GetByIdWithProfileDetailsAsync(userId);
+
+        if (currentUser is null)
+        {
+            return Results.NotFound(new
+            {
+                message = "Kullanıcı bulunamadı."
+            });
+        }
+
+        if (currentUser.Profile is null)
+        {
+            return Results.NotFound(new
+            {
+                message = "Kullanıcı profili bulunamadı."
+            });
+        }
+
+        var professionId = currentUser.Profile.ProfessionId;
+
+        var response =
+            await contentService.GetByProfessionAsync(professionId);
+
+        return Results.Ok(response);
+    })
+    .RequireAuthorization();
+
+
+// ==============================
+// CONTENT PROGRESS - START
+// ==============================
+
+app.MapPost(
+    "/api/content/{contentId:guid}/start",
+    async (
+        Guid contentId,
+        ClaimsPrincipal user,
+        IContentProgressService contentProgressService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Results.Unauthorized();
+
+        try
+        {
+            var response =
+                await contentProgressService.StartAsync(
+                    userId,
+                    contentId);
+
+            return Results.Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(new
+            {
+                message = ex.Message
+            });
+        }
+    })
+    .RequireAuthorization();
+
+
+// ==============================
+// CONTENT PROGRESS - COMPLETE
+// ==============================
+
+app.MapPost(
+    "/api/content/{contentId:guid}/complete",
+    async (
+        Guid contentId,
+        ClaimsPrincipal user,
+        IContentProgressService contentProgressService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Results.Unauthorized();
+
+        try
+        {
+            var response =
+                await contentProgressService.CompleteAsync(
+                    userId,
+                    contentId);
+
+            return Results.Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(new
+            {
+                message = ex.Message
+            });
+        }
+    })
+    .RequireAuthorization();
+
+
+// CONTENT PROGRESS - GET
+app.MapGet(
+    "/api/content/{contentId:guid}/progress",
+    async (
+        Guid contentId,
+        ClaimsPrincipal user,
+        IContentProgressService contentProgressService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Results.Unauthorized();
+
+        try
+        {
+            var response =
+                await contentProgressService.GetAsync(
+                    userId,
+                    contentId);
+
+            if (response is null)
+            {
+                return Results.Ok(new
+                {
+                    contentId,
+                    isStarted = false,
+                    isCompleted = false,
+                    startedAt = (DateTime?)null,
+                    completedAt = (DateTime?)null
+                });
+            }
+
+            return Results.Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(new
+            {
+                message = ex.Message
+            });
+        }
+    })
+    .RequireAuthorization();
+
+// ==============================
+// QUIZZES - GET ALL ACTIVE
+// ==============================
+app.MapGet(
+    "/api/quizzes",
+    async (IQuizService quizService) =>
+    {
+        var response = await quizService.GetAllActiveAsync();
+        return Results.Ok(response);
+    });
+
+// ==============================
+// QUIZZES - GET ACTIVE / DAILY
+// ==============================
+app.MapGet(
+    "/api/quizzes/active",
+    async (IQuizService quizService) =>
+    {
+        var response = await quizService.GetActiveQuizAsync();
+        return response is null
+            ? Results.NotFound(new { message = "Aktif quiz bulunamadı." })
+            : Results.Ok(response);
+    });
+
+// ==============================
+// QUIZZES - GET BY ID
+// ==============================
+app.MapGet(
+    "/api/quizzes/{quizId:guid}",
+    async (Guid quizId, IQuizService quizService) =>
+    {
+        var response = await quizService.GetByIdAsync(quizId);
+        return response is null
+            ? Results.NotFound(new { message = "Quiz bulunamadı." })
+            : Results.Ok(response);
+    });
+
+// ==============================
+// QUIZZES - SUBMIT
+// ==============================
+app.MapPost(
+    "/api/quizzes/{quizId:guid}/submit",
+    async (
+        Guid quizId,
+        QuizSubmitRequest request,
+        ClaimsPrincipal user,
+        IQuizService quizService) =>
+    {
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        try
+        {
+            var response = await quizService.SubmitAsync(userId, quizId, request);
+            return Results.Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+    })
+    .RequireAuthorization();
 
 app.Run();

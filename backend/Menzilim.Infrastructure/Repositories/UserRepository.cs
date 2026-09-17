@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Menzilim.Application.Interfaces.Repositories;
 using Menzilim.Domain;
 using Menzilim.Infrastructure.Data;
@@ -23,12 +23,28 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByIdAsync(Guid id)
     {
         return await _dbContext.Users
+            .Include(u => u.Profile)
+            .FirstOrDefaultAsync(u => u.Id == id);
+    }
+
+    public async Task<User?> GetByIdWithProfileDetailsAsync(Guid id)
+    {
+        return await _dbContext.Users
+            .Include(u => u.Profile)
+                .ThenInclude(p => p!.Profession)
+            .Include(u => u.Profile)
+                .ThenInclude(p => p!.Specialization)
             .FirstOrDefaultAsync(u => u.Id == id);
     }
 
     public async Task AddAsync(User user)
     {
         await _dbContext.Users.AddAsync(user);
+    }
+
+    public async Task AddProfileAsync(UserProfile profile)
+    {
+        await _dbContext.UserProfiles.AddAsync(profile);
     }
 
     public async Task SaveChangesAsync()
