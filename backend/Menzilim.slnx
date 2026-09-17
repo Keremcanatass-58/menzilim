@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Menzilim.Api/Menzilim.Api.csproj" />
+  <Project Path="Menzilim.Application/Menzilim.Application.csproj" />
+  <Project Path="Menzilim.Domain/Menzilim.Domain.csproj" />
+  <Project Path="Menzilim.Infrastructure/Menzilim.Infrastructure.csproj" />
+</Solution>
