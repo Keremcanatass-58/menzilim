@@ -89,14 +89,17 @@ public static class ContentRecommendationEngine
         var specMatch = SpecializationMatch(content, specialization);
         var inProgress = inProgressIds.Contains(content.Id);
 
-        if (specMatch && inProgress) return 0; // a) uzmanlık + devam eden
-        if (specMatch) return 1;               // b) uzmanlık + başlanmamış
-        if (inProgress) return 2;              // devam eden (uzmanlık değil)
-        if (professionIds.Contains(content.Id)) return 3; // c) meslek + başlanmamış
-        return 4;                              // d) diğer uygun içerik
+        if (specMatch && inProgress) return 0;
+        if (specMatch) return 1;
+        if (inProgress) return 2;
+        if (professionIds.Contains(content.Id)) return 3;
+
+        return 4;
     }
 
-    private static int LevelMatch(DomainContent content, string? experienceLevel)
+    private static int LevelMatch(
+        DomainContent content,
+        string? experienceLevel)
     {
         if (string.IsNullOrWhiteSpace(experienceLevel))
         {
@@ -111,7 +114,9 @@ public static class ContentRecommendationEngine
             : 0;
     }
 
-    private static bool SpecializationMatch(DomainContent content, string? specialization)
+    private static bool SpecializationMatch(
+        DomainContent content,
+        string? specialization)
     {
         if (string.IsNullOrWhiteSpace(specialization))
         {
@@ -140,14 +145,17 @@ public static class ContentRecommendationEngine
             case 0:
             case 2:
                 return "Bu içeriğe başlamışsın, kaldığın yerden devam edebilirsin.";
+
             case 1:
                 return string.IsNullOrWhiteSpace(specializationName)
                     ? "Uzmanlık alanınla ilgili olduğu için öneriliyor."
                     : $"Uzmanlığın {specializationName.Trim()} olduğu için öneriliyor.";
+
             case 3:
                 return string.IsNullOrWhiteSpace(professionName)
                     ? "Mesleğinle ilgili olduğu için öneriliyor."
                     : $"Mesleğin {professionName.Trim()} ile ilgili olduğu için öneriliyor.";
+
             default:
                 return string.IsNullOrWhiteSpace(careerGoal)
                     ? "Gelişimine katkı sağlayabilecek bir içerik."
