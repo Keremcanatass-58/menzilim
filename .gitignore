@@ -1,0 +1,4 @@
+
+# Local Playwright artifacts
+.playwright-mcp/
+ai_coach_e2e.png

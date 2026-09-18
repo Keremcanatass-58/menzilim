@@ -32,4 +32,6 @@ class ApiConstants {
 
   static String submitQuiz(String quizId) =>
       '$baseUrl/api/quizzes/$quizId/submit';
+
+  static String get aiCoachAsk => '$baseUrl/api/ai-coach/ask';
 }

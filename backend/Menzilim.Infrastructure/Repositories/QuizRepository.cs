@@ -43,6 +43,12 @@ public class QuizRepository : IQuizRepository
         await _dbContext.QuizAttempts.AddAsync(attempt);
     }
 
+    public async Task<int> GetAttemptCountByUserAsync(Guid userId)
+    {
+        return await _dbContext.QuizAttempts
+            .CountAsync(a => a.UserId == userId);
+    }
+
     public async Task SaveChangesAsync()
     {
         await _dbContext.SaveChangesAsync();

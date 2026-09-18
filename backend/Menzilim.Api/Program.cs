@@ -24,7 +24,13 @@ using Menzilim.Application.Services.Onboarding;
 using Menzilim.Application.DTOs.Quiz;
 using Menzilim.Application.Interfaces.Quiz;
 using Menzilim.Application.Services.Quiz;
+using Menzilim.Application.Interfaces.AI;
+using Menzilim.Application.DTOs.AICoach;
+using Menzilim.Application.Interfaces.AICoach;
+using Menzilim.Application.Services.AICoach;
+using Menzilim.Infrastructure.Configuration;
 using Menzilim.Infrastructure.Data;
+using Menzilim.Infrastructure.Services.AI;
 using Menzilim.Infrastructure.Data.Seed;
 using Menzilim.Infrastructure.Repositories;
 using Menzilim.Infrastructure.Services;
@@ -61,6 +67,7 @@ builder.Services.AddScoped<IContentProgressService, ContentProgressService>();
 builder.Services.AddScoped<IUserContentProgressRepository, UserContentProgressRepository>();
 builder.Services.AddScoped<IQuizService, QuizService>();
 builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+builder.Services.AddScoped<IAICoachService, AICoachService>();
 
 
 // ==============================
@@ -77,6 +84,37 @@ builder.Services.AddScoped<IDailyPlanRepository, DailyPlanRepository>();
 
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+
+
+// ==============================
+// AI PROVIDER
+// ==============================
+
+// Gizli olmayan ayarlar yapılandırmadan bağlanır; API anahtarı yalnızca
+// ortam değişkeni (AIProvider__ApiKey veya ANTHROPIC_API_KEY) / User Secrets
+// üzerinden gelir, koda veya appsettings.json'a yazılmaz.
+builder.Services.Configure<AIProviderOptions>(options =>
+{
+    builder.Configuration
+        .GetSection(AIProviderOptions.SectionName)
+        .Bind(options);
+
+    options.ApiKey ??= Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
+});
+
+// "anthropic" seçilirse gerçek sağlayıcı, aksi halde mock kullanılır.
+// Anahtar eksikse startup çökmeden, çağrı anında açık hata döner.
+var aiProviderName =
+    builder.Configuration["AIProvider:Provider"] ?? "mock";
+
+if (string.Equals(aiProviderName, "anthropic", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddScoped<IAIProvider, AnthropicAIProvider>();
+}
+else
+{
+    builder.Services.AddScoped<IAIProvider, MockAIProvider>();
+}
 
 
 // ==============================
@@ -755,6 +793,38 @@ app.MapPost(
         try
         {
             var response = await quizService.SubmitAsync(userId, quizId, request);
+            return Results.Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+    })
+    .RequireAuthorization();
+
+// ==============================
+// AI COACH - ASK
+// ==============================
+app.MapPost(
+    "/api/ai-coach/ask",
+    async (
+        AICoachAskRequest request,
+        ClaimsPrincipal user,
+        IAICoachService aiCoachService) =>
+    {
+        var userIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        try
+        {
+            var response = await aiCoachService.AskAsync(userId, request);
             return Results.Ok(response);
         }
         catch (KeyNotFoundException ex)

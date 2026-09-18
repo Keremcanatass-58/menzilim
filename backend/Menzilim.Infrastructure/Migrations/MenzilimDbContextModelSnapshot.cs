@@ -144,6 +144,9 @@ namespace Menzilim.Infrastructure.Migrations
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("ContentId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("DailyPlanId")
                         .HasColumnType("uniqueidentifier");
 
@@ -165,6 +168,8 @@ namespace Menzilim.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ContentId");
 
                     b.HasIndex("DailyPlanId");
 
@@ -647,11 +652,18 @@ namespace Menzilim.Infrastructure.Migrations
 
             modelBuilder.Entity("Menzilim.Domain.DailyTask", b =>
                 {
+                    b.HasOne("Menzilim.Domain.Content", "Content")
+                        .WithMany()
+                        .HasForeignKey("ContentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Menzilim.Domain.DailyPlan", "DailyPlan")
                         .WithMany("Tasks")
                         .HasForeignKey("DailyPlanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Content");
 
                     b.Navigation("DailyPlan");
                 });

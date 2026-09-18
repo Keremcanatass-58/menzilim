@@ -11,5 +11,9 @@ public class DailyTask
     public bool IsCompleted { get; set; }
     public DateTime? CompletedAt { get; set; }
 
+    // Learn görevi için ilişkilendirilen içerik (opsiyonel).
+    public Guid? ContentId { get; set; }
+
     public DailyPlan DailyPlan { get; set; } = null!;
+    public Content? Content { get; set; }
 }

@@ -6,8 +6,11 @@ import '../../daily_plan/models/daily_plan_response.dart';
 import '../../daily_plan/services/daily_plan_service.dart';
 import '../models/dashboard_response.dart';
 import '../services/dashboard_service.dart';
+import '../../content/models/content_response.dart';
+import '../../content/services/content_service.dart';
 import '../../content/screens/discover_screen.dart';
 import '../../quiz/screens/quiz_screen.dart';
+import '../../ai_coach/screens/ai_coach_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -22,6 +25,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final DailyPlanService _dailyPlanService =
       DailyPlanService(ApiClient());
+
+  final ContentService _contentService =
+      ContentService(ApiClient());
 
   final TokenStorage _tokenStorage = TokenStorage();
 
@@ -123,12 +129,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  bool _taskOpensContent(DailyTaskResponse task) {
+    return task.taskType.toLowerCase() == 'learn' &&
+        task.contentId != null &&
+        task.contentId!.isNotEmpty;
+  }
+
   void _onTaskTap(DailyTaskResponse task) {
-    if (task.taskType.toLowerCase() == 'quiz') {
+    if (_taskOpensContent(task)) {
+      _openContent(task);
+    } else if (task.taskType.toLowerCase() == 'quiz') {
       _openQuiz(task);
     } else {
       _completeTask(task);
     }
+  }
+
+  Future<void> _openContent(DailyTaskResponse task) async {
+    final token = await _tokenStorage.getToken();
+    if (token == null || token.isEmpty) {
+      return;
+    }
+
+    ContentResponse content;
+    try {
+      content = await _contentService.getById(token, task.contentId!);
+    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('İçerik açılamadı.'),
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+
+    // Mevcut ContentDetailScreen kullanılır; start/complete ilerleme
+    // davranışı orada aynen çalışır.
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ContentDetailScreen(content: content),
+      ),
+    );
+
+    if (!mounted) return;
+
+    // İçerik ilerlemesi değişmiş olabilir; dashboard'ı yenile.
+    await _loadDashboard();
   }
 
   Future<void> _openQuiz(DailyTaskResponse task) async {
@@ -651,6 +701,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           completed: task.isCompleted,
                           isCompleting:
                               _completingTaskId == task.id,
+                          opensContent: _taskOpensContent(task),
                           onTap: () => _onTaskTap(task),
                         ),
                       ),
@@ -674,6 +725,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       label: const Text(
                         'Öğrenmeye Devam Et',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const AiCoachScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.auto_awesome,
+                      ),
+                      label: const Text(
+                        "AI Koç'a Sor",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -735,6 +812,7 @@ class _TaskCard extends StatelessWidget {
   final int estimatedMinutes;
   final bool completed;
   final bool isCompleting;
+  final bool opensContent;
   final VoidCallback onTap;
 
   const _TaskCard({
@@ -745,6 +823,7 @@ class _TaskCard extends StatelessWidget {
     required this.completed,
     required this.isCompleting,
     required this.onTap,
+    this.opensContent = false,
   });
 
   @override
@@ -806,6 +885,29 @@ class _TaskCard extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+
+                  if (opensContent && !completed) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'İçeriğe Git',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_forward,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -820,12 +922,12 @@ class _TaskCard extends StatelessWidget {
                   strokeWidth: 2,
                 ),
               )
+            else if (completed)
+              const Icon(Icons.check_circle)
+            else if (opensContent)
+              const Icon(Icons.chevron_right)
             else
-              Icon(
-                completed
-                    ? Icons.check_circle
-                    : Icons.circle_outlined,
-              ),
+              const Icon(Icons.circle_outlined),
           ],
         ),
       ),

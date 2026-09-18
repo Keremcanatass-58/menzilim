@@ -52,6 +52,7 @@ class DailyTaskResponse {
   final int estimatedMinutes;
   final bool isCompleted;
   final DateTime? completedAt;
+  final String? contentId;
 
   DailyTaskResponse({
     required this.id,
@@ -61,6 +62,7 @@ class DailyTaskResponse {
     required this.estimatedMinutes,
     required this.isCompleted,
     required this.completedAt,
+    this.contentId,
   });
 
   factory DailyTaskResponse.fromJson(Map<String, dynamic> json) {
@@ -75,6 +77,7 @@ class DailyTaskResponse {
       completedAt: json['completedAt'] == null
           ? null
           : DateTime.tryParse(json['completedAt'].toString()),
+      contentId: json['contentId']?.toString(),
     );
   }
 }

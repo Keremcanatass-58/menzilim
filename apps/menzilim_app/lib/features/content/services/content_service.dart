@@ -24,6 +24,20 @@ class ContentService {
         .toList();
   }
 
+  Future<ContentResponse> getById(
+    String token,
+    String contentId,
+  ) async {
+    final response = await _apiClient.get(
+      '${ApiConstants.baseUrl}/api/content/$contentId',
+      token: token,
+    );
+
+    return ContentResponse.fromJson(
+      response as Map<String, dynamic>,
+    );
+  }
+
   Future<Map<String, dynamic>> getProgress(
     String token,
     String contentId,

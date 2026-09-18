@@ -7,11 +7,23 @@ namespace Menzilim.Application.Services.DailyPlan;
 public class DailyPlanService : IDailyPlanService
 {
     private readonly IDailyPlanRepository _dailyPlanRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IUserContentProgressRepository _contentProgressRepository;
+    private readonly IQuizRepository _quizRepository;
+    private readonly IContentRepository _contentRepository;
 
     public DailyPlanService(
-        IDailyPlanRepository dailyPlanRepository)
+        IDailyPlanRepository dailyPlanRepository,
+        IUserRepository userRepository,
+        IUserContentProgressRepository contentProgressRepository,
+        IQuizRepository quizRepository,
+        IContentRepository contentRepository)
     {
         _dailyPlanRepository = dailyPlanRepository;
+        _userRepository = userRepository;
+        _contentProgressRepository = contentProgressRepository;
+        _quizRepository = quizRepository;
+        _contentRepository = contentRepository;
     }
 
     public async Task<DailyPlanResponse> GetTodayAsync(
@@ -19,28 +31,23 @@ public class DailyPlanService : IDailyPlanService
     {
         var today = DateTime.UtcNow.Date;
 
-        var dailyPlan =
+        var existing =
             await _dailyPlanRepository
                 .GetByUserAndDateAsync(userId, today);
 
-        if (dailyPlan is null)
+        if (existing is not null)
         {
-            dailyPlan = CreateDefaultPlan(userId, today);
-
-            await _dailyPlanRepository.AddAsync(dailyPlan);
-            await _dailyPlanRepository.SaveChangesAsync();
-        }
-        else
-        {
-            var changed = EnsureDefaultTasks(dailyPlan);
-
-            if (changed)
-            {
-                await _dailyPlanRepository.SaveChangesAsync();
-            }
+            // Aynı gün için plan zaten var: yeniden üretmeden mevcut planı kullan.
+            return MapToResponse(existing);
         }
 
-        return MapToResponse(dailyPlan);
+        var context = await BuildContextAsync(userId);
+        var plan = BuildPlan(userId, today, context);
+
+        await _dailyPlanRepository.AddAsync(plan);
+        await _dailyPlanRepository.SaveChangesAsync();
+
+        return MapToResponse(plan);
     }
 
     public async Task<DailyPlanResponse> CompleteTaskAsync(
@@ -80,120 +87,75 @@ public class DailyPlanService : IDailyPlanService
         return MapToResponse(task.DailyPlan);
     }
 
-    private static bool EnsureDefaultTasks(
-        Menzilim.Domain.DailyPlan dailyPlan)
+    private async Task<DailyPlanGenerationContext> BuildContextAsync(
+        Guid userId)
     {
-        var changed = false;
+        var user =
+            await _userRepository.GetByIdWithProfileDetailsAsync(userId);
+        var profile = user?.Profile;
 
-        if (!dailyPlan.Tasks.Any(t => t.TaskType == "Learn"))
+        var contentProgress =
+            await _contentProgressRepository.GetByUserAsync(userId);
+        var quizAttemptCount =
+            await _quizRepository.GetAttemptCountByUserAsync(userId);
+
+        var professionContent = profile is null
+            ? new List<Menzilim.Domain.Content>()
+            : await _contentRepository.GetByProfessionAsync(profile.ProfessionId);
+
+        var selection = DailyPlanContentSelector.Select(
+            professionContent,
+            contentProgress,
+            profile?.Specialization?.Name);
+
+        return new DailyPlanGenerationContext
         {
-            dailyPlan.Tasks.Add(
-                new Menzilim.Domain.DailyTask
-                {
-                    Id = Guid.NewGuid(),
-                    DailyPlanId = dailyPlan.Id,
-                    Title = "Bugünün Konusunu Öğren",
-                    Description =
-                        "Kariyer hedefin doğrultusunda bugünün konusunu öğren.",
-                    TaskType = "Learn",
-                    EstimatedMinutes = 25,
-                    IsCompleted = false
-                });
-
-            changed = true;
-        }
-
-        if (!dailyPlan.Tasks.Any(t => t.TaskType == "Practice"))
-        {
-            dailyPlan.Tasks.Add(
-                new Menzilim.Domain.DailyTask
-                {
-                    Id = Guid.NewGuid(),
-                    DailyPlanId = dailyPlan.Id,
-                    Title = "Uygulama Yap",
-                    Description =
-                        "Öğrendiğin konuyla ilgili küçük bir uygulama gerçekleştir.",
-                    TaskType = "Practice",
-                    EstimatedMinutes = 20,
-                    IsCompleted = false
-                });
-
-            changed = true;
-        }
-
-        if (!dailyPlan.Tasks.Any(t => t.TaskType == "Quiz"))
-        {
-            dailyPlan.Tasks.Add(
-                new Menzilim.Domain.DailyTask
-                {
-                    Id = Guid.NewGuid(),
-                    DailyPlanId = dailyPlan.Id,
-                    Title = "Bilgini Test Et",
-                    Description =
-                        "Bugün öğrendiklerini kısa bir test ile kontrol et.",
-                    TaskType = "Quiz",
-                    EstimatedMinutes = 15,
-                    IsCompleted = false
-                });
-
-            changed = true;
-        }
-
-        return changed;
+            ProfessionName = profile?.Profession?.Name ?? string.Empty,
+            SpecializationName = profile?.Specialization?.Name ?? string.Empty,
+            ExperienceLevel = profile?.ExperienceLevel ?? string.Empty,
+            CareerGoal = profile?.CareerGoal ?? string.Empty,
+            DailyLearningMinutes = profile?.DailyLearningMinutes ?? 0,
+            CompletedContentCount =
+                contentProgress.Count(c => c.IsCompleted),
+            InProgressContentCount =
+                contentProgress.Count(c => !c.IsCompleted),
+            QuizAttemptCount = quizAttemptCount,
+            LearnContentId = selection.ContentId,
+            LearnContentTitle = selection.Title,
+            LearnContentIsContinuation = selection.IsContinuation,
+        };
     }
 
-    private static Menzilim.Domain.DailyPlan CreateDefaultPlan(
+    private static Menzilim.Domain.DailyPlan BuildPlan(
         Guid userId,
-        DateTime date)
+        DateTime date,
+        DailyPlanGenerationContext context)
     {
         var plan = new Menzilim.Domain.DailyPlan
         {
             Id = Guid.NewGuid(),
             UserId = userId,
             Date = date,
-            Title = "Bugünün Öğrenme Planı",
+            Title = DailyPlanGenerator.BuildPlanTitle(context),
             IsCompleted = false,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         };
 
-        plan.Tasks.Add(
-            new Menzilim.Domain.DailyTask
-            {
-                Id = Guid.NewGuid(),
-                DailyPlanId = plan.Id,
-                Title = "Bugünün Konusunu Öğren",
-                Description =
-                    "Kariyer hedefin doğrultusunda bugünün konusunu öğren.",
-                TaskType = "Learn",
-                EstimatedMinutes = 25,
-                IsCompleted = false
-            });
-
-        plan.Tasks.Add(
-            new Menzilim.Domain.DailyTask
-            {
-                Id = Guid.NewGuid(),
-                DailyPlanId = plan.Id,
-                Title = "Uygulama Yap",
-                Description =
-                    "Öğrendiğin konuyla ilgili küçük bir uygulama gerçekleştir.",
-                TaskType = "Practice",
-                EstimatedMinutes = 20,
-                IsCompleted = false
-            });
-
-        plan.Tasks.Add(
-            new Menzilim.Domain.DailyTask
-            {
-                Id = Guid.NewGuid(),
-                DailyPlanId = plan.Id,
-                Title = "Bilgini Test Et",
-                Description =
-                    "Bugün öğrendiklerini kısa bir test ile kontrol et.",
-                TaskType = "Quiz",
-                EstimatedMinutes = 15,
-                IsCompleted = false
-            });
+        foreach (var task in DailyPlanGenerator.Generate(context))
+        {
+            plan.Tasks.Add(
+                new Menzilim.Domain.DailyTask
+                {
+                    Id = Guid.NewGuid(),
+                    DailyPlanId = plan.Id,
+                    Title = task.Title,
+                    Description = task.Description,
+                    TaskType = task.TaskType,
+                    EstimatedMinutes = task.EstimatedMinutes,
+                    IsCompleted = false,
+                    ContentId = task.ContentId,
+                });
+        }
 
         return plan;
     }
@@ -210,7 +172,8 @@ public class DailyPlanService : IDailyPlanService
                 TaskType = task.TaskType,
                 EstimatedMinutes = task.EstimatedMinutes,
                 IsCompleted = task.IsCompleted,
-                CompletedAt = task.CompletedAt
+                CompletedAt = task.CompletedAt,
+                ContentId = task.ContentId
             })
             .ToList();
 

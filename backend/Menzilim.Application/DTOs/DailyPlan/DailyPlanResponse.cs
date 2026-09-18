@@ -20,4 +20,5 @@ public class DailyTaskResponse
     public int EstimatedMinutes { get; set; }
     public bool IsCompleted { get; set; }
     public DateTime? CompletedAt { get; set; }
+    public Guid? ContentId { get; set; }
 }

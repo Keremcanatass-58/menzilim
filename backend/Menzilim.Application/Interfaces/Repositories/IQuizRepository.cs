@@ -9,5 +9,6 @@ public interface IQuizRepository
     Task<DomainQuiz?> GetByIdWithQuestionsAsync(Guid id);
     Task<DomainQuiz?> GetFirstActiveWithQuestionsAsync();
     Task AddAttemptAsync(QuizAttempt attempt);
+    Task<int> GetAttemptCountByUserAsync(Guid userId);
     Task SaveChangesAsync();
 }

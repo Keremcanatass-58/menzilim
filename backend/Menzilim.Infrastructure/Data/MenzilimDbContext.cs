@@ -124,6 +124,12 @@ public class MenzilimDbContext : DbContext
             .HasForeignKey(dt => dt.DailyPlanId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<DailyTask>()
+            .HasOne(dt => dt.Content)
+            .WithMany()
+            .HasForeignKey(dt => dt.ContentId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         modelBuilder.Entity<UserProgress>()
             .HasOne(up => up.User)
             .WithMany()
