@@ -4,7 +4,9 @@ import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
 import '../models/login_request.dart';
 import '../services/auth_service.dart';
+import '../../dashboard/screens/dashboard_screen.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
+import '../../onboarding/services/onboarding_service.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -22,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TokenStorage _tokenStorage = TokenStorage();
 
   late final AuthService _authService;
+  late final OnboardingService _onboardingService;
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -30,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _authService = AuthService(_apiClient);
+    _onboardingService = OnboardingService(_apiClient);
   }
 
   @override
@@ -66,13 +70,24 @@ class _LoginScreenState extends State<LoginScreen> {
         email: response.email,
       );
 
+      // Onboarding'i tamamlamış kullanıcı doğrudan dashboard'a gider.
+      // Profil kontrolü başarısız olursa onboarding'e düşülür.
+      var hasProfile = false;
+      try {
+        hasProfile = await _onboardingService.hasProfile(response.token);
+      } catch (_) {
+        hasProfile = false;
+      }
+
       if (!mounted) return;
 
       _showMessage('Giriş başarılı.');
 
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => const OnboardingScreen(),
+          builder: (_) => hasProfile
+              ? const DashboardScreen()
+              : const OnboardingScreen(),
         ),
       );
     } catch (e) {

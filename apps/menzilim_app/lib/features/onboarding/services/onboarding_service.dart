@@ -17,4 +17,23 @@ class OnboardingService {
       token: token,
     );
   }
+
+  // Profil varsa true, backend 404 dönerse (onboarding yapılmamış) false.
+  // Diğer hatalar çağırana iletilir.
+  Future<bool> hasProfile(String token) async {
+    try {
+      await _apiClient.get(
+        ApiConstants.myOnboarding,
+        token: token,
+      );
+
+      return true;
+    } on ApiException catch (e) {
+      if (e.statusCode == 404) {
+        return false;
+      }
+
+      rethrow;
+    }
+  }
 }
