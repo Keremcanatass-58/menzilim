@@ -1,29 +1,38 @@
 using Menzilim.Application.DTOs.DailyPlan;
+using Menzilim.Application.DTOs.Skills;
 using Menzilim.Application.Interfaces.DailyPlan;
 using Menzilim.Application.Interfaces.Repositories;
+using Menzilim.Application.Services.Skills;
+using Menzilim.Domain;
 
 namespace Menzilim.Application.Services.DailyPlan;
 
 public class DailyPlanService : IDailyPlanService
 {
+    // Learn + (varsa) Practice için en fazla iki farklı içerik seçilir.
+    private const int ContentSlotCount = 2;
+
     private readonly IDailyPlanRepository _dailyPlanRepository;
     private readonly IUserRepository _userRepository;
     private readonly IUserContentProgressRepository _contentProgressRepository;
     private readonly IQuizRepository _quizRepository;
     private readonly IContentRepository _contentRepository;
+    private readonly ISkillRepository _skillRepository;
 
     public DailyPlanService(
         IDailyPlanRepository dailyPlanRepository,
         IUserRepository userRepository,
         IUserContentProgressRepository contentProgressRepository,
         IQuizRepository quizRepository,
-        IContentRepository contentRepository)
+        IContentRepository contentRepository,
+        ISkillRepository skillRepository)
     {
         _dailyPlanRepository = dailyPlanRepository;
         _userRepository = userRepository;
         _contentProgressRepository = contentProgressRepository;
         _quizRepository = quizRepository;
         _contentRepository = contentRepository;
+        _skillRepository = skillRepository;
     }
 
     public async Task<DailyPlanResponse> GetTodayAsync(
@@ -160,10 +169,28 @@ public class DailyPlanService : IDailyPlanService
         return plan;
     }
 
+    // DailyTask'ta sıra kolonu yok; veritabanı görevleri sırasız döndürebilir.
+    // Kullanıcı sırası DailyPlanGenerator'ın görev tipleriyle aynıdır.
+    private static readonly string[] TaskTypeOrder =
+        { "Learn", "Practice", "Quiz", "Review" };
+
+    private static int TaskTypeRank(string taskType)
+    {
+        var index = Array.FindIndex(
+            TaskTypeOrder,
+            type => string.Equals(type, taskType, StringComparison.OrdinalIgnoreCase));
+
+        // Bilinmeyen tipler sona.
+        return index < 0 ? TaskTypeOrder.Length : index;
+    }
+
     private static DailyPlanResponse MapToResponse(
         Menzilim.Domain.DailyPlan dailyPlan)
     {
         var tasks = dailyPlan.Tasks
+            .OrderBy(task => TaskTypeRank(task.TaskType))
+            .ThenBy(task => task.Title, StringComparer.Ordinal)
+            .ThenBy(task => task.Id)
             .Select(task => new DailyTaskResponse
             {
                 Id = task.Id,

@@ -28,8 +28,11 @@ public class DailyPlanRepository : IDailyPlanRepository
     public async Task<DailyTask?> GetTaskByIdAsync(
         Guid taskId)
     {
+        // Planın tüm görevleri de yüklenir; aksi halde plan tamamlanma durumu
+        // yalnızca bu görevle hesaplanır ve yanıt tek görev döndürür.
         return await _dbContext.DailyTasks
             .Include(dt => dt.DailyPlan)
+                .ThenInclude(dp => dp.Tasks)
             .FirstOrDefaultAsync(dt => dt.Id == taskId);
     }
 
