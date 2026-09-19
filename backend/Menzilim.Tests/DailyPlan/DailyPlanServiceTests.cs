@@ -137,7 +137,7 @@ public class DailyPlanServiceTests
         IUserContentProgressRepository progressRepo,
         IQuizRepository quizRepo,
         IContentRepository contentRepo) =>
-        new(planRepo, userRepo, progressRepo, quizRepo, contentRepo);
+        new(planRepo, userRepo, progressRepo, quizRepo, contentRepo, new FakeSkillRepository());
 
     private static User UserWith(
         int minutes,
@@ -263,6 +263,25 @@ internal sealed class FakeQuizRepository : IQuizRepository
         Task.FromResult(new List<QuizAttempt>());
 
     public Task SaveChangesAsync() => Task.CompletedTask;
+}
+
+// Skill verisi olmayan kullanıcı: mevcut (skill öncesi) seçim davranışı korunur.
+internal sealed class FakeSkillRepository : ISkillRepository
+{
+    public Task<bool> SpecializationExistsAsync(Guid specializationId) =>
+        Task.FromResult(false);
+
+    public Task<List<Skill>> GetActiveBySpecializationAsync(Guid specializationId) =>
+        Task.FromResult(new List<Skill>());
+
+    public Task<List<ContentSkill>> GetActiveContentLinksAsync(IReadOnlyCollection<Guid> skillIds) =>
+        Task.FromResult(new List<ContentSkill>());
+
+    public Task<List<Menzilim.Domain.Quiz>> GetActiveQuizzesAsync(IReadOnlyCollection<Guid> skillIds) =>
+        Task.FromResult(new List<Menzilim.Domain.Quiz>());
+
+    public Task<List<QuizAttempt>> GetUserQuizAttemptsAsync(Guid userId, IReadOnlyCollection<Guid> quizIds) =>
+        Task.FromResult(new List<QuizAttempt>());
 }
 
 internal sealed class FakeContentRepository : IContentRepository
