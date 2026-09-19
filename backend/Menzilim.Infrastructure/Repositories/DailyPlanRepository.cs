@@ -41,6 +41,15 @@ public class DailyPlanRepository : IDailyPlanRepository
         await _dbContext.DailyPlans.AddAsync(dailyPlan);
     }
 
+    public async Task<List<DailyPlan>> GetAllByUserAsync(Guid userId)
+    {
+        return await _dbContext.DailyPlans
+            .Include(dp => dp.Tasks)
+            .Where(dp => dp.UserId == userId)
+            .OrderByDescending(dp => dp.Date)
+            .ToListAsync();
+    }
+
     public async Task SaveChangesAsync()
     {
         await _dbContext.SaveChangesAsync();

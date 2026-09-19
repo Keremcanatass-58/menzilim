@@ -205,6 +205,9 @@ internal sealed class FakeDailyPlanRepository : IDailyPlanRepository
         return Task.CompletedTask;
     }
 
+    public Task<List<Menzilim.Domain.DailyPlan>> GetAllByUserAsync(Guid userId) =>
+        Task.FromResult(new List<Menzilim.Domain.DailyPlan>());
+
     public Task SaveChangesAsync()
     {
         SaveCount++;
@@ -255,6 +258,9 @@ internal sealed class FakeQuizRepository : IQuizRepository
 
     public Task<int> GetAttemptCountByUserAsync(Guid userId) =>
         Task.FromResult(AttemptCount);
+
+    public Task<List<QuizAttempt>> GetByUserAsync(Guid userId) =>
+        Task.FromResult(new List<QuizAttempt>());
 
     public Task SaveChangesAsync() => Task.CompletedTask;
 }
