@@ -31,6 +31,8 @@ public class MenzilimDbContext : DbContext
     public DbSet<UserProgress> UserProgresses => Set<UserProgress>();
     public DbSet<UserActivity> UserActivities => Set<UserActivity>();
     public DbSet<UserContentProgress> UserContentProgresses => Set<UserContentProgress>();
+    public DbSet<NewsItem> NewsItems => Set<NewsItem>();
+    public DbSet<NewsItemSkill> NewsItemSkills => Set<NewsItemSkill>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -162,6 +164,18 @@ public class MenzilimDbContext : DbContext
             .HasForeignKey(dt => dt.ContentId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        modelBuilder.Entity<NewsItemSkill>()
+            .HasOne(ns => ns.NewsItem)
+            .WithMany(n => n.Skills)
+            .HasForeignKey(ns => ns.NewsItemId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<NewsItemSkill>()
+            .HasOne(ns => ns.Skill)
+            .WithMany()
+            .HasForeignKey(ns => ns.SkillId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<UserProgress>()
             .HasOne(up => up.User)
             .WithMany()
@@ -192,6 +206,16 @@ public class MenzilimDbContext : DbContext
 
         modelBuilder.Entity<ContentSkill>()
             .HasIndex(cs => new { cs.ContentId, cs.SkillId })
+            .IsUnique();
+
+        modelBuilder.Entity<NewsItemSkill>()
+            .HasIndex(ns => new { ns.NewsItemId, ns.SkillId })
+            .IsUnique();
+
+        // Aynı haber iki kez eklenmesin (seed ve ileride feed alımı).
+        // (Email'deki gibi index nedeniyle nvarchar(450) olur.)
+        modelBuilder.Entity<NewsItem>()
+            .HasIndex(n => n.SourceUrl)
             .IsUnique();
 
         // Seed, skill'leri isimle bulup tekrar eklemeyi önleyebilsin diye

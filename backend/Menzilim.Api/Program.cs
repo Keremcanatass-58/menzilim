@@ -32,6 +32,8 @@ using Menzilim.Application.Interfaces.AICoach;
 using Menzilim.Application.Services.AICoach;
 using Menzilim.Application.Interfaces.Progress;
 using Menzilim.Application.Services.Progress;
+using Menzilim.Application.Interfaces.News;
+using Menzilim.Application.Services.News;
 using Menzilim.Infrastructure.Configuration;
 using Menzilim.Infrastructure.Data;
 using Menzilim.Infrastructure.Services.AI;
@@ -76,6 +78,8 @@ builder.Services.AddScoped<IQuizService, QuizService>();
 builder.Services.AddScoped<IQuizRepository, QuizRepository>();
 builder.Services.AddScoped<IAICoachService, AICoachService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
+builder.Services.AddScoped<INewsService, NewsService>();
+builder.Services.AddScoped<INewsRepository, NewsRepository>();
 
 
 // ==============================
@@ -195,6 +199,9 @@ using (var scope = app.Services.CreateScope())
 
     // Skill'lere bağlandığı için DatabaseSeeder'dan sonra çalışır.
     await ContentSeeder.SeedAsync(db, seedLogger);
+
+    // Haberler de skill'lere bağlanır.
+    await NewsSeeder.SeedAsync(db, seedLogger);
 }
 
 
@@ -966,6 +973,30 @@ app.MapGet(
         }
 
         var response = await progressService.GetMyProgressAsync(userId);
+        return Results.Ok(response);
+    })
+    .RequireAuthorization();
+
+// ==============================
+// NEWS - GET ME
+// ==============================
+
+app.MapGet(
+    "/api/news/me",
+    async (
+        ClaimsPrincipal user,
+        INewsService newsService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        // Onboarding yapılmamışsa kişiselleştirilecek alan yok: boş liste.
+        var response = await newsService.GetForUserAsync(userId);
         return Results.Ok(response);
     })
     .RequireAuthorization();

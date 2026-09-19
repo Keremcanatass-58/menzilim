@@ -10,6 +10,8 @@ import 'package:menzilim_app/features/daily_plan/services/daily_plan_service.dar
 import 'package:menzilim_app/features/dashboard/models/dashboard_response.dart';
 import 'package:menzilim_app/features/dashboard/screens/dashboard_screen.dart';
 import 'package:menzilim_app/features/dashboard/services/dashboard_service.dart';
+import 'package:menzilim_app/features/news/models/news_item.dart';
+import 'package:menzilim_app/features/news/services/news_service.dart';
 import 'package:menzilim_app/features/quiz/screens/quiz_screen.dart';
 import 'package:menzilim_app/features/skills/models/skill_progress_response.dart';
 import 'package:menzilim_app/features/skills/services/skill_service.dart';
@@ -103,6 +105,13 @@ class _FakeSkillService extends SkillService {
   Future<List<SkillProgressResponse>> getMySkills(String token) async => [];
 }
 
+class _FakeNewsService extends NewsService {
+  _FakeNewsService() : super(ApiClient());
+
+  @override
+  Future<List<NewsItem>> getMyNews(String token) async => [];
+}
+
 ContentResponse _content(String id, String title) => ContentResponse(
       id: id,
       title: title,
@@ -146,6 +155,7 @@ class _Harness {
           dailyPlanService: plan,
           contentService: content,
           skillService: _FakeSkillService(),
+          newsService: _FakeNewsService(),
         ),
       );
 }

@@ -266,6 +266,70 @@ namespace Menzilim.Infrastructure.Migrations
                     b.ToTable("LearningPaths");
                 });
 
+            modelBuilder.Entity("Menzilim.Domain.NewsItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("PublishedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SourceName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SourceUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SourceUrl")
+                        .IsUnique();
+
+                    b.ToTable("NewsItems");
+                });
+
+            modelBuilder.Entity("Menzilim.Domain.NewsItemSkill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("NewsItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SkillId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SkillId");
+
+                    b.HasIndex("NewsItemId", "SkillId")
+                        .IsUnique();
+
+                    b.ToTable("NewsItemSkills");
+                });
+
             modelBuilder.Entity("Menzilim.Domain.Profession", b =>
                 {
                     b.Property<Guid>("Id")
@@ -757,6 +821,25 @@ namespace Menzilim.Infrastructure.Migrations
                     b.Navigation("LearningPath");
                 });
 
+            modelBuilder.Entity("Menzilim.Domain.NewsItemSkill", b =>
+                {
+                    b.HasOne("Menzilim.Domain.NewsItem", "NewsItem")
+                        .WithMany("Skills")
+                        .HasForeignKey("NewsItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Menzilim.Domain.Skill", "Skill")
+                        .WithMany()
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NewsItem");
+
+                    b.Navigation("Skill");
+                });
+
             modelBuilder.Entity("Menzilim.Domain.Question", b =>
                 {
                     b.HasOne("Menzilim.Domain.Quiz", "Quiz")
@@ -931,6 +1014,11 @@ namespace Menzilim.Infrastructure.Migrations
             modelBuilder.Entity("Menzilim.Domain.LearningPath", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Menzilim.Domain.NewsItem", b =>
+                {
+                    b.Navigation("Skills");
                 });
 
             modelBuilder.Entity("Menzilim.Domain.Profession", b =>

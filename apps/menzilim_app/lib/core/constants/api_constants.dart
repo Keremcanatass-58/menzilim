@@ -36,4 +36,6 @@ class ApiConstants {
   static String get aiCoachAsk => '$baseUrl/api/ai-coach/ask';
 
   static String get progress => '$baseUrl/api/progress/me';
+
+  static String get myNews => '$baseUrl/api/news/me';
 }

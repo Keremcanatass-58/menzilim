@@ -13,6 +13,11 @@ import '../../content/screens/discover_screen.dart';
 import '../../quiz/screens/quiz_screen.dart';
 import '../../ai_coach/screens/ai_coach_screen.dart';
 import '../../progress/screens/progress_screen.dart';
+import '../../news/models/news_item.dart';
+import '../../news/screens/news_screen.dart';
+import '../../news/services/news_link_opener.dart';
+import '../../news/services/news_service.dart';
+import '../../news/widgets/news_card.dart';
 import '../../skills/models/skill_progress_response.dart';
 import '../../skills/screens/skills_screen.dart';
 import '../../skills/services/skill_service.dart';
@@ -24,6 +29,8 @@ class DashboardScreen extends StatefulWidget {
   final DailyPlanService? dailyPlanService;
   final ContentService? contentService;
   final SkillService? skillService;
+  final NewsService? newsService;
+  final NewsLinkOpener? openNewsLink;
 
   const DashboardScreen({
     super.key,
@@ -31,6 +38,8 @@ class DashboardScreen extends StatefulWidget {
     this.dailyPlanService,
     this.contentService,
     this.skillService,
+    this.newsService,
+    this.openNewsLink,
   });
 
   @override
@@ -49,6 +58,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   late final SkillService _skillService =
       widget.skillService ?? SkillService(ApiClient());
+
+  late final NewsService _newsService =
+      widget.newsService ?? NewsService(ApiClient());
+
+  late final NewsLinkOpener _openNewsLink =
+      widget.openNewsLink ?? openNewsLinkExternally;
 
   final TokenStorage _tokenStorage = TokenStorage();
 
@@ -73,12 +88,156 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? _skillsError;
   int _skillsRequestId = 0;
 
+  // Haberler de bağımsız yüklenir; hatası dashboard'u düşürmez.
+  static const int _dashboardNewsCount = 3;
+  List<NewsItem> _news = [];
+  bool _isLoadingNews = true;
+  String? _newsError;
+
   @override
   void initState() {
     super.initState();
     _loadDashboard();
     _loadRecommendations();
     _loadSkills();
+    _loadNews();
+  }
+
+  Future<void> _loadNews() async {
+    // İlk yüklemede state zaten "yükleniyor"; initState içinde setState gerekmez.
+    if (mounted && !_isLoadingNews) {
+      setState(() {
+        _isLoadingNews = true;
+        _newsError = null;
+      });
+    }
+
+    try {
+      final token = await _tokenStorage.getToken();
+
+      if (token == null || token.isEmpty) {
+        throw Exception('Oturum bilgisi bulunamadı.');
+      }
+
+      final news = await _newsService.getMyNews(token);
+
+      if (!mounted) return;
+
+      setState(() {
+        _news = news;
+        _isLoadingNews = false;
+        _newsError = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingNews = false;
+        _newsError = 'Haberler yüklenemedi.';
+      });
+    }
+  }
+
+  void _openNewsScreen() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => NewsScreen(
+          newsService: _newsService,
+          openLink: _openNewsLink,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNewsSection() {
+    final colors = Theme.of(context).colorScheme;
+
+    Widget body;
+
+    if (_isLoadingNews) {
+      body = const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    } else if (_newsError != null) {
+      body = Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          border: Border.all(color: colors.outlineVariant),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          children: [
+            Text(_newsError!),
+            TextButton(
+              onPressed: _loadNews,
+              child: const Text('Tekrar Dene'),
+            ),
+          ],
+        ),
+      );
+    } else if (_news.isEmpty) {
+      body = Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          border: Border.all(color: colors.outlineVariant),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: const Text('Şu an alanında gösterilecek haber yok.'),
+      );
+    } else {
+      body = Column(
+        children: _news
+            .take(_dashboardNewsCount)
+            .map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: NewsCard(
+                  item: item,
+                  compact: true,
+                  onOpen: () => openNewsItem(context, item, _openNewsLink),
+                ),
+              ),
+            )
+            .toList(),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Expanded(
+              child: Text(
+                'Bugün Senin Alanında',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            if (_news.isNotEmpty)
+              TextButton(
+                onPressed: _openNewsScreen,
+                child: const Text('Tüm Haberler'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        body,
+      ],
+    );
   }
 
   Future<void> _loadSkills() async {
@@ -1010,6 +1169,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(height: 16),
 
                   _buildRecommendationsSection(),
+
+                  const SizedBox(height: 32),
+
+                  _buildNewsSection(),
 
                   const SizedBox(height: 20),
 
