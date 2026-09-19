@@ -6,6 +6,7 @@ import '../../daily_plan/models/daily_plan_response.dart';
 import '../../daily_plan/services/daily_plan_service.dart';
 import '../models/dashboard_response.dart';
 import '../services/dashboard_service.dart';
+import '../../content/models/content_recommendation_response.dart';
 import '../../content/models/content_response.dart';
 import '../../content/services/content_service.dart';
 import '../../content/screens/discover_screen.dart';
@@ -38,10 +39,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? _errorMessage;
   String? _completingTaskId;
 
+  // Öneriler dashboard'dan bağımsız yüklenir; hataları dashboard'u düşürmez.
+  List<ContentRecommendationResponse> _recommendations = [];
+  bool _isLoadingRecommendations = true;
+  String? _recommendationsError;
+  int _recommendationsRequestId = 0;
+
+  String? _openingContentId;
+
   @override
   void initState() {
     super.initState();
     _loadDashboard();
+    _loadRecommendations();
+  }
+
+  Future<void> _loadRecommendations() async {
+    // Üst üste yenilemelerde yalnızca en son isteğin sonucu uygulanır.
+    final requestId = ++_recommendationsRequestId;
+
+    // İlk yüklemede state zaten "yükleniyor"; initState içinde setState gerekmez.
+    if (mounted && !_isLoadingRecommendations) {
+      setState(() {
+        _isLoadingRecommendations = true;
+        _recommendationsError = null;
+      });
+    }
+
+    try {
+      final token = await _tokenStorage.getToken();
+
+      if (token == null || token.isEmpty) {
+        throw Exception('Oturum bilgisi bulunamadı.');
+      }
+
+      final recommendations =
+          await _contentService.getRecommendations(token);
+
+      if (!mounted || requestId != _recommendationsRequestId) return;
+
+      setState(() {
+        _recommendations = recommendations;
+        _isLoadingRecommendations = false;
+        _recommendationsError = null;
+      });
+    } catch (e) {
+      if (!mounted || requestId != _recommendationsRequestId) return;
+
+      setState(() {
+        _isLoadingRecommendations = false;
+        _recommendationsError = 'Öneriler yüklenemedi.';
+      });
+    }
   }
 
   Future<void> _loadDashboard() async {
@@ -137,7 +186,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _onTaskTap(DailyTaskResponse task) {
     if (_taskOpensContent(task)) {
-      _openContent(task);
+      _openContentById(task.contentId!);
     } else if (task.taskType.toLowerCase() == 'quiz') {
       _openQuiz(task);
     } else {
@@ -145,17 +194,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  Future<void> _openContent(DailyTaskResponse task) async {
+  // Günlük plan görevleri ve öneri kartları için ortak içerik açma akışı.
+  Future<void> _openContentById(String contentId) async {
+    // Aynı anda birden fazla detay sayfası açılmasın.
+    if (_openingContentId != null) {
+      return;
+    }
+
     final token = await _tokenStorage.getToken();
     if (token == null || token.isEmpty) {
       return;
     }
 
+    if (!mounted) return;
+
+    setState(() {
+      _openingContentId = contentId;
+    });
+
     ContentResponse content;
     try {
-      content = await _contentService.getById(token, task.contentId!);
+      content = await _contentService.getById(token, contentId);
     } catch (_) {
       if (!mounted) return;
+
+      setState(() {
+        _openingContentId = null;
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -167,6 +232,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     if (!mounted) return;
 
+    setState(() {
+      _openingContentId = null;
+    });
+
     // Mevcut ContentDetailScreen kullanılır; start/complete ilerleme
     // davranışı orada aynen çalışır.
     await Navigator.of(context).push(
@@ -177,8 +246,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     if (!mounted) return;
 
-    // İçerik ilerlemesi değişmiş olabilir; dashboard'ı yenile.
-    await _loadDashboard();
+    // İçerik ilerlemesi değişmiş olabilir; dashboard'ı ve önerileri yenile.
+    await Future.wait([
+      _loadDashboard(),
+      _loadRecommendations(),
+    ]);
   }
 
   Future<void> _openQuiz(DailyTaskResponse task) async {
@@ -198,6 +270,83 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // Quiz sonucunda günlük görev backend'de tamamlanmış olabilir;
     // dashboard ve günlük plan durumunu yenile.
     await _loadDashboard();
+  }
+
+  Widget _buildRecommendationsSection() {
+    // Yenileme sırasında mevcut liste korunur; spinner yalnızca liste boşken.
+    if (_isLoadingRecommendations && _recommendations.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (_recommendationsError != null) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.grey.shade300,
+          ),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          children: [
+            Text(_recommendationsError!),
+            TextButton(
+              onPressed: _loadRecommendations,
+              child: const Text('Tekrar Dene'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_recommendations.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.grey.shade300,
+          ),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: const Text(
+          'Şu an sana özel yeni içerik yok.',
+        ),
+      );
+    }
+
+    return Column(
+      children: _recommendations
+          .map(
+            (recommendation) => Padding(
+              padding: const EdgeInsets.only(
+                bottom: 12,
+              ),
+              child: _RecommendationCard(
+                recommendation: recommendation,
+                isOpening:
+                    _openingContentId == recommendation.contentId,
+                onTap: () =>
+                    _openContentById(recommendation.contentId),
+              ),
+            ),
+          )
+          .toList(),
+    );
   }
 
   IconData _getTaskIcon(String taskType) {
@@ -707,6 +856,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
 
+                  const SizedBox(height: 32),
+
+                  const Text(
+                    'Sana Özel İçerikler',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  _buildRecommendationsSection(),
+
                   const SizedBox(height: 20),
 
                   SizedBox(
@@ -928,6 +1091,175 @@ class _TaskCard extends StatelessWidget {
               const Icon(Icons.chevron_right)
             else
               const Icon(Icons.circle_outlined),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RecommendationCard extends StatelessWidget {
+  final ContentRecommendationResponse recommendation;
+  final bool isOpening;
+  final VoidCallback onTap;
+
+  const _RecommendationCard({
+    required this.recommendation,
+    required this.isOpening,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isStarted = recommendation.isStarted;
+    final description = recommendation.description;
+
+    return InkWell(
+      onTap: isOpening ? null : onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.grey.shade300,
+          ),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                isStarted
+                    ? Icons.play_circle_outline
+                    : Icons.auto_stories_outlined,
+              ),
+            ),
+
+            const SizedBox(width: 16),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isStarted
+                          ? colorScheme.secondaryContainer
+                          : colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      isStarted ? 'Devam ediyor' : 'Yeni',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    recommendation.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+
+                  if (description != null &&
+                      description.isNotEmpty) ...[
+                    const SizedBox(height: 5),
+                    Text(
+                      description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+
+                  if (recommendation
+                      .recommendationReason.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.lightbulb_outline,
+                          size: 16,
+                          color: Colors.grey.shade600,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            recommendation.recommendationReason,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 13,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  const SizedBox(height: 10),
+
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        isStarted ? 'Devam Et' : 'Başla',
+                        style: TextStyle(
+                          color: colorScheme.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_forward,
+                        size: 16,
+                        color: colorScheme.primary,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            if (isOpening)
+              const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                ),
+              )
+            else
+              const Icon(Icons.chevron_right),
           ],
         ),
       ),

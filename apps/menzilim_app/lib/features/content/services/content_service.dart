@@ -1,5 +1,6 @@
 ﻿import '../../../core/constants/api_constants.dart';
 import '../../../core/network/api_client.dart';
+import '../models/content_recommendation_response.dart';
 import '../models/content_response.dart';
 
 class ContentService {
@@ -18,6 +19,25 @@ class ContentService {
     return data
         .map(
           (item) => ContentResponse.fromJson(
+            item as Map<String, dynamic>,
+          ),
+        )
+        .toList();
+  }
+
+  Future<List<ContentRecommendationResponse>> getRecommendations(
+    String token,
+  ) async {
+    final response = await _apiClient.get(
+      '${ApiConstants.baseUrl}/api/content/recommendations',
+      token: token,
+    );
+
+    final data = response as List<dynamic>;
+
+    return data
+        .map(
+          (item) => ContentRecommendationResponse.fromJson(
             item as Map<String, dynamic>,
           ),
         )
