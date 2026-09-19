@@ -93,6 +93,14 @@ public sealed class SkillEndpointsTests : IDisposable
 
     private async Task<Guid> CreateContentLinkedToAsync(string skillName)
     {
+        // Sayımlar yalnızca testin kendi içeriğine göre yapılsın: açılışta
+        // seed'lenen örnek içerikler devre dışı bırakılır.
+        await using (var seeded = _factory.CreateDbContext())
+        {
+            await seeded.Contents.ExecuteUpdateAsync(
+                s => s.SetProperty(c => c.IsActive, false));
+        }
+
         var response = await _client.PostAsJsonAsync("/api/content", new CreateContentRequest
         {
             Title = "ASP.NET Core Web API Development",

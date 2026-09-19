@@ -33,9 +33,14 @@ public class QuizRepository : IQuizRepository
 
     public async Task<DomainQuiz?> GetFirstActiveWithQuestionsAsync()
     {
+        // Birden fazla aktif quiz varken sonuç deterministik olsun: en eski
+        // quiz (mevcut "ASP.NET Core Temelleri") varsayılan kalır.
         return await _dbContext.Quizzes
             .Include(q => q.Questions)
-            .FirstOrDefaultAsync(q => q.IsActive);
+            .Where(q => q.IsActive)
+            .OrderBy(q => q.CreatedAt)
+            .ThenBy(q => q.Id)
+            .FirstOrDefaultAsync();
     }
 
     public async Task AddAttemptAsync(QuizAttempt attempt)

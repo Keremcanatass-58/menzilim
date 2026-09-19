@@ -192,6 +192,9 @@ using (var scope = app.Services.CreateScope())
         .CreateLogger(nameof(DatabaseSeeder));
 
     await DatabaseSeeder.SeedAsync(db, seedLogger);
+
+    // Skill'lere bağlandığı için DatabaseSeeder'dan sonra çalışır.
+    await ContentSeeder.SeedAsync(db, seedLogger);
 }
 
 
