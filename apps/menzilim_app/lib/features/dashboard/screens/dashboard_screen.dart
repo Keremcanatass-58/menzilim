@@ -249,15 +249,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  // İçeriğe bağlanabilen görev tipleri (Quiz/Review içerik açmaz).
+  static const Set<String> _contentTaskTypes = {'learn', 'practice'};
+
   bool _taskOpensContent(DailyTaskResponse task) {
-    return task.taskType.toLowerCase() == 'learn' &&
+    return _contentTaskTypes.contains(task.taskType.toLowerCase()) &&
         task.contentId != null &&
         task.contentId!.isNotEmpty;
   }
 
   void _onTaskTap(DailyTaskResponse task) {
     if (_taskOpensContent(task)) {
-      _openContentById(task.contentId!);
+      _openContentById(task.contentId!, task: task);
     } else if (task.taskType.toLowerCase() == 'quiz') {
       _openQuiz(task);
     } else {
@@ -266,7 +269,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   // Günlük plan görevleri ve öneri kartları için ortak içerik açma akışı.
-  Future<void> _openContentById(String contentId) async {
+  // Görevden açıldıysa ([task] verilirse) dönüşte içerik tamamlanmışsa
+  // görev de tamamlanır.
+  Future<void> _openContentById(
+    String contentId, {
+    DailyTaskResponse? task,
+  }) async {
     // Aynı anda birden fazla detay sayfası açılmasın.
     if (_openingContentId != null) {
       return;
@@ -317,6 +325,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     if (!mounted) return;
 
+    if (task != null) {
+      await _completeTaskIfContentCompleted(token, task, contentId);
+
+      if (!mounted) return;
+    }
+
     // İçerik ilerlemesi değişmiş olabilir; dashboard'ı, önerileri ve
     // beceri özetini yenile.
     await Future.wait([
@@ -324,6 +338,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _loadRecommendations(),
       _loadSkills(),
     ]);
+  }
+
+  // İçeriğe bağlı görev, içerik tamamlandığında mevcut /complete ile
+  // tamamlanır. Aksi halde bu görevler hiç tamamlanamazdı.
+  Future<void> _completeTaskIfContentCompleted(
+    String token,
+    DailyTaskResponse task,
+    String contentId,
+  ) async {
+    if (task.isCompleted) return;
+
+    try {
+      final progress =
+          await _contentService.getProgress(token, contentId);
+
+      if (progress['isCompleted'] != true) return;
+
+      await _dailyPlanService.completeTask(token, task.id);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${task.title} tamamlandı! 🎉'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (_) {
+      // Görev tamamlanamazsa akış bozulmaz; dashboard yine yenilenir.
+    }
   }
 
   Future<void> _openQuiz(DailyTaskResponse task) async {
