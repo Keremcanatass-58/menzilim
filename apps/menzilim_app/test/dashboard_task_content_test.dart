@@ -119,6 +119,7 @@ DailyTaskResponse _task(
   String type,
   String title, {
   String? contentId,
+  String? quizId,
   String? description,
 }) =>
     DailyTaskResponse(
@@ -130,6 +131,7 @@ DailyTaskResponse _task(
       isCompleted: false,
       completedAt: null,
       contentId: contentId,
+      quizId: quizId,
     );
 
 class _Harness {
@@ -158,7 +160,7 @@ _Harness _standardPlan({String? practiceContentId, bool contentCompleted = false
     _FakeDailyPlanService([
       _task('t-learn', 'Learn', 'Bugünün Konusunu Öğren (Backend)', contentId: 'c-learn'),
       _task('t-practice', 'Practice', 'Uygulama Yap (Backend)', contentId: practiceContentId),
-      _task('t-quiz', 'Quiz', 'Bilgini Test Et (Backend)'),
+      _task('t-quiz', 'Quiz', 'Bilgini Test Et (Backend)', quizId: 'q-backend'),
     ]),
     _FakeContentService(contents, contentCompleted: contentCompleted),
   );
@@ -236,6 +238,18 @@ void main() {
     expect(find.byType(ContentDetailScreen), findsNothing);
     expect(find.byType(QuizScreen), findsOneWidget);
     expect(h.content.openedIds, isEmpty);
+  });
+
+  testWidgets("Quiz görevi backend'in seçtiği quiz'i açar", (tester) async {
+    final h = _standardPlan(practiceContentId: 'c-practice');
+    await tester.pumpWidget(h.build());
+    await tester.pumpAndSettle();
+
+    await _tapTask(tester, 'Bilgini Test Et (Backend)');
+
+    final screen = tester.widget<QuizScreen>(find.byType(QuizScreen));
+    expect(screen.quizId, 'q-backend');
+    expect(screen.dailyTaskId, 't-quiz');
   });
 
   testWidgets('içerik tamamlandıysa dönüşte görev de tamamlanır', (tester) async {

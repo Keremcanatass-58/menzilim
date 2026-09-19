@@ -193,6 +193,107 @@ public sealed class SeedContentEndpointsTests : IDisposable
         Assert.Equal("ASP.NET Core Temelleri", active!.Title);
     }
 
+    private async Task<string> QuizTitleAsync(Guid quizId)
+    {
+        await using var db = _factory.CreateDbContext();
+        return (await db.Quizzes.SingleAsync(q => q.Id == quizId)).Title;
+    }
+
+    private static Guid? QuizIdOf(JsonElement task) =>
+        task.GetProperty("quizId").ValueKind == JsonValueKind.Null
+            ? null
+            : task.GetProperty("quizId").GetGuid();
+
+    [Theory]
+    [InlineData("Frontend", "JavaScript ve Web Temelleri")]
+    [InlineData("Backend", "Entity Framework Core ve SQL Temelleri")]
+    [InlineData("Full Stack", "REST API Temelleri")]
+    [InlineData("Mobile", "Flutter ve Dart Temelleri")]
+    public async Task DailyPlan_QuizTask_PointsToSpecializationQuiz(
+        string specialization,
+        string expectedQuizTitle)
+    {
+        var token = await RegisterWithProfileAsync(specialization, 60);
+
+        var tasks = await GetPlanTasksAsync(token);
+
+        var quiz = tasks.Single(t => t.GetProperty("taskType").GetString() == "Quiz");
+        var quizId = QuizIdOf(quiz);
+        Assert.NotNull(quizId);
+        Assert.Equal(expectedQuizTitle, await QuizTitleAsync(quizId!.Value));
+
+        // Yalnızca Quiz görevinde dolu; diğer görevlerin sözleşmesi aynı.
+        Assert.All(
+            tasks.Where(t => t.GetProperty("taskType").GetString() != "Quiz"),
+            t => Assert.Null(QuizIdOf(t)));
+
+        // Aynı gün tekrar istendiğinde (mevcut plan) aynı quiz.
+        var again = await GetPlanTasksAsync(token);
+        Assert.Equal(
+            quizId,
+            QuizIdOf(again.Single(t => t.GetProperty("taskType").GetString() == "Quiz")));
+    }
+
+    [Theory]
+    [InlineData("SOC")]
+    [InlineData("Data Analyst")]
+    public async Task DailyPlan_QuizTask_FallsBackToDefaultQuiz_WhenNoSpecializationQuiz(
+        string specialization)
+    {
+        var token = await RegisterWithProfileAsync(specialization, 60);
+
+        var tasks = await GetPlanTasksAsync(token);
+
+        var quizId = QuizIdOf(tasks.Single(t => t.GetProperty("taskType").GetString() == "Quiz"));
+        Assert.NotNull(quizId);
+        Assert.Equal("ASP.NET Core Temelleri", await QuizTitleAsync(quizId!.Value));
+    }
+
+    [Fact]
+    public async Task DailyPlan_QuizTask_SubmitAndComplete_KeepsWorking()
+    {
+        var token = await RegisterWithProfileAsync("Frontend", 60);
+        var quizTask = (await GetPlanTasksAsync(token))
+            .Single(t => t.GetProperty("taskType").GetString() == "Quiz");
+        var quizId = QuizIdOf(quizTask)!.Value;
+
+        // Görevdeki quizId mevcut quiz API'siyle açılır ve çözülür.
+        var detail = await _client.GetFromJsonAsync<QuizDetailResponse>($"/api/quizzes/{quizId}");
+        Assert.Equal("JavaScript ve Web Temelleri", detail!.Title);
+
+        var definition = ContentSeeder.Quizzes.Single(q => q.Title == detail.Title);
+        var answers = detail.Questions.Select(q => new
+        {
+            questionId = q.Id,
+            selectedOption = definition.Questions.Single(d => d.Text == q.Text).CorrectOption,
+        }).ToList();
+
+        var submit = await SendAsync(
+            HttpMethod.Post, $"/api/quizzes/{quizId}/submit", token, new { answers });
+        Assert.Equal(HttpStatusCode.OK, submit.StatusCode);
+        Assert.Equal(100, (await submit.Content.ReadFromJsonAsync<QuizSubmitResultResponse>())!.Score);
+
+        // Günlük görev tamamlanır; yanıt aynı quizId'yi korur.
+        var complete = await SendAsync(
+            HttpMethod.Post,
+            $"/api/daily-plan/tasks/{quizTask.GetProperty("id").GetString()}/complete",
+            token);
+        Assert.Equal(HttpStatusCode.OK, complete.StatusCode);
+
+        var plan = await complete.Content.ReadFromJsonAsync<JsonElement>();
+        var completedQuiz = plan.GetProperty("tasks").EnumerateArray()
+            .Single(t => t.GetProperty("taskType").GetString() == "Quiz");
+        Assert.True(completedQuiz.GetProperty("isCompleted").GetBoolean());
+        Assert.Equal(quizId, QuizIdOf(completedQuiz));
+
+        // Quiz skoru ilgili skill'in ilerlemesine yansır.
+        var skills = await SendAsync(HttpMethod.Get, "/api/skills/me", token);
+        var javaScript = (await skills.Content.ReadFromJsonAsync<JsonElement>())
+            .EnumerateArray()
+            .Single(s => s.GetProperty("skillName").GetString() == "JavaScript");
+        Assert.Equal(100, javaScript.GetProperty("bestQuizScore").GetInt32());
+    }
+
     [Fact]
     public async Task SeededQuiz_CanBeSubmitted_WithCorrectAnswers()
     {

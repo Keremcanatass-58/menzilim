@@ -21,4 +21,7 @@ public class DailyTaskResponse
     public bool IsCompleted { get; set; }
     public DateTime? CompletedAt { get; set; }
     public Guid? ContentId { get; set; }
+
+    // Yalnızca Quiz görevlerinde dolu: kullanıcının uzmanlığına uygun quiz.
+    public Guid? QuizId { get; set; }
 }

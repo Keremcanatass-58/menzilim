@@ -54,6 +54,10 @@ class DailyTaskResponse {
   final DateTime? completedAt;
   final String? contentId;
 
+  // Yalnızca Quiz görevlerinde: backend'in kullanıcının uzmanlığına göre
+  // seçtiği quiz. Yoksa QuizScreen varsayılan aktif quiz'i açar.
+  final String? quizId;
+
   DailyTaskResponse({
     required this.id,
     required this.title,
@@ -63,6 +67,7 @@ class DailyTaskResponse {
     required this.isCompleted,
     required this.completedAt,
     this.contentId,
+    this.quizId,
   });
 
   factory DailyTaskResponse.fromJson(Map<String, dynamic> json) {
@@ -78,6 +83,7 @@ class DailyTaskResponse {
           ? null
           : DateTime.tryParse(json['completedAt'].toString()),
       contentId: json['contentId']?.toString(),
+      quizId: json['quizId']?.toString(),
     );
   }
 }

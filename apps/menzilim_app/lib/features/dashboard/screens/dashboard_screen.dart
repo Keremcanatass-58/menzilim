@@ -372,11 +372,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _openQuiz(DailyTaskResponse task) async {
-    // Aktif quiz'i getirmek için quizId verilmiyor; QuizScreen içindeki
-    // mevcut akış quiz gönderildiğinde bu günlük görevi tamamlar.
+    // Quiz'i backend seçer (task.quizId); gelmezse QuizScreen varsayılan
+    // aktif quiz'i açar. QuizScreen içindeki mevcut akış quiz gönderildiğinde
+    // bu günlük görevi tamamlar.
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => QuizScreen(
+          quizId: task.quizId,
           dailyTaskId: task.id,
           isDailyTaskCompleted: task.isCompleted,
         ),

@@ -47,7 +47,7 @@ public class DailyPlanService : IDailyPlanService
         if (existing is not null)
         {
             // Aynı gün için plan zaten var: yeniden üretmeden mevcut planı kullan.
-            return MapToResponse(existing);
+            return MapToResponse(existing, await ResolveQuizIdAsync(userId, existing));
         }
 
         var context = await BuildContextAsync(userId);
@@ -56,7 +56,7 @@ public class DailyPlanService : IDailyPlanService
         await _dailyPlanRepository.AddAsync(plan);
         await _dailyPlanRepository.SaveChangesAsync();
 
-        return MapToResponse(plan);
+        return MapToResponse(plan, await ResolveQuizIdAsync(userId, plan));
     }
 
     public async Task<DailyPlanResponse> CompleteTaskAsync(
@@ -93,7 +93,9 @@ public class DailyPlanService : IDailyPlanService
 
         await _dailyPlanRepository.SaveChangesAsync();
 
-        return MapToResponse(task.DailyPlan);
+        return MapToResponse(
+            task.DailyPlan,
+            await ResolveQuizIdAsync(userId, task.DailyPlan));
     }
 
     private async Task<DailyPlanGenerationContext> BuildContextAsync(
@@ -192,6 +194,53 @@ public class DailyPlanService : IDailyPlanService
         return (skillProgress, contentSkills);
     }
 
+    /// <summary>
+    /// Quiz görevinin açacağı quiz'i kullanıcının uzmanlığına göre seçer.
+    /// DailyTask'ta quiz kolonu olmadığından seçim yanıt anında yapılır;
+    /// seçim yalnızca profile bağlı olduğu için gün içinde sabittir.
+    /// Sabit sayıda sorgu (N+1 yok); plan Quiz görevi içermiyorsa hiç sorgu yok.
+    /// Uzmanlığa uygun quiz yoksa mevcut varsayılan aktif quiz kullanılır.
+    /// </summary>
+    private async Task<Guid?> ResolveQuizIdAsync(
+        Guid userId,
+        Menzilim.Domain.DailyPlan plan)
+    {
+        if (!plan.Tasks.Any(t => IsQuizTask(t.TaskType)))
+        {
+            return null;
+        }
+
+        var profile =
+            (await _userRepository.GetByIdWithProfileDetailsAsync(userId))?.Profile;
+
+        if (profile is not null)
+        {
+            var skills =
+                await _skillRepository.GetActiveBySpecializationAsync(profile.SpecializationId);
+
+            var quizzes = skills.Count == 0
+                ? new List<Menzilim.Domain.Quiz>()
+                : await _skillRepository.GetActiveQuizzesAsync(
+                    skills.Select(s => s.Id).ToList());
+
+            var selected = DailyPlanQuizSelector.Select(
+                quizzes,
+                profile.Specialization?.Name);
+
+            if (selected is not null)
+            {
+                return selected.Id;
+            }
+        }
+
+        var fallback = await _quizRepository.GetFirstActiveWithQuestionsAsync();
+
+        return fallback?.Id;
+    }
+
+    private static bool IsQuizTask(string taskType) =>
+        string.Equals(taskType, "Quiz", StringComparison.OrdinalIgnoreCase);
+
     private static Menzilim.Domain.DailyPlan BuildPlan(
         Guid userId,
         DateTime date,
@@ -242,7 +291,8 @@ public class DailyPlanService : IDailyPlanService
     }
 
     private static DailyPlanResponse MapToResponse(
-        Menzilim.Domain.DailyPlan dailyPlan)
+        Menzilim.Domain.DailyPlan dailyPlan,
+        Guid? quizId)
     {
         var tasks = dailyPlan.Tasks
             .OrderBy(task => TaskTypeRank(task.TaskType))
@@ -257,7 +307,8 @@ public class DailyPlanService : IDailyPlanService
                 EstimatedMinutes = task.EstimatedMinutes,
                 IsCompleted = task.IsCompleted,
                 CompletedAt = task.CompletedAt,
-                ContentId = task.ContentId
+                ContentId = task.ContentId,
+                QuizId = IsQuizTask(task.TaskType) ? quizId : null
             })
             .ToList();
 
