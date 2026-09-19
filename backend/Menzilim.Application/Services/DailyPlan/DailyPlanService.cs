@@ -112,10 +112,21 @@ public class DailyPlanService : IDailyPlanService
             ? new List<Menzilim.Domain.Content>()
             : await _contentRepository.GetByProfessionAsync(profile.ProfessionId);
 
-        var selection = DailyPlanContentSelector.Select(
+        var (skillProgress, contentSkills) = profile is null
+            ? (new List<SkillProgressResponse>(), new List<ContentSkill>())
+            : await LoadSkillProgressAsync(
+                userId, profile.SpecializationId, contentProgress);
+
+        var selections = DailyPlanSkillContentSelector.Select(
             professionContent,
             contentProgress,
-            profile?.Specialization?.Name);
+            contentSkills,
+            skillProgress,
+            profile?.Specialization?.Name,
+            ContentSlotCount);
+
+        var learn = selections.ElementAtOrDefault(0);
+        var practice = selections.ElementAtOrDefault(1);
 
         return new DailyPlanGenerationContext
         {
@@ -129,10 +140,56 @@ public class DailyPlanService : IDailyPlanService
             InProgressContentCount =
                 contentProgress.Count(c => !c.IsCompleted),
             QuizAttemptCount = quizAttemptCount,
-            LearnContentId = selection.ContentId,
-            LearnContentTitle = selection.Title,
-            LearnContentIsContinuation = selection.IsContinuation,
+            LearnContentId = learn?.ContentId,
+            LearnContentTitle = learn?.Title,
+            LearnContentIsContinuation = learn?.IsContinuation ?? false,
+            LearnFocusSkillName = learn?.FocusSkillName,
+            PracticeContentId = practice?.ContentId,
+            PracticeContentTitle = practice?.Title,
+            PracticeFocusSkillName = practice?.FocusSkillName,
         };
+    }
+
+    /// <summary>
+    /// Kullanıcının uzmanlık skill'lerinin ilerlemesini /api/skills/me ile aynı
+    /// kaynaklardan ve aynı engine ile hesaplar. Sabit sayıda sorgu (N+1 yok).
+    /// </summary>
+    private async Task<(List<SkillProgressResponse> SkillProgress, List<ContentSkill> ContentSkills)>
+        LoadSkillProgressAsync(
+            Guid userId,
+            Guid specializationId,
+            IReadOnlyList<UserContentProgress> contentProgress)
+    {
+        var skills =
+            await _skillRepository.GetActiveBySpecializationAsync(specializationId);
+
+        if (skills.Count == 0)
+        {
+            return (new List<SkillProgressResponse>(), new List<ContentSkill>());
+        }
+
+        var skillIds = skills.Select(s => s.Id).ToList();
+
+        var contentSkills =
+            await _skillRepository.GetActiveContentLinksAsync(skillIds);
+        var quizzes =
+            await _skillRepository.GetActiveQuizzesAsync(skillIds);
+
+        var quizAttempts = quizzes.Count == 0
+            ? new List<QuizAttempt>()
+            : await _skillRepository.GetUserQuizAttemptsAsync(
+                userId,
+                quizzes.Select(q => q.Id).ToList());
+
+        var skillProgress = SkillProgressEngine.Calculate(
+            userId,
+            skills,
+            contentSkills,
+            contentProgress,
+            quizzes,
+            quizAttempts);
+
+        return (skillProgress, contentSkills);
     }
 
     private static Menzilim.Domain.DailyPlan BuildPlan(

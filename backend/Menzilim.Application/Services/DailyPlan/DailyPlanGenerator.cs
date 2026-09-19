@@ -19,6 +19,12 @@ public class DailyPlanGenerationContext
     public Guid? LearnContentId { get; init; }
     public string? LearnContentTitle { get; init; }
     public bool LearnContentIsContinuation { get; init; }
+    public string? LearnFocusSkillName { get; init; }
+
+    // Practice görevi için Learn'den FARKLI ikinci içerik (yoksa null kalır).
+    public Guid? PracticeContentId { get; init; }
+    public string? PracticeContentTitle { get; init; }
+    public string? PracticeFocusSkillName { get; init; }
 }
 
 public class GeneratedTask
@@ -177,9 +183,9 @@ public static class DailyPlanGenerator
             {
                 TaskType = "Practice",
                 Title = "Uygulama Yap" + focusSuffix,
-                Description =
-                    "Öğrendiğin konuyla ilgili küçük bir uygulama gerçekleştir.",
+                Description = BuildPracticeDescription(context),
                 EstimatedMinutes = minutes,
+                ContentId = context.PracticeContentId,
             },
             "Quiz" => new GeneratedTask
             {
@@ -209,6 +215,21 @@ public static class DailyPlanGenerator
         };
     }
 
+    private static string BuildPracticeDescription(
+        DailyPlanGenerationContext context)
+    {
+        if (string.IsNullOrWhiteSpace(context.PracticeContentTitle))
+        {
+            return "Öğrendiğin konuyla ilgili küçük bir uygulama gerçekleştir.";
+        }
+
+        var title = context.PracticeContentTitle.Trim();
+
+        return string.IsNullOrWhiteSpace(context.PracticeFocusSkillName)
+            ? $"\"{title}\" içeriği üzerinden küçük bir uygulama gerçekleştir."
+            : $"{context.PracticeFocusSkillName.Trim()} becerin için \"{title}\" içeriği üzerinden küçük bir uygulama gerçekleştir.";
+    }
+
     private static string BuildLearnDescription(
         DailyPlanGenerationContext context,
         string goal)
@@ -220,6 +241,11 @@ public static class DailyPlanGenerator
             basePart = context.LearnContentIsContinuation
                 ? $"Devam eden içeriğine kaldığın yerden devam et: \"{title}\"."
                 : $"Bugün için önerilen içerik: \"{title}\".";
+
+            if (!string.IsNullOrWhiteSpace(context.LearnFocusSkillName))
+            {
+                basePart += $" Odak beceri: {context.LearnFocusSkillName.Trim()}.";
+            }
         }
         else
         {
