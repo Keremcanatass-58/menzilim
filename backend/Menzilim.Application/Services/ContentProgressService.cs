@@ -25,7 +25,7 @@ public class ContentProgressService : IContentProgressService
         var content = await _contentRepository.GetByIdAsync(contentId);
 
         if (content is null)
-            throw new KeyNotFoundException("Ýçerik bulunamadý.");
+            throw new KeyNotFoundException("Ä°Ã§erik bulunamadÄ±.");
 
         var progress = await _progressRepository.GetAsync(
             userId,
@@ -56,7 +56,7 @@ public class ContentProgressService : IContentProgressService
         var content = await _contentRepository.GetByIdAsync(contentId);
 
         if (content is null)
-            throw new KeyNotFoundException("Ýçerik bulunamadý.");
+            throw new KeyNotFoundException("Ä°Ã§erik bulunamadÄ±.");
 
         var progress = await _progressRepository.GetAsync(
             userId,
@@ -90,7 +90,7 @@ public class ContentProgressService : IContentProgressService
         var content = await _contentRepository.GetByIdAsync(contentId);
 
         if (content is null)
-            throw new KeyNotFoundException("Ýçerik bulunamadý.");
+            throw new KeyNotFoundException("Ä°Ã§erik bulunamadÄ±.");
 
         var progress = await _progressRepository.GetAsync(
             userId,

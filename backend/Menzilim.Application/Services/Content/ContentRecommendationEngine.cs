@@ -13,7 +13,10 @@ public static class ContentRecommendationEngine
     public const int DefaultCount = 5;
 
     /// <param name="professionContent">Kullanıcının mesleğine ait aktif içerikler.</param>
-    /// <param name="allActiveContent">Fallback için tüm aktif içerikler.</param>
+    /// <param name="allActiveContent">
+    /// Tüm aktif içerikler. Yalnızca kullanıcının meslek dışında başladığı
+    /// içerikleri bulmak için kullanılır; başka meslek içerikleri önerilmez.
+    /// </param>
     /// <param name="progress">Kullanıcının içerik ilerlemesi.</param>
     public static List<ContentRecommendationResponse> Recommend(
         IReadOnlyList<DomainContent> professionContent,
@@ -25,7 +28,8 @@ public static class ContentRecommendationEngine
         string? careerGoal,
         int count = DefaultCount)
     {
-        var take = count <= 0 ? DefaultCount : count;
+        // En fazla DefaultCount (5) öneri döner.
+        var take = count <= 0 || count > DefaultCount ? DefaultCount : count;
 
         var completedIds = progress
             .Where(p => p.IsCompleted)
@@ -36,65 +40,69 @@ public static class ContentRecommendationEngine
             .Select(p => p.ContentId)
             .ToHashSet();
 
+        // Bir içerik tamamlanmış kaydı varsa devam eden sayılmaz.
         var inProgressIds = progress
-            .Where(p => !p.IsCompleted)
+            .Where(p => !p.IsCompleted && !completedIds.Contains(p.ContentId))
             .Select(p => p.ContentId)
             .ToHashSet();
 
-        var professionIds = professionContent
-            .Select(c => c.Id)
-            .ToHashSet();
-
-        // Aday havuzu: önce meslek içerikleri, sonra diğer aktif içerikler.
-        // Id'ye göre tekilleştir; tamamlananları dışla.
+        // Aday havuzu: meslek içerikleri + kullanıcının başladığı (meslek dışı
+        // olsa bile) içerikler. Id'ye göre tekilleştir; tamamlananları dışla.
         var candidates = professionContent
-            .Concat(allActiveContent)
+            .Concat(allActiveContent.Where(c => inProgressIds.Contains(c.Id)))
             .GroupBy(c => c.Id)
             .Select(g => g.First())
             .Where(c => !completedIds.Contains(c.Id))
             .ToList();
 
         var ordered = candidates
-            .OrderBy(c => Tier(c, specializationName, inProgressIds, professionIds))
-            .ThenByDescending(c => LevelMatch(c, experienceLevel))
-            .ThenByDescending(c => c.PublishedAt)
-            .ThenBy(c => c.Id)
+            .Select(c => new
+            {
+                Content = c,
+                Tier = Tier(c, specializationName, inProgressIds),
+                LevelMatch = LevelMatch(c, experienceLevel),
+            })
+            .OrderBy(x => x.Tier)
+            .ThenByDescending(x => x.LevelMatch)
+            .ThenByDescending(x => x.Content.PublishedAt)
+            .ThenBy(x => x.Content.Id)
             .Take(take)
             .ToList();
 
         return ordered
-            .Select(c => new ContentRecommendationResponse
+            .Select(x => new ContentRecommendationResponse
             {
-                ContentId = c.Id,
-                Title = c.Title,
-                Description = c.Description,
-                Url = c.Url,
-                IsStarted = startedIds.Contains(c.Id),
-                IsCompleted = completedIds.Contains(c.Id),
+                ContentId = x.Content.Id,
+                Title = x.Content.Title,
+                Description = x.Content.Description,
+                Url = x.Content.Url,
+                IsStarted = startedIds.Contains(x.Content.Id),
+                IsCompleted = completedIds.Contains(x.Content.Id),
                 RecommendationReason = Reason(
-                    Tier(c, specializationName, inProgressIds, professionIds),
+                    x.Tier,
+                    x.LevelMatch == 1,
                     professionName,
                     specializationName,
+                    experienceLevel,
                     careerGoal),
             })
             .ToList();
     }
 
+    // 0: devam eden + uzmanlık, 1: devam eden, 2: uzmanlık, 3: meslek (fallback).
     private static int Tier(
         DomainContent content,
         string? specialization,
-        IReadOnlyCollection<Guid> inProgressIds,
-        IReadOnlyCollection<Guid> professionIds)
+        IReadOnlyCollection<Guid> inProgressIds)
     {
         var specMatch = SpecializationMatch(content, specialization);
         var inProgress = inProgressIds.Contains(content.Id);
 
-        if (specMatch && inProgress) return 0;
-        if (specMatch) return 1;
-        if (inProgress) return 2;
-        if (professionIds.Contains(content.Id)) return 3;
+        if (inProgress && specMatch) return 0;
+        if (inProgress) return 1;
+        if (specMatch) return 2;
 
-        return 4;
+        return 3;
     }
 
     private static int LevelMatch(
@@ -136,30 +144,37 @@ public static class ContentRecommendationEngine
 
     private static string Reason(
         int tier,
+        bool levelMatch,
         string? professionName,
         string? specializationName,
+        string? experienceLevel,
         string? careerGoal)
     {
+        var levelSuffix = levelMatch && !string.IsNullOrWhiteSpace(experienceLevel)
+            ? $" {experienceLevel.Trim()} seviyene uygun."
+            : string.Empty;
+
         switch (tier)
         {
             case 0:
-            case 2:
-                return "Bu içeriğe başlamışsın, kaldığın yerden devam edebilirsin.";
+                return $"Uzmanlığın {specializationName!.Trim()} ile ilgili bu içeriğe başlamışsın, kaldığın yerden devam edebilirsin.";
 
             case 1:
-                return string.IsNullOrWhiteSpace(specializationName)
-                    ? "Uzmanlık alanınla ilgili olduğu için öneriliyor."
-                    : $"Uzmanlığın {specializationName.Trim()} olduğu için öneriliyor.";
+                return "Bu içeriğe başlamışsın, kaldığın yerden devam edebilirsin.";
 
-            case 3:
-                return string.IsNullOrWhiteSpace(professionName)
+            case 2:
+                return $"Uzmanlığın {specializationName!.Trim()} olduğu için öneriliyor.{levelSuffix}";
+
+            default:
+                var professionPart = string.IsNullOrWhiteSpace(professionName)
                     ? "Mesleğinle ilgili olduğu için öneriliyor."
                     : $"Mesleğin {professionName.Trim()} ile ilgili olduğu için öneriliyor.";
 
-            default:
-                return string.IsNullOrWhiteSpace(careerGoal)
-                    ? "Gelişimine katkı sağlayabilecek bir içerik."
-                    : $"Kariyer hedefin ({careerGoal.Trim()}) doğrultusunda önerilen bir içerik.";
+                var goalSuffix = string.IsNullOrWhiteSpace(careerGoal)
+                    ? string.Empty
+                    : $" Kariyer hedefin ({careerGoal.Trim()}) doğrultusunda faydalı olabilir.";
+
+                return $"{professionPart}{levelSuffix}{goalSuffix}";
         }
     }
 }

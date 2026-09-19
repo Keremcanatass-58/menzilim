@@ -3,4 +3,5 @@
   <Project Path="Menzilim.Application/Menzilim.Application.csproj" />
   <Project Path="Menzilim.Domain/Menzilim.Domain.csproj" />
   <Project Path="Menzilim.Infrastructure/Menzilim.Infrastructure.csproj" />
+  <Project Path="Menzilim.Tests/Menzilim.Tests.csproj" />
 </Solution>

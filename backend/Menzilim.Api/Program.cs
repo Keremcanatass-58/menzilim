@@ -61,6 +61,7 @@ builder.Services.AddScoped<IDailyPlanService, DailyPlanService>();
 builder.Services.AddScoped<IDailyPlanRepository, DailyPlanRepository>();
 builder.Services.AddScoped<IContentService, ContentService>();
 builder.Services.AddScoped<IContentRepository, ContentRepository>();
+builder.Services.AddScoped<IContentRecommendationService, ContentRecommendationService>();
 builder.Services.AddScoped<IContentProfessionService, ContentProfessionService>();
 builder.Services.AddScoped<IContentProfessionRepository, ContentProfessionRepository>();
 builder.Services.AddScoped<IContentProgressService, ContentProgressService>();
@@ -568,6 +569,39 @@ app.MapPost(
                 message = "Bu içerik zaten bu meslek ile eşleştirilmiş."
             });
     });
+
+// ==============================
+// CONTENT - RECOMMENDATIONS
+// ==============================
+
+app.MapGet(
+    "/api/content/recommendations",
+    async (
+        ClaimsPrincipal user,
+        IContentRecommendationService recommendationService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Results.Unauthorized();
+
+        try
+        {
+            var response =
+                await recommendationService.GetForUserAsync(userId);
+
+            return Results.Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(new
+            {
+                message = ex.Message
+            });
+        }
+    })
+    .RequireAuthorization();
 
 // ==============================
 // CONTENT - GET ME
