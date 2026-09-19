@@ -12,6 +12,7 @@ import '../../content/services/content_service.dart';
 import '../../content/screens/discover_screen.dart';
 import '../../quiz/screens/quiz_screen.dart';
 import '../../ai_coach/screens/ai_coach_screen.dart';
+import '../../progress/screens/progress_screen.dart';
 import '../../skills/models/skill_progress_response.dart';
 import '../../skills/screens/skills_screen.dart';
 import '../../skills/services/skill_service.dart';
@@ -1052,6 +1053,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       label: const Text(
                         "AI Koç'a Sor",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ProgressScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.bar_chart_outlined,
+                      ),
+                      label: const Text(
+                        'İlerlememi Gör',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

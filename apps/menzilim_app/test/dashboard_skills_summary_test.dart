@@ -9,6 +9,7 @@ import 'package:menzilim_app/features/dashboard/models/dashboard_response.dart';
 import 'package:menzilim_app/features/dashboard/screens/dashboard_screen.dart';
 import 'package:menzilim_app/features/dashboard/services/dashboard_service.dart';
 import 'package:menzilim_app/features/dashboard/widgets/dashboard_skills_summary.dart';
+import 'package:menzilim_app/features/progress/screens/progress_screen.dart';
 import 'package:menzilim_app/features/skills/models/skill_progress_response.dart';
 import 'package:menzilim_app/features/skills/screens/skills_screen.dart';
 import 'package:menzilim_app/features/skills/services/skill_service.dart';
@@ -232,6 +233,23 @@ void main() {
 
     expect(find.byType(SkillsScreen), findsOneWidget);
     expect(find.text('Yeteneklerim'), findsOneWidget);
+  });
+
+  testWidgets('İlerlememi Gör ProgressScreen\'e götürür', (tester) async {
+    final skills = _FakeSkillService([
+      () async => [_skill('ASP.NET Core', 50)],
+    ]);
+
+    await tester.pumpWidget(_app(skills));
+    await tester.pumpAndSettle();
+
+    final action = find.text('İlerlememi Gör');
+    await tester.ensureVisible(action);
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ProgressScreen), findsOneWidget);
+    expect(find.text('Genel İlerleme'), findsOneWidget);
   });
 
   // Dashboard'un tamamı test fontuyla 400px'te zaten (mevcut, bu adımla
