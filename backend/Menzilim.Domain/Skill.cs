@@ -15,4 +15,10 @@ public class Skill
     public DateTime CreatedAt { get; set; }
 
     public ICollection<UserSkill> UserSkills { get; set; } = new List<UserSkill>();
+
+    public ICollection<SpecializationSkill> SpecializationSkills { get; set; } = new List<SpecializationSkill>();
+
+    public ICollection<ContentSkill> ContentSkills { get; set; } = new List<ContentSkill>();
+
+    public ICollection<Quiz> Quizzes { get; set; } = new List<Quiz>();
 }

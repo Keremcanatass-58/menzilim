@@ -85,6 +85,28 @@ namespace Menzilim.Infrastructure.Migrations
                     b.ToTable("ContentProfessions");
                 });
 
+            modelBuilder.Entity("Menzilim.Domain.ContentSkill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ContentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SkillId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SkillId");
+
+                    b.HasIndex("ContentId", "SkillId")
+                        .IsUnique();
+
+                    b.ToTable("ContentSkills");
+                });
+
             modelBuilder.Entity("Menzilim.Domain.ContentTag", b =>
                 {
                     b.Property<Guid>("Id")
@@ -326,11 +348,16 @@ namespace Menzilim.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<Guid?>("SkillId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SkillId");
 
                     b.ToTable("Quizzes");
                 });
@@ -389,9 +416,12 @@ namespace Menzilim.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Skills");
                 });
@@ -423,6 +453,28 @@ namespace Menzilim.Infrastructure.Migrations
                     b.HasIndex("ProfessionId");
 
                     b.ToTable("Specializations");
+                });
+
+            modelBuilder.Entity("Menzilim.Domain.SpecializationSkill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SkillId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SpecializationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SkillId");
+
+                    b.HasIndex("SpecializationId", "SkillId")
+                        .IsUnique();
+
+                    b.ToTable("SpecializationSkills");
                 });
 
             modelBuilder.Entity("Menzilim.Domain.User", b =>
@@ -639,6 +691,25 @@ namespace Menzilim.Infrastructure.Migrations
                     b.Navigation("Profession");
                 });
 
+            modelBuilder.Entity("Menzilim.Domain.ContentSkill", b =>
+                {
+                    b.HasOne("Menzilim.Domain.Content", "Content")
+                        .WithMany("Skills")
+                        .HasForeignKey("ContentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Menzilim.Domain.Skill", "Skill")
+                        .WithMany("ContentSkills")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Content");
+
+                    b.Navigation("Skill");
+                });
+
             modelBuilder.Entity("Menzilim.Domain.ContentTag", b =>
                 {
                     b.HasOne("Menzilim.Domain.Content", "Content")
@@ -697,6 +768,16 @@ namespace Menzilim.Infrastructure.Migrations
                     b.Navigation("Quiz");
                 });
 
+            modelBuilder.Entity("Menzilim.Domain.Quiz", b =>
+                {
+                    b.HasOne("Menzilim.Domain.Skill", "Skill")
+                        .WithMany("Quizzes")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Skill");
+                });
+
             modelBuilder.Entity("Menzilim.Domain.QuizAttempt", b =>
                 {
                     b.HasOne("Menzilim.Domain.Quiz", "Quiz")
@@ -725,6 +806,25 @@ namespace Menzilim.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Profession");
+                });
+
+            modelBuilder.Entity("Menzilim.Domain.SpecializationSkill", b =>
+                {
+                    b.HasOne("Menzilim.Domain.Skill", "Skill")
+                        .WithMany("SpecializationSkills")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Menzilim.Domain.Specialization", "Specialization")
+                        .WithMany("SpecializationSkills")
+                        .HasForeignKey("SpecializationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Skill");
+
+                    b.Navigation("Specialization");
                 });
 
             modelBuilder.Entity("Menzilim.Domain.UserActivity", b =>
@@ -818,6 +918,8 @@ namespace Menzilim.Infrastructure.Migrations
                 {
                     b.Navigation("Professions");
 
+                    b.Navigation("Skills");
+
                     b.Navigation("Tags");
                 });
 
@@ -847,11 +949,19 @@ namespace Menzilim.Infrastructure.Migrations
 
             modelBuilder.Entity("Menzilim.Domain.Skill", b =>
                 {
+                    b.Navigation("ContentSkills");
+
+                    b.Navigation("Quizzes");
+
+                    b.Navigation("SpecializationSkills");
+
                     b.Navigation("UserSkills");
                 });
 
             modelBuilder.Entity("Menzilim.Domain.Specialization", b =>
                 {
+                    b.Navigation("SpecializationSkills");
+
                     b.Navigation("UserProfiles");
                 });
 

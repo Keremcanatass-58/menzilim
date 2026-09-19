@@ -15,4 +15,5 @@ public class Content
 
     public ICollection<ContentTag> Tags { get; set; } = new List<ContentTag>();
     public ICollection<ContentProfession> Professions { get; set; } = new List<ContentProfession>();
+    public ICollection<ContentSkill> Skills { get; set; } = new List<ContentSkill>();
 }

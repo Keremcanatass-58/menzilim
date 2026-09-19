@@ -12,23 +12,42 @@ import '../../content/services/content_service.dart';
 import '../../content/screens/discover_screen.dart';
 import '../../quiz/screens/quiz_screen.dart';
 import '../../ai_coach/screens/ai_coach_screen.dart';
+import '../../skills/models/skill_progress_response.dart';
+import '../../skills/screens/skills_screen.dart';
+import '../../skills/services/skill_service.dart';
+import '../widgets/dashboard_skills_summary.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  // Testlerde sahte servisler verilebilir; normalde gerçek API kullanılır.
+  final DashboardService? dashboardService;
+  final DailyPlanService? dailyPlanService;
+  final ContentService? contentService;
+  final SkillService? skillService;
+
+  const DashboardScreen({
+    super.key,
+    this.dashboardService,
+    this.dailyPlanService,
+    this.contentService,
+    this.skillService,
+  });
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final DashboardService _dashboardService =
-      DashboardService(ApiClient());
+  late final DashboardService _dashboardService =
+      widget.dashboardService ?? DashboardService(ApiClient());
 
-  final DailyPlanService _dailyPlanService =
-      DailyPlanService(ApiClient());
+  late final DailyPlanService _dailyPlanService =
+      widget.dailyPlanService ?? DailyPlanService(ApiClient());
 
-  final ContentService _contentService =
-      ContentService(ApiClient());
+  late final ContentService _contentService =
+      widget.contentService ?? ContentService(ApiClient());
+
+  late final SkillService _skillService =
+      widget.skillService ?? SkillService(ApiClient());
 
   final TokenStorage _tokenStorage = TokenStorage();
 
@@ -47,11 +66,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   String? _openingContentId;
 
+  // Beceri özeti de bağımsız yüklenir; hatası dashboard'u düşürmez.
+  List<SkillProgressResponse> _skills = [];
+  bool _isLoadingSkills = true;
+  String? _skillsError;
+  int _skillsRequestId = 0;
+
   @override
   void initState() {
     super.initState();
     _loadDashboard();
     _loadRecommendations();
+    _loadSkills();
+  }
+
+  Future<void> _loadSkills() async {
+    final requestId = ++_skillsRequestId;
+
+    // İlk yüklemede state zaten "yükleniyor"; initState içinde setState gerekmez.
+    if (mounted && !_isLoadingSkills) {
+      setState(() {
+        _isLoadingSkills = true;
+        _skillsError = null;
+      });
+    }
+
+    try {
+      final token = await _tokenStorage.getToken();
+
+      if (token == null || token.isEmpty) {
+        throw Exception('Oturum bilgisi bulunamadı.');
+      }
+
+      final skills = await _skillService.getMySkills(token);
+
+      if (!mounted || requestId != _skillsRequestId) return;
+
+      setState(() {
+        _skills = skills;
+        _isLoadingSkills = false;
+        _skillsError = null;
+      });
+    } catch (e) {
+      if (!mounted || requestId != _skillsRequestId) return;
+
+      setState(() {
+        _isLoadingSkills = false;
+        _skillsError = 'Beceriler yüklenemedi.';
+      });
+    }
+  }
+
+  void _openSkills() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const SkillsScreen(),
+      ),
+    );
   }
 
   Future<void> _loadRecommendations() async {
@@ -246,10 +317,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     if (!mounted) return;
 
-    // İçerik ilerlemesi değişmiş olabilir; dashboard'ı ve önerileri yenile.
+    // İçerik ilerlemesi değişmiş olabilir; dashboard'ı, önerileri ve
+    // beceri özetini yenile.
     await Future.wait([
       _loadDashboard(),
       _loadRecommendations(),
+      _loadSkills(),
     ]);
   }
 
@@ -268,8 +341,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (!mounted) return;
 
     // Quiz sonucunda günlük görev backend'de tamamlanmış olabilir;
-    // dashboard ve günlük plan durumunu yenile.
-    await _loadDashboard();
+    // dashboard, günlük plan ve (quiz skoru nedeniyle) beceri özetini yenile.
+    await Future.wait([
+      _loadDashboard(),
+      _loadSkills(),
+    ]);
   }
 
   Widget _buildRecommendationsSection() {
@@ -436,6 +512,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                       const Spacer(),
+                      IconButton(
+                        tooltip: 'Yeteneklerim',
+                        onPressed: _openSkills,
+                        icon: const Icon(
+                          Icons.insights_outlined,
+                        ),
+                      ),
                       IconButton(
                         onPressed: () {
                         Navigator.of(context).push(
@@ -792,6 +875,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ],
                     ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Beceri Özeti
+                  DashboardSkillsSummary(
+                    skills: _skills,
+                    isLoading: _isLoadingSkills,
+                    errorMessage: _skillsError,
+                    onRetry: _loadSkills,
+                    onViewAll: _openSkills,
                   ),
 
                   const SizedBox(height: 32),

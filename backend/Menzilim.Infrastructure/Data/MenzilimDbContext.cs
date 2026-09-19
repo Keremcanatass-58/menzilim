@@ -16,6 +16,8 @@ public class MenzilimDbContext : DbContext
     public DbSet<Specialization> Specializations => Set<Specialization>();
     public DbSet<Skill> Skills => Set<Skill>();
     public DbSet<UserSkill> UserSkills => Set<UserSkill>();
+    public DbSet<SpecializationSkill> SpecializationSkills => Set<SpecializationSkill>();
+    public DbSet<ContentSkill> ContentSkills => Set<ContentSkill>();
     public DbSet<Content> Contents => Set<Content>();
     public DbSet<ContentTag> ContentTags => Set<ContentTag>();
     public DbSet<ContentProfession> ContentProfessions => Set<ContentProfession>();
@@ -69,6 +71,36 @@ public class MenzilimDbContext : DbContext
             .WithMany(s => s.UserSkills)
             .HasForeignKey(us => us.SkillId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<SpecializationSkill>()
+            .HasOne(ss => ss.Specialization)
+            .WithMany(s => s.SpecializationSkills)
+            .HasForeignKey(ss => ss.SpecializationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<SpecializationSkill>()
+            .HasOne(ss => ss.Skill)
+            .WithMany(s => s.SpecializationSkills)
+            .HasForeignKey(ss => ss.SkillId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ContentSkill>()
+            .HasOne(cs => cs.Content)
+            .WithMany(c => c.Skills)
+            .HasForeignKey(cs => cs.ContentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ContentSkill>()
+            .HasOne(cs => cs.Skill)
+            .WithMany(s => s.ContentSkills)
+            .HasForeignKey(cs => cs.SkillId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Quiz>()
+            .HasOne(q => q.Skill)
+            .WithMany(s => s.Quizzes)
+            .HasForeignKey(q => q.SkillId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<ContentTag>()
             .HasOne(ct => ct.Content)
@@ -152,6 +184,20 @@ public class MenzilimDbContext : DbContext
 
         modelBuilder.Entity<UserSkill>()
             .HasIndex(us => new { us.UserId, us.SkillId })
+            .IsUnique();
+
+        modelBuilder.Entity<SpecializationSkill>()
+            .HasIndex(ss => new { ss.SpecializationId, ss.SkillId })
+            .IsUnique();
+
+        modelBuilder.Entity<ContentSkill>()
+            .HasIndex(cs => new { cs.ContentId, cs.SkillId })
+            .IsUnique();
+
+        // Seed, skill'leri isimle bulup tekrar eklemeyi önleyebilsin diye
+        // benzersiz. (Email'deki gibi index nedeniyle nvarchar(450) olur.)
+        modelBuilder.Entity<Skill>()
+            .HasIndex(s => s.Name)
             .IsUnique();
     }
 }

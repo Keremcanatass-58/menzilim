@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Menzilim.Domain;
 
 namespace Menzilim.Infrastructure.Data.Seed;
 
 public static class DatabaseSeeder
 {
-    public static async Task SeedAsync(MenzilimDbContext db)
+    public static async Task SeedAsync(
+        MenzilimDbContext db,
+        ILogger? logger = null)
     {
         if (!await db.Professions.AnyAsync())
         {
@@ -195,5 +198,7 @@ public static class DatabaseSeeder
             db.Quizzes.Add(quiz);
             await db.SaveChangesAsync();
         }
+
+        await SkillSeeder.SeedAsync(db, logger);
     }
 }

@@ -17,4 +17,6 @@ public class Specialization
     public Profession Profession { get; set; } = null!;
 
     public ICollection<UserProfile> UserProfiles { get; set; } = new List<UserProfile>();
+
+    public ICollection<SpecializationSkill> SpecializationSkills { get; set; } = new List<SpecializationSkill>();
 }

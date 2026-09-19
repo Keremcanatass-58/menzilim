@@ -4,6 +4,8 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Menzilim.Application.Interfaces.Content;
+using Menzilim.Application.Interfaces.Skills;
+using Menzilim.Application.Services.Skills;
 using Menzilim.Application.DTOs.Content;
 using Menzilim.Application.Services.Content;
 using Menzilim.Application.Services;
@@ -62,6 +64,8 @@ builder.Services.AddScoped<IDailyPlanRepository, DailyPlanRepository>();
 builder.Services.AddScoped<IContentService, ContentService>();
 builder.Services.AddScoped<IContentRepository, ContentRepository>();
 builder.Services.AddScoped<IContentRecommendationService, ContentRecommendationService>();
+builder.Services.AddScoped<ISkillService, SkillService>();
+builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddScoped<IContentProfessionService, ContentProfessionService>();
 builder.Services.AddScoped<IContentProfessionRepository, ContentProfessionRepository>();
 builder.Services.AddScoped<IContentProgressService, ContentProgressService>();
@@ -180,7 +184,11 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider
         .GetRequiredService<MenzilimDbContext>();
 
-    await DatabaseSeeder.SeedAsync(db);
+    var seedLogger = scope.ServiceProvider
+        .GetRequiredService<ILoggerFactory>()
+        .CreateLogger(nameof(DatabaseSeeder));
+
+    await DatabaseSeeder.SeedAsync(db, seedLogger);
 }
 
 
@@ -278,6 +286,67 @@ app.MapGet(
 
         return Results.Ok(specializations);
     });
+
+
+// ==============================
+// SKILLS - BY SPECIALIZATION
+// ==============================
+
+app.MapGet(
+    "/api/specializations/{specializationId:guid}/skills",
+    async (
+        Guid specializationId,
+        ISkillService skillService) =>
+    {
+        try
+        {
+            var response =
+                await skillService.GetBySpecializationAsync(specializationId);
+
+            return Results.Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(new
+            {
+                message = ex.Message
+            });
+        }
+    });
+
+
+// ==============================
+// SKILLS - GET ME
+// ==============================
+
+app.MapGet(
+    "/api/skills/me",
+    async (
+        ClaimsPrincipal user,
+        ISkillService skillService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Results.Unauthorized();
+
+        try
+        {
+            var response =
+                await skillService.GetMyProgressAsync(userId);
+
+            return Results.Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(new
+            {
+                message = ex.Message
+            });
+        }
+    })
+    .RequireAuthorization();
 
 
 // ==============================
