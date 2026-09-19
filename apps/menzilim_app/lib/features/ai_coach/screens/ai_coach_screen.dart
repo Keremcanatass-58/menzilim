@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/l10n.dart';
+import '../../../core/theme/app_theme.dart';
+
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
 import '../models/ai_coach_models.dart';
@@ -64,7 +67,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
       if (!mounted) return;
 
       setState(() {
-        _errorMessage = 'AI koçuna ulaşılamadı. Lütfen tekrar deneyin.';
+        _errorMessage = context.l10n.coachUnreachable;
         _isLoading = false;
       });
     }
@@ -74,7 +77,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Koç'),
+        title: Text(context.l10n.coachTitle),
       ),
       body: SafeArea(
         child: Center(
@@ -92,20 +95,22 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primaryContainer,
+                      color: context.colors.primaryContainer,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(Icons.auto_awesome, size: 28),
-                        SizedBox(width: 12),
+                        Icon(
+                          Icons.auto_awesome,
+                          size: 28,
+                          color: context.colors.onPrimaryContainer,
+                        ),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Kariyer hedefine göre kişisel bir yol '
-                            'arkadaşın. Aklına takılanı sor.',
+                            context.l10n.coachIntro,
                             style: TextStyle(
+                              color: context.colors.onPrimaryContainer,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                               height: 1.4,
@@ -126,7 +131,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
                     enabled: !_isLoading,
                     textInputAction: TextInputAction.newline,
                     decoration: InputDecoration(
-                      hintText: 'Sorunu buraya yaz...',
+                      hintText: context.l10n.coachHint,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -147,12 +152,13 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
                               ),
                             )
                           : const Icon(Icons.send_outlined),
                       label: Text(
-                        _isLoading ? 'Yanıtlanıyor...' : 'Gönder',
+                        _isLoading
+                            ? context.l10n.coachAnswering
+                            : context.l10n.coachSend,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -193,18 +199,21 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.red.shade200),
-          color: Colors.red.shade50,
+          border: Border.all(color: context.colors.error),
+          color: context.colors.errorContainer,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
           children: [
-            const Icon(Icons.error_outline, color: Colors.red),
+            Icon(Icons.error_outline, color: context.colors.error),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 _errorMessage!,
-                style: const TextStyle(fontSize: 15),
+                style: TextStyle(
+                  fontSize: 15,
+                  color: context.colors.onErrorContainer,
+                ),
               ),
             ),
           ],
@@ -217,7 +226,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color: context.colors.outlineVariant),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -228,15 +237,15 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
                 Icon(
                   Icons.auto_awesome,
                   size: 20,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: context.colors.primary,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'AI Koç',
+                  context.l10n.coachTitle,
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade700,
+                    color: context.colors.onSurfaceVariant,
                   ),
                 ),
               ],

@@ -1,26 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/l10n.dart';
 import '../models/news_item.dart';
 import '../services/news_link_opener.dart';
 
-const List<String> _turkishMonths = [
-  'Ocak',
-  'Şubat',
-  'Mart',
-  'Nisan',
-  'Mayıs',
-  'Haziran',
-  'Temmuz',
-  'Ağustos',
-  'Eylül',
-  'Ekim',
-  'Kasım',
-  'Aralık',
-];
-
-/// Ör. 11 Kasım 2025. Yalnızca tarih gösterilir (saat dilimi farkı önemsiz).
-String formatNewsDate(DateTime date) {
-  return '${date.day} ${_turkishMonths[date.month - 1]} ${date.year}';
+/// Ör. "11 Kasım 2025" / "November 11, 2025". Yalnızca tarih gösterilir
+/// (saat dilimi farkı önemsiz). intl tarih verisine ihtiyaç duymaz.
+String formatNewsDate(AppLocalizations l10n, DateTime date) {
+  return l10n.newsDate(
+    date.day,
+    l10n.monthName('m${date.month}'),
+    date.year.toString(),
+  );
 }
 
 /// Haberin kaynağını açar; açılamazsa kullanıcıya bildirir.
@@ -31,10 +22,11 @@ Future<void> openNewsItem(
 ) async {
   final uri = Uri.tryParse(item.sourceUrl);
   final messenger = ScaffoldMessenger.of(context);
+  final l10n = context.l10n;
 
   if (uri == null || !uri.hasScheme) {
     messenger.showSnackBar(
-      const SnackBar(content: Text('Geçersiz haber bağlantısı.')),
+      SnackBar(content: Text(l10n.newsInvalidLink)),
     );
     return;
   }
@@ -43,7 +35,7 @@ Future<void> openNewsItem(
 
   if (!opened) {
     messenger.showSnackBar(
-      const SnackBar(content: Text('Haber açılamadı.')),
+      SnackBar(content: Text(l10n.newsOpenError)),
     );
   }
 }
@@ -122,7 +114,7 @@ class NewsCard extends StatelessWidget {
                     if (item.publishedAt != null) ...[
                       const SizedBox(width: 10),
                       Text(
-                        formatNewsDate(item.publishedAt!),
+                        formatNewsDate(context.l10n, item.publishedAt!),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colors.onSurfaceVariant,
                         ),
@@ -159,7 +151,7 @@ class NewsCard extends StatelessWidget {
                 TextButton.icon(
                   onPressed: onOpen,
                   icon: const Icon(Icons.open_in_new, size: 18),
-                  label: const Text('Haberi İncele'),
+                  label: Text(context.l10n.newsReadMore),
                 ),
                 if (host != null) ...[
                   const SizedBox(width: 4),

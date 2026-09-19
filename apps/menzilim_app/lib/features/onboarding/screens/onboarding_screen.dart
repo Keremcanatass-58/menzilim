@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/l10n.dart';
+import '../../../core/theme/app_theme.dart';
+
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
 import '../models/onboarding_request.dart';
@@ -79,7 +82,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
       setState(() {
         _isLoadingProfessions = false;
-        _errorMessage = 'Meslekler yüklenirken bir hata oluştu.';
+        _errorMessage = context.l10n.onboardingProfessionsLoadError;
       });
     }
   }
@@ -109,7 +112,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
       setState(() {
         _isLoadingSpecializations = false;
-        _errorMessage = 'Uzmanlıklar yüklenirken bir hata oluştu.';
+        _errorMessage = context.l10n.onboardingSpecializationsLoadError;
       });
     }
   }
@@ -135,7 +138,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _goNext() {
     if (_currentStep == 0) {
       if (_selectedProfession == null) {
-        _showMessage('Lütfen bir meslek seç.');
+        _showMessage(context.l10n.onboardingSelectProfession);
         return;
       }
 
@@ -144,7 +147,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     if (_currentStep == 1) {
       if (_selectedSpecialization == null) {
-        _showMessage('Lütfen bir uzmanlık alanı seç.');
+        _showMessage(context.l10n.onboardingSelectSpecialization);
         return;
       }
 
@@ -157,7 +160,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     if (_currentStep == 2) {
       if (_selectedExperienceLevel == null) {
-        _showMessage('Lütfen deneyim seviyeni seç.');
+        _showMessage(context.l10n.onboardingSelectExperience);
         return;
       }
 
@@ -172,7 +175,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final goal = _careerGoalController.text.trim();
 
       if (goal.isEmpty) {
-        _showMessage('Lütfen kariyer hedefini yaz.');
+        _showMessage(context.l10n.onboardingEnterCareerGoal);
         return;
       }
 
@@ -186,7 +189,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     if (_currentStep == 4) {
       if (_selectedDailyMinutes == null) {
-        _showMessage('Lütfen günlük öğrenme süresini seç.');
+        _showMessage(context.l10n.onboardingSelectDailyTime);
         return;
       }
 
@@ -219,7 +222,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (!mounted) return;
 
       _showMessage(
-        'Oturum bilgisi bulunamadı. Lütfen tekrar giriş yap.',
+        context.l10n.commonSessionMissing,
       );
 
       return;
@@ -246,7 +249,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (!mounted) return;
 
       _showMessage(
-        'Profilin başarıyla oluşturuldu. MENZİLİM yolculuğun başlıyor!',
+        context.l10n.onboardingSaved,
       );
 
       await Future.delayed(
@@ -264,7 +267,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (!mounted) return;
 
       _showMessage(
-        'Profilin kaydedilemedi. Lütfen tekrar dene.',
+        context.l10n.onboardingSaveFailed,
       );
     } finally {
       if (mounted) {
@@ -342,9 +345,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildHeader() {
     return Row(
       children: [
-        const Text(
-          'MENZİLİM',
-          style: TextStyle(
+        Text(
+          context.l10n.appName,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
@@ -352,9 +355,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
         const Spacer(),
         Text(
-          '${_currentStep + 1} / 5',
+          context.l10n.onboardingStep(_currentStep + 1, 5),
           style: TextStyle(
-            color: Colors.grey.shade600,
+            color: context.colors.onSurfaceVariant,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -405,19 +408,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Kariyer yolculuğuna başlayalım.',
-          style: TextStyle(
+        Text(
+          context.l10n.onboardingProfessionTitle,
+          style: const TextStyle(
             fontSize: 34,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 12),
         Text(
-          'Hangi alanda kendini geliştirmek istiyorsun?',
+          context.l10n.onboardingProfessionSubtitle,
           style: TextStyle(
             fontSize: 18,
-            color: Colors.grey.shade700,
+            color: context.colors.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 32),
@@ -463,9 +466,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
 
     return _buildSelectionStep(
-      title: 'Uzmanlık alanını seç.',
-      subtitle:
-          '${_selectedProfession?.name} alanında hangi yönde ilerlemek istiyorsun?',
+      title: context.l10n.onboardingSpecializationTitle,
+      subtitle: context.l10n.onboardingSpecializationSubtitle(
+        _selectedProfession?.name ?? '',
+      ),
       items: _specializations
           .map(
             (specialization) => _SelectionCard(
@@ -484,31 +488,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildExperienceStep() {
+    final l10n = context.l10n;
+
+    // value backend'e gönderilir ve çevrilmez; yalnızca etiketler yerelleşir.
     final levels = [
       (
         value: 'Beginner',
-        title: 'Başlangıç',
-        description: 'Temel seviyeden başlıyorum.',
+        title: l10n.experienceBeginner,
+        description: l10n.experienceBeginnerDescription,
         icon: Icons.eco_outlined,
       ),
       (
         value: 'Intermediate',
-        title: 'Orta',
-        description: 'Temelleri biliyorum, kendimi geliştiriyorum.',
+        title: l10n.experienceIntermediate,
+        description: l10n.experienceIntermediateDescription,
         icon: Icons.trending_up,
       ),
       (
         value: 'Advanced',
-        title: 'İleri',
-        description: 'Deneyimliyim ve uzmanlaşmak istiyorum.',
+        title: l10n.experienceAdvanced,
+        description: l10n.experienceAdvancedDescription,
         icon: Icons.rocket_launch_outlined,
       ),
     ];
 
     return _buildSelectionStep(
-      title: 'Kendini hangi seviyede görüyorsun?',
-      subtitle:
-          'Böylece öğrenme planını mevcut seviyene göre oluşturabiliriz.',
+      title: l10n.onboardingExperienceTitle,
+      subtitle: l10n.onboardingExperienceSubtitle,
       items: levels
           .map(
             (level) => _SelectionCard(
@@ -532,19 +538,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       children: [
         _buildBackButton(),
         const SizedBox(height: 24),
-        const Text(
-          'Kariyer hedefin nedir?',
-          style: TextStyle(
+        Text(
+          context.l10n.onboardingCareerGoalTitle,
+          style: const TextStyle(
             fontSize: 34,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 12),
         Text(
-          'MENZİLİM sana uygun bir yol oluşturabilsin.',
+          context.l10n.onboardingCareerGoalSubtitle,
           style: TextStyle(
             fontSize: 18,
-            color: Colors.grey.shade700,
+            color: context.colors.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 32),
@@ -555,8 +561,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             setState(() {});
           },
           decoration: InputDecoration(
-            hintText:
-                'Örn: Backend alanında profesyonelleşmek ve işe girmek istiyorum.',
+            hintText: context.l10n.onboardingCareerGoalHint,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -570,11 +575,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildDailyTimeStep() {
+    final l10n = context.l10n;
+
     final times = [
-      (30, '30 dakika', 'Yoğun günler için'),
-      (60, '1 saat', 'Düzenli gelişim için'),
-      (90, '1,5 saat', 'Daha hızlı ilerlemek için'),
-      (120, '2 saat', 'Yoğun öğrenme için'),
+      (30, l10n.dailyTime30, l10n.dailyTime30Description),
+      (60, l10n.dailyTime60, l10n.dailyTime60Description),
+      (90, l10n.dailyTime90, l10n.dailyTime90Description),
+      (120, l10n.dailyTime120, l10n.dailyTime120Description),
     ];
 
     return Column(
@@ -582,19 +589,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       children: [
         _buildBackButton(),
         const SizedBox(height: 24),
-        const Text(
-          'Günde ne kadar zaman ayırabilirsin?',
-          style: TextStyle(
+        Text(
+          l10n.onboardingDailyTimeTitle,
+          style: const TextStyle(
             fontSize: 34,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 12),
         Text(
-          'Gerçekçi bir süre seç. Önemli olan sürdürülebilirlik.',
+          l10n.onboardingDailyTimeSubtitle,
           style: TextStyle(
             fontSize: 18,
-            color: Colors.grey.shade700,
+            color: context.colors.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 32),
@@ -621,8 +628,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         const SizedBox(height: 20),
         _buildNextButton(
           text: _isSaving
-              ? 'Kaydediliyor...'
-              : 'MENZİLİM Yolculuğuna Başla',
+              ? l10n.onboardingSaving
+              : l10n.onboardingFinish,
         ),
       ],
     );
@@ -650,7 +657,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           subtitle,
           style: TextStyle(
             fontSize: 18,
-            color: Colors.grey.shade700,
+            color: context.colors.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 32),
@@ -670,7 +677,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildNextButton({
-    String text = 'Devam Et',
+    String? text,
   }) {
     final canContinue = _canContinue();
 
@@ -681,7 +688,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         onPressed:
             canContinue && !_isSaving ? _goNext : null,
         child: Text(
-          text,
+          text ?? context.l10n.commonContinue,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -717,7 +724,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return TextButton.icon(
       onPressed: _isSaving ? null : _goBack,
       icon: const Icon(Icons.arrow_back),
-      label: const Text('Geri'),
+      label: Text(context.l10n.commonBack),
     );
   }
 
@@ -734,13 +741,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            _errorMessage ?? 'Bir hata oluştu.',
+            _errorMessage ?? context.l10n.commonErrorGeneric,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: onRetry,
-            child: const Text('Tekrar Dene'),
+            child: Text(context.l10n.commonRetry),
           ),
         ],
       ),
@@ -782,7 +789,7 @@ class _SelectionCard extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? colorScheme.primary
-                  : Colors.grey.shade300,
+                  : colorScheme.outlineVariant,
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(18),
@@ -823,7 +830,7 @@ class _SelectionCard extends StatelessWidget {
                       Text(
                         description!,
                         style: TextStyle(
-                          color: Colors.grey.shade600,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -837,7 +844,7 @@ class _SelectionCard extends StatelessWidget {
                 size: isSelected ? 25 : 18,
                 color: isSelected
                     ? colorScheme.primary
-                    : Colors.grey.shade600,
+                    : colorScheme.onSurfaceVariant,
               ),
             ],
           ),
@@ -861,8 +868,8 @@ class _ProgressBar extends StatelessWidget {
       height: 5,
       decoration: BoxDecoration(
         color: isActive
-            ? Theme.of(context).colorScheme.primary
-            : Colors.grey.shade300,
+            ? context.colors.primary
+            : context.colors.outlineVariant,
         borderRadius: BorderRadius.circular(10),
       ),
     );

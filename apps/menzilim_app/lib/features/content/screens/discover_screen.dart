@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/localization/l10n.dart';
+import '../../../core/theme/app_theme.dart';
+
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
 import '../models/content_response.dart';
@@ -52,7 +55,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'İçerikler yüklenemedi.';
+        _errorMessage = context.l10n.discoverLoadError;
       });
     }
   }
@@ -71,9 +74,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Keşfet',
-          style: TextStyle(
+        title: Text(
+          context.l10n.discoverTitle,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -117,7 +120,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
                   _loadContent();
                 },
-                child: const Text('Tekrar Dene'),
+                child: Text(context.l10n.commonRetry),
               ),
             ],
           ),
@@ -129,11 +132,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       return RefreshIndicator(
         onRefresh: _loadContent,
         child: ListView(
-          children: const [
-            SizedBox(height: 180),
+          children: [
+            const SizedBox(height: 180),
             Center(
               child: Text(
-                'Şu an sana uygun içerik bulunmuyor.',
+                context.l10n.discoverEmpty,
+                textAlign: TextAlign.center,
               ),
             ),
           ],
@@ -146,19 +150,19 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       child: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          const Text(
-            'Senin için seçtiklerimiz',
-            style: TextStyle(
+          Text(
+            context.l10n.discoverHeadline,
+            style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Mesleğine ve gelişim yolculuğuna uygun içerikler.',
+            context.l10n.discoverSubtitle,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey.shade600,
+              color: context.colors.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 24),
@@ -195,7 +199,7 @@ class _ContentCard extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.grey.shade300,
+            color: context.colors.outlineVariant,
           ),
           borderRadius: BorderRadius.circular(20),
         ),
@@ -210,13 +214,11 @@ class _ContentCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primaryContainer,
+                    color: context.colors.primaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    content.level,
+                    context.l10n.experienceLevelLabel(content.level),
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -227,7 +229,7 @@ class _ContentCard extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_ios,
                   size: 16,
-                  color: Colors.grey.shade600,
+                  color: context.colors.onSurfaceVariant,
                 ),
               ],
             ),
@@ -247,7 +249,7 @@ class _ContentCard extends StatelessWidget {
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: Colors.grey.shade600,
+                  color: context.colors.onSurfaceVariant,
                   height: 1.4,
                 ),
               ),
@@ -258,27 +260,31 @@ class _ContentCard extends StatelessWidget {
                 Icon(
                   Icons.public,
                   size: 18,
-                  color: Colors.grey.shade600,
+                  color: context.colors.onSurfaceVariant,
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  content.source,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500,
+                Flexible(
+                  child: Text(
+                    content.source,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: context.colors.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Icon(
                   Icons.schedule_outlined,
                   size: 18,
-                  color: Colors.grey.shade600,
+                  color: context.colors.onSurfaceVariant,
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  '${content.readingTimeMinutes} dk',
+                  context.l10n.commonMinutesShort(content.readingTimeMinutes),
                   style: TextStyle(
-                    color: Colors.grey.shade600,
+                    color: context.colors.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -355,7 +361,7 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
 
       setState(() {
         _isLoadingProgress = false;
-        _errorMessage = 'İçerik ilerlemesi yüklenemedi.';
+        _errorMessage = context.l10n.contentProgressLoadError;
       });
     }
   }
@@ -394,8 +400,8 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('İçerik tamamlandı! 🎉'),
+        SnackBar(
+          content: Text(context.l10n.contentCompletedToast),
         ),
       );
     } catch (e) {
@@ -406,8 +412,8 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('İçerik tamamlanırken bir hata oluştu.'),
+        SnackBar(
+          content: Text(context.l10n.contentCompleteError),
         ),
       );
     }
@@ -418,8 +424,8 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
 
     if (uri == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Geçersiz içerik bağlantısı.'),
+        SnackBar(
+          content: Text(context.l10n.contentInvalidLink),
         ),
       );
       return;
@@ -432,8 +438,8 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
 
     if (!launched && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('İçerik açılamadı.'),
+        SnackBar(
+          content: Text(context.l10n.contentOpenError),
         ),
       );
     }
@@ -443,7 +449,7 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('İçerik Detayı'),
+        title: Text(context.l10n.contentDetailTitle),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -456,13 +462,13 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
                 vertical: 8,
               ),
               decoration: BoxDecoration(
-                color: _isCompleted
-                    ? Theme.of(context).colorScheme.primaryContainer
-                    : Theme.of(context).colorScheme.primaryContainer,
+                color: context.colors.primaryContainer,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                _isCompleted ? 'Tamamlandı ✓' : content.level,
+                _isCompleted
+                    ? context.l10n.contentCompletedBadge
+                    : context.l10n.experienceLevelLabel(content.level),
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                 ),
@@ -482,26 +488,30 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
                 Icon(
                   Icons.public,
                   size: 20,
-                  color: Colors.grey.shade600,
+                  color: context.colors.onSurfaceVariant,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  content.source,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
+                Flexible(
+                  child: Text(
+                    content.source,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: context.colors.onSurfaceVariant,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 20),
                 Icon(
                   Icons.schedule_outlined,
                   size: 20,
-                  color: Colors.grey.shade600,
+                  color: context.colors.onSurfaceVariant,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '${content.readingTimeMinutes} dakika',
+                  context.l10n.commonMinutes(content.readingTimeMinutes),
                   style: TextStyle(
-                    color: Colors.grey.shade600,
+                    color: context.colors.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -509,9 +519,9 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
             const SizedBox(height: 32),
             if (content.description != null &&
                 content.description!.isNotEmpty) ...[
-              const Text(
-                'Hakkında',
-                style: TextStyle(
+              Text(
+                context.l10n.contentAbout,
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
@@ -534,9 +544,9 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
                     ? null
                     : () => _openUrl(context),
                 icon: const Icon(Icons.open_in_new),
-                label: const Text(
-                  'İçeriği Aç',
-                  style: TextStyle(
+                label: Text(
+                  context.l10n.contentOpen,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -568,8 +578,8 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
                       ),
                 label: Text(
                   _isCompleted
-                      ? 'İçerik Tamamlandı'
-                      : 'Tamamladım',
+                      ? context.l10n.contentCompletedButton
+                      : context.l10n.contentMarkComplete,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -582,7 +592,7 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
               Text(
                 _errorMessage!,
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.error,
+                  color: context.colors.error,
                 ),
               ),
             ],

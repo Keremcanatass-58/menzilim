@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/l10n.dart';
+import '../../../core/theme/app_theme.dart';
+
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
 import '../../daily_plan/services/daily_plan_service.dart';
@@ -75,7 +78,7 @@ class _QuizScreenState extends State<QuizScreen> {
       if (!mounted) return;
 
       setState(() {
-        _errorMessage = 'Quiz yüklenirken bir hata oluştu.';
+        _errorMessage = context.l10n.quizLoadError;
         _isLoading = false;
       });
     }
@@ -121,8 +124,8 @@ class _QuizScreenState extends State<QuizScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Quiz gönderilirken bir hata oluştu.'),
+        SnackBar(
+          content: Text(context.l10n.quizSubmitError),
         ),
       );
     }
@@ -156,7 +159,7 @@ class _QuizScreenState extends State<QuizScreen> {
     if (_errorMessage != null || _quiz == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Quiz'),
+          title: Text(context.l10n.quizTitle),
         ),
         body: Center(
           child: Padding(
@@ -164,21 +167,21 @@ class _QuizScreenState extends State<QuizScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.error_outline,
                   size: 48,
-                  color: Colors.red,
+                  color: context.colors.error,
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  _errorMessage ?? 'Quiz bulunamadı.',
+                  _errorMessage ?? context.l10n.quizNotFound,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _loadQuiz,
-                  child: const Text('Tekrar Dene'),
+                  child: Text(context.l10n.commonRetry),
                 ),
               ],
             ),
@@ -207,8 +210,8 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget _buildQuizView() {
     final questions = _quiz!.questions;
     if (questions.isEmpty) {
-      return const Center(
-        child: Text('Bu quiz için henüz soru bulunmuyor.'),
+      return Center(
+        child: Text(context.l10n.quizNoQuestions),
       );
     }
 
@@ -233,16 +236,23 @@ class _QuizScreenState extends State<QuizScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Soru ${_currentIndex + 1} / ${questions.length}',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade700,
+              Flexible(
+                child: Text(
+                  context.l10n.quizQuestionProgress(
+                    _currentIndex + 1,
+                    questions.length,
+                  ),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: context.colors.onSurfaceVariant,
+                  ),
                 ),
               ),
               Text(
-                '%${(((_currentIndex + 1) / questions.length) * 100).round()}',
+                context.l10n.commonPercent(
+                  (((_currentIndex + 1) / questions.length) * 100).round(),
+                ),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -268,12 +278,13 @@ class _QuizScreenState extends State<QuizScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: context.colors.primaryContainer,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               currentQuestion.text,
-              style: const TextStyle(
+              style: TextStyle(
+                color: context.colors.onPrimaryContainer,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 height: 1.4,
@@ -304,15 +315,12 @@ class _QuizScreenState extends State<QuizScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Theme.of(context)
-                            .colorScheme
-                            .primary
-                            .withValues(alpha: 0.1)
+                        ? context.colors.primary.withValues(alpha: 0.1)
                         : Colors.transparent,
                     border: Border.all(
                       color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.grey.shade300,
+                          ? context.colors.primary
+                          : context.colors.outlineVariant,
                       width: isSelected ? 2 : 1,
                     ),
                     borderRadius: BorderRadius.circular(16),
@@ -325,14 +333,16 @@ class _QuizScreenState extends State<QuizScreen> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.grey.shade200,
+                              ? context.colors.primary
+                              : context.colors.surfaceContainerHighest,
                         ),
                         alignment: Alignment.center,
                         child: Text(
                           key,
                           style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black87,
+                            color: isSelected
+                                ? context.colors.onPrimary
+                                : context.colors.onSurface,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -384,11 +394,12 @@ class _QuizScreenState extends State<QuizScreen> {
                       height: 24,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
                       ),
                     )
                   : Text(
-                      isLastQuestion ? "Quiz'i Bitir" : 'Sonraki',
+                      isLastQuestion
+                          ? context.l10n.quizFinish
+                          : context.l10n.quizNext,
                       style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
@@ -410,17 +421,17 @@ class _QuizScreenState extends State<QuizScreen> {
         children: [
           const SizedBox(height: 20),
 
-          const Icon(
+          Icon(
             Icons.emoji_events_outlined,
             size: 72,
-            color: Colors.amber,
+            color: context.statusColors.warning,
           ),
 
           const SizedBox(height: 16),
 
-          const Text(
-            'Quiz Sonucu',
-            style: TextStyle(
+          Text(
+            context.l10n.quizResultTitle,
+            style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
             ),
@@ -429,11 +440,15 @@ class _QuizScreenState extends State<QuizScreen> {
           const SizedBox(height: 12),
 
           Text(
-            '${result.correctAnswers} / ${result.totalQuestions} Doğru',
+            context.l10n.quizResultCorrectOfTotal(
+              result.correctAnswers,
+              result.totalQuestions,
+            ),
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: Colors.grey.shade700,
+              color: context.colors.onSurfaceVariant,
             ),
           ),
 
@@ -445,66 +460,70 @@ class _QuizScreenState extends State<QuizScreen> {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               border: Border.all(
-                color: Colors.grey.shade300,
+                color: context.colors.outlineVariant,
               ),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
               children: [
-                const Text(
-                  'Başarı',
+                Text(
+                  context.l10n.quizResultSuccess,
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey,
+                    color: context.colors.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '%${result.score}',
+                  context.l10n.commonPercent(result.score),
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: context.colors.primary,
                   ),
                 ),
                 const SizedBox(height: 24),
                 const Divider(),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                Wrap(
+                  alignment: WrapAlignment.spaceEvenly,
+                  spacing: 24,
+                  runSpacing: 12,
                   children: [
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.check,
-                          color: Colors.green,
+                          color: context.statusColors.success,
                           size: 24,
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${result.correctAnswers} Doğru',
-                          style: const TextStyle(
+                          context.l10n.quizResultCorrect(result.correctAnswers),
+                          style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
-                            color: Colors.green,
+                            color: context.statusColors.success,
                           ),
                         ),
                       ],
                     ),
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.close,
-                          color: Colors.red,
+                          color: context.colors.error,
                           size: 24,
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${result.wrongAnswers} Yanlış',
-                          style: const TextStyle(
+                          context.l10n.quizResultWrong(result.wrongAnswers),
+                          style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
-                            color: Colors.red,
+                            color: context.colors.error,
                           ),
                         ),
                       ],
@@ -524,9 +543,9 @@ class _QuizScreenState extends State<QuizScreen> {
             child: ElevatedButton.icon(
               onPressed: _loadQuiz,
               icon: const Icon(Icons.refresh),
-              label: const Text(
-                'Tekrar Çöz',
-                style: TextStyle(
+              label: Text(
+                context.l10n.quizRetake,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -550,9 +569,9 @@ class _QuizScreenState extends State<QuizScreen> {
                 Navigator.of(context).pop();
               },
               icon: const Icon(Icons.arrow_back),
-              label: const Text(
-                "Dashboard'a Dön",
-                style: TextStyle(
+              label: Text(
+                context.l10n.quizBackToDashboard,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),

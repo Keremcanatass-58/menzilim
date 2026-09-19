@@ -1,0 +1,776 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for English (`en`).
+class AppLocalizationsEn extends AppLocalizations {
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
+
+  @override
+  String get appName => 'MENZİLİM';
+
+  @override
+  String get commonRetry => 'Try Again';
+
+  @override
+  String get commonSessionMissing => 'Session not found. Please sign in again.';
+
+  @override
+  String commonMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'minutes',
+      one: 'minute',
+    );
+    return '$minutes $_temp0';
+  }
+
+  @override
+  String commonMinutesShort(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String commonPercent(int value) {
+    return '$value%';
+  }
+
+  @override
+  String commonTaskCompleted(String title) {
+    return '$title completed! 🎉';
+  }
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get settingsLanguageTurkish => 'Türkçe';
+
+  @override
+  String get settingsLanguageEnglish => 'English';
+
+  @override
+  String get settingsTheme => 'Theme';
+
+  @override
+  String get settingsThemeSystem => 'System';
+
+  @override
+  String get settingsThemeLight => 'Light';
+
+  @override
+  String get settingsThemeDark => 'Dark';
+
+  @override
+  String get settingsThemeSystemHint =>
+      'System follows your device appearance.';
+
+  @override
+  String get loginTitle => 'Welcome back.';
+
+  @override
+  String get loginSubtitle =>
+      'Continue your growth journey where you left off.';
+
+  @override
+  String get loginFillFields => 'Please fill in your email and password.';
+
+  @override
+  String get loginSuccess => 'Signed in successfully.';
+
+  @override
+  String get loginFailed => 'Could not sign in. Check your email or password.';
+
+  @override
+  String get loginButton => 'Sign In';
+
+  @override
+  String get loginNoAccount => 'Don\'t have an account? ';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get emailHint => 'name@example.com';
+
+  @override
+  String get passwordLabel => 'Password';
+
+  @override
+  String get registerButton => 'Sign Up';
+
+  @override
+  String get registerTitle => 'Start your journey.';
+
+  @override
+  String get registerSubtitle =>
+      'Create your account and start your personal growth journey.';
+
+  @override
+  String get registerFillAll => 'Please fill in all fields.';
+
+  @override
+  String get registerInvalidEmail => 'Enter a valid email address.';
+
+  @override
+  String get registerPasswordTooShort =>
+      'Password must be at least 6 characters.';
+
+  @override
+  String get registerPasswordsMismatch => 'Passwords do not match.';
+
+  @override
+  String get registerSuccess => 'Your account has been created.';
+
+  @override
+  String get registerUnexpectedError =>
+      'An unexpected error occurred during sign-up.';
+
+  @override
+  String get registerConfirmPasswordLabel => 'Confirm Password';
+
+  @override
+  String get registerCreateAccount => 'Create Account';
+
+  @override
+  String get registerHaveAccount => 'Already have an account? Sign in';
+
+  @override
+  String get commonErrorGeneric => 'Something went wrong.';
+
+  @override
+  String get commonBack => 'Back';
+
+  @override
+  String get commonContinue => 'Continue';
+
+  @override
+  String get onboardingProfessionsLoadError => 'Could not load professions.';
+
+  @override
+  String get onboardingSpecializationsLoadError =>
+      'Could not load specializations.';
+
+  @override
+  String get onboardingSelectProfession => 'Please choose a profession.';
+
+  @override
+  String get onboardingSelectSpecialization =>
+      'Please choose a specialization.';
+
+  @override
+  String get onboardingSelectExperience =>
+      'Please choose your experience level.';
+
+  @override
+  String get onboardingEnterCareerGoal => 'Please enter your career goal.';
+
+  @override
+  String get onboardingSelectDailyTime =>
+      'Please choose your daily learning time.';
+
+  @override
+  String get onboardingSaved =>
+      'Your profile is ready. Your MENZİLİM journey begins!';
+
+  @override
+  String get onboardingSaveFailed =>
+      'Your profile could not be saved. Please try again.';
+
+  @override
+  String onboardingStep(int current, int total) {
+    return '$current / $total';
+  }
+
+  @override
+  String get onboardingProfessionTitle => 'Let\'s start your career journey.';
+
+  @override
+  String get onboardingProfessionSubtitle =>
+      'Which field do you want to grow in?';
+
+  @override
+  String get onboardingSpecializationTitle => 'Choose your specialization.';
+
+  @override
+  String onboardingSpecializationSubtitle(String profession) {
+    return 'Which direction do you want to take in $profession?';
+  }
+
+  @override
+  String get onboardingExperienceTitle => 'What level do you see yourself at?';
+
+  @override
+  String get onboardingExperienceSubtitle =>
+      'This lets us build your learning plan around your current level.';
+
+  @override
+  String get experienceBeginner => 'Beginner';
+
+  @override
+  String get experienceBeginnerDescription => 'I\'m starting from the basics.';
+
+  @override
+  String get experienceIntermediate => 'Intermediate';
+
+  @override
+  String get experienceIntermediateDescription =>
+      'I know the basics and I\'m improving.';
+
+  @override
+  String get experienceAdvanced => 'Advanced';
+
+  @override
+  String get experienceAdvancedDescription =>
+      'I\'m experienced and want to specialize.';
+
+  @override
+  String get onboardingCareerGoalTitle => 'What is your career goal?';
+
+  @override
+  String get onboardingCareerGoalSubtitle =>
+      'So MENZİLİM can build a path that fits you.';
+
+  @override
+  String get onboardingCareerGoalHint =>
+      'E.g. I want to become a professional backend developer and get hired.';
+
+  @override
+  String get onboardingDailyTimeTitle =>
+      'How much time can you spend each day?';
+
+  @override
+  String get onboardingDailyTimeSubtitle =>
+      'Pick a realistic time. Consistency is what matters.';
+
+  @override
+  String get dailyTime30 => '30 minutes';
+
+  @override
+  String get dailyTime30Description => 'For busy days';
+
+  @override
+  String get dailyTime60 => '1 hour';
+
+  @override
+  String get dailyTime60Description => 'For steady progress';
+
+  @override
+  String get dailyTime90 => '1.5 hours';
+
+  @override
+  String get dailyTime90Description => 'To progress faster';
+
+  @override
+  String get dailyTime120 => '2 hours';
+
+  @override
+  String get dailyTime120Description => 'For intensive learning';
+
+  @override
+  String get onboardingSaving => 'Saving...';
+
+  @override
+  String get onboardingFinish => 'Start Your MENZİLİM Journey';
+
+  @override
+  String get dashboardLoadError => 'Could not load your dashboard.';
+
+  @override
+  String get dashboardRecommendationsLoadError =>
+      'Could not load recommendations.';
+
+  @override
+  String get dashboardSkillsLoadError => 'Could not load skills.';
+
+  @override
+  String get dashboardTaskCompleteError =>
+      'Something went wrong while completing the task.';
+
+  @override
+  String get contentOpenError => 'Could not open the content.';
+
+  @override
+  String get dashboardGreeting => 'Hello 👋';
+
+  @override
+  String get dashboardHeadline => 'Keep up your growth journey.';
+
+  @override
+  String get dashboardSubheadline => 'Take one more step for yourself today.';
+
+  @override
+  String get dashboardTodayGoal => 'Today\'s Goal';
+
+  @override
+  String dashboardDailyGoal(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'minutes',
+      one: 'minute',
+    );
+    return 'Your daily learning goal: $minutes $_temp0';
+  }
+
+  @override
+  String dashboardMinutesCompleted(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'minutes',
+      one: 'minute',
+    );
+    return '$minutes $_temp0 completed';
+  }
+
+  @override
+  String get dashboardProfileTitle => 'Your Profile';
+
+  @override
+  String get profileProfession => 'Profession';
+
+  @override
+  String get profileSpecialization => 'Specialization';
+
+  @override
+  String get profileLevel => 'Level';
+
+  @override
+  String get profileCareerGoal => 'Career goal';
+
+  @override
+  String get dashboardProgressTitle => 'Progress';
+
+  @override
+  String get dashboardDailyPlan => 'Daily Plan';
+
+  @override
+  String dashboardTasksCompleted(int completed, int total) {
+    return '$completed / $total tasks completed';
+  }
+
+  @override
+  String dashboardMinutesOfTotal(int completed, int total) {
+    return '$completed / $total minutes';
+  }
+
+  @override
+  String get dashboardContent => 'Content';
+
+  @override
+  String dashboardContentCompleted(int count) {
+    return '$count completed';
+  }
+
+  @override
+  String dashboardContentInProgress(int count) {
+    return '$count in progress';
+  }
+
+  @override
+  String get dailyPlanTitle => 'Today\'s Roadmap';
+
+  @override
+  String get dailyPlanEmpty => 'No tasks for today yet.';
+
+  @override
+  String get dailyPlanTaskFallbackDescription =>
+      'A task from today\'s growth plan.';
+
+  @override
+  String get recommendationsTitle => 'Recommended for You';
+
+  @override
+  String get recommendationsEmpty =>
+      'No new recommendations for you right now.';
+
+  @override
+  String get dashboardContinueLearning => 'Continue Learning';
+
+  @override
+  String get dashboardAskCoach => 'Ask the AI Coach';
+
+  @override
+  String get dashboardViewProgress => 'View My Progress';
+
+  @override
+  String get taskGoToContent => 'Go to Content';
+
+  @override
+  String get recommendationInProgress => 'In progress';
+
+  @override
+  String get recommendationNew => 'New';
+
+  @override
+  String get recommendationStart => 'Start';
+
+  @override
+  String get skillsTitle => 'My Skills';
+
+  @override
+  String get discoverTitle => 'Discover';
+
+  @override
+  String get newsSectionTitle => 'In Your Field Today';
+
+  @override
+  String get newsViewAll => 'All News';
+
+  @override
+  String get newsLoadError => 'Could not load news.';
+
+  @override
+  String get newsEmpty => 'No news for your field right now.';
+
+  @override
+  String get skillsSummaryTitle => 'My Skills';
+
+  @override
+  String skillsSummaryCounts(int total, int started) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'skills',
+      one: 'skill',
+    );
+    return '$total $_temp0 · progress in $started';
+  }
+
+  @override
+  String get skillsSummaryEmpty =>
+      'You haven\'t made progress in any skill yet.';
+
+  @override
+  String get skillsViewAll => 'View All Skills';
+
+  @override
+  String get skillsLoadError => 'Could not load skills.';
+
+  @override
+  String get skillsEmpty => 'There are no skills for your specialization yet.';
+
+  @override
+  String get skillsMapTitle => 'Your skill map';
+
+  @override
+  String skillsMapSubtitle(int total, int started) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'skills',
+      one: 'skill',
+    );
+    return 'You\'ve made progress in $started of $total $_temp0.';
+  }
+
+  @override
+  String skillsStatContent(int completed, int total) {
+    return 'Content: $completed / $total';
+  }
+
+  @override
+  String skillsStatQuiz(int attempted, int total) {
+    return 'Quiz: $attempted / $total';
+  }
+
+  @override
+  String skillsStatInProgress(int count) {
+    return 'In progress: $count';
+  }
+
+  @override
+  String skillsStatBestScore(int score) {
+    return 'Best score: $score%';
+  }
+
+  @override
+  String skillsStatLatestScore(int score) {
+    return 'Latest score: $score%';
+  }
+
+  @override
+  String get skillsNoMaterial =>
+      'No content or quiz has been added for this skill yet.';
+
+  @override
+  String get progressTitle => 'Overall Progress';
+
+  @override
+  String get progressLoadError => 'Could not load progress.';
+
+  @override
+  String get progressNoData => 'No progress data found.';
+
+  @override
+  String get progressOverview => 'Overview';
+
+  @override
+  String get progressCompletedTasks => 'Completed Tasks';
+
+  @override
+  String get progressUnitTotal => 'total';
+
+  @override
+  String get progressLearningTime => 'Learning Time';
+
+  @override
+  String get progressUnitMinutes => 'minutes';
+
+  @override
+  String get progressCompletedPlans => 'Completed Plans';
+
+  @override
+  String get progressUnitPlans => 'plans';
+
+  @override
+  String get progressActiveDays => 'Active Days';
+
+  @override
+  String get progressUnitDays => 'days';
+
+  @override
+  String get progressToday => 'Today';
+
+  @override
+  String get progressTodayPlan => 'Today\'s Plan';
+
+  @override
+  String get progressNoPlanToday => 'No Plan Today';
+
+  @override
+  String progressPercentSuffix(int value) {
+    return '$value%';
+  }
+
+  @override
+  String get progressTasks => 'Tasks';
+
+  @override
+  String get progressDuration => 'Time';
+
+  @override
+  String progressMinutesOfTotal(int completed, int total) {
+    return '$completed/$total min';
+  }
+
+  @override
+  String get progressContentTitle => 'Content Progress';
+
+  @override
+  String get progressCompleted => 'Completed';
+
+  @override
+  String get progressInProgress => 'In Progress';
+
+  @override
+  String get progressQuizTitle => 'Quiz Progress';
+
+  @override
+  String get progressQuizSummary => 'Quiz Summary';
+
+  @override
+  String progressQuizAttempts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'attempts',
+      one: 'attempt',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get progressNoQuizAttempts => 'You haven\'t taken a quiz yet.';
+
+  @override
+  String get progressBestScore => 'Best Score';
+
+  @override
+  String get progressAverage => 'Average';
+
+  @override
+  String get progressLatestScore => 'Latest Score';
+
+  @override
+  String get progressSkillsTitle => 'Skills';
+
+  @override
+  String progressSkillsSummary(int total, int started) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'skills',
+      one: 'skill',
+    );
+    return 'Progress in $started of $total $_temp0';
+  }
+
+  @override
+  String get progressStrongestSkills => 'Strongest Skills';
+
+  @override
+  String get progressFocusSkills => 'Focus Skills (Low Progress)';
+
+  @override
+  String get quizTitle => 'Quiz';
+
+  @override
+  String get quizLoadError => 'Could not load the quiz.';
+
+  @override
+  String get quizSubmitError => 'Could not submit the quiz.';
+
+  @override
+  String get quizNotFound => 'Quiz not found.';
+
+  @override
+  String get quizNoQuestions => 'This quiz has no questions yet.';
+
+  @override
+  String quizQuestionProgress(int current, int total) {
+    return 'Question $current / $total';
+  }
+
+  @override
+  String get quizFinish => 'Finish Quiz';
+
+  @override
+  String get quizNext => 'Next';
+
+  @override
+  String get quizResultTitle => 'Quiz Result';
+
+  @override
+  String quizResultCorrectOfTotal(int correct, int total) {
+    return '$correct / $total Correct';
+  }
+
+  @override
+  String get quizResultSuccess => 'Score';
+
+  @override
+  String quizResultCorrect(int count) {
+    return '$count Correct';
+  }
+
+  @override
+  String quizResultWrong(int count) {
+    return '$count Wrong';
+  }
+
+  @override
+  String get quizRetake => 'Retake';
+
+  @override
+  String get quizBackToDashboard => 'Back to Dashboard';
+
+  @override
+  String get coachTitle => 'AI Coach';
+
+  @override
+  String get coachIntro =>
+      'A personal companion tuned to your career goal. Ask whatever is on your mind.';
+
+  @override
+  String get coachHint => 'Type your question here...';
+
+  @override
+  String get coachSend => 'Send';
+
+  @override
+  String get coachAnswering => 'Answering...';
+
+  @override
+  String get coachUnreachable =>
+      'Could not reach the AI coach. Please try again.';
+
+  @override
+  String get discoverLoadError => 'Could not load content.';
+
+  @override
+  String get discoverEmpty => 'There is no suitable content for you right now.';
+
+  @override
+  String get discoverHeadline => 'Picked for you';
+
+  @override
+  String get discoverSubtitle =>
+      'Content that fits your profession and growth journey.';
+
+  @override
+  String get contentDetailTitle => 'Content Details';
+
+  @override
+  String get contentProgressLoadError => 'Could not load content progress.';
+
+  @override
+  String get contentCompletedToast => 'Content completed! 🎉';
+
+  @override
+  String get contentCompleteError =>
+      'Something went wrong while completing the content.';
+
+  @override
+  String get contentInvalidLink => 'Invalid content link.';
+
+  @override
+  String get contentCompletedBadge => 'Completed ✓';
+
+  @override
+  String get contentAbout => 'About';
+
+  @override
+  String get contentOpen => 'Open Content';
+
+  @override
+  String get contentCompletedButton => 'Content Completed';
+
+  @override
+  String get contentMarkComplete => 'Mark as Complete';
+
+  @override
+  String get newsScreenTitle => 'News in Your Field';
+
+  @override
+  String get newsReadMore => 'Read Article';
+
+  @override
+  String get newsInvalidLink => 'Invalid news link.';
+
+  @override
+  String get newsOpenError => 'Could not open the article.';
+
+  @override
+  String monthName(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      'm1': 'January',
+      'm2': 'February',
+      'm3': 'March',
+      'm4': 'April',
+      'm5': 'May',
+      'm6': 'June',
+      'm7': 'July',
+      'm8': 'August',
+      'm9': 'September',
+      'm10': 'October',
+      'm11': 'November',
+      'm12': 'December',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String newsDate(int day, String month, String year) {
+    return '$month $day, $year';
+  }
+}

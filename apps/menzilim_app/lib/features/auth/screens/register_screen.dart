@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/l10n.dart';
+import '../../../core/theme/app_theme.dart';
+
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
 import '../models/register_request.dart';
@@ -48,22 +51,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final confirmPassword = _confirmPasswordController.text;
 
     if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-      _showMessage('Lütfen tüm alanları doldur.');
+      _showMessage(context.l10n.registerFillAll);
       return;
     }
 
     if (!email.contains('@')) {
-      _showMessage('Geçerli bir e-posta adresi gir.');
+      _showMessage(context.l10n.registerInvalidEmail);
       return;
     }
 
     if (password.length < 6) {
-      _showMessage('Şifre en az 6 karakter olmalı.');
+      _showMessage(context.l10n.registerPasswordTooShort);
       return;
     }
 
     if (password != confirmPassword) {
-      _showMessage('Şifreler eşleşmiyor.');
+      _showMessage(context.l10n.registerPasswordsMismatch);
       return;
     }
 
@@ -87,7 +90,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (!mounted) return;
 
-      _showMessage('Hesabın başarıyla oluşturuldu.');
+      _showMessage(context.l10n.registerSuccess);
 
       await Future.delayed(const Duration(milliseconds: 500));
 
@@ -104,9 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (e is ApiException) {
         _showMessage(e.message);
       } else {
-        _showMessage(
-          'Kayıt sırasında beklenmeyen bir hata oluştu.',
-        );
+        _showMessage(context.l10n.registerUnexpectedError);
       }
     } finally {
       if (mounted) {
@@ -140,6 +141,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -152,9 +155,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'MENZİLİM',
-                    style: TextStyle(
+                  Text(
+                    l10n.appName,
+                    style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.5,
@@ -163,9 +166,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   const SizedBox(height: 48),
 
-                  const Text(
-                    'Yolculuğunu başlat.',
-                    style: TextStyle(
+                  Text(
+                    l10n.registerTitle,
+                    style: const TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.bold,
                     ),
@@ -174,10 +177,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 12),
 
                   Text(
-                    'Hesabını oluştur ve kişisel gelişim yolculuğuna başla.',
+                    l10n.registerSubtitle,
                     style: TextStyle(
                       fontSize: 17,
-                      color: Colors.grey.shade700,
+                      color: context.colors.onSurfaceVariant,
                     ),
                   ),
 
@@ -188,8 +191,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
-                      labelText: 'E-posta',
-                      hintText: 'ornek@mail.com',
+                      labelText: l10n.emailLabel,
+                      hintText: l10n.emailHint,
                       prefixIcon: const Icon(
                         Icons.email_outlined,
                       ),
@@ -206,7 +209,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
-                      labelText: 'Şifre',
+                      labelText: l10n.passwordLabel,
                       prefixIcon: const Icon(
                         Icons.lock_outline,
                       ),
@@ -236,7 +239,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     onSubmitted: (_) => _register(),
                     textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
-                      labelText: 'Şifre Tekrar',
+                      labelText: l10n.registerConfirmPasswordLabel,
                       prefixIcon: const Icon(
                         Icons.lock_outline,
                       ),
@@ -274,9 +277,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Text(
-                              'Hesap Oluştur',
-                              style: TextStyle(
+                          : Text(
+                              l10n.registerCreateAccount,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -289,8 +292,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Center(
                     child: TextButton(
                       onPressed: _isLoading ? null : _openLoginScreen,
-                      child: const Text(
-                        'Zaten hesabın var mı? Giriş yap',
+                      child: Text(
+                        l10n.registerHaveAccount,
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),

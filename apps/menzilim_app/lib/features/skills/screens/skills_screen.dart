@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/l10n.dart';
+import '../../../core/theme/app_theme.dart';
+
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
 import '../models/skill_progress_response.dart';
@@ -56,7 +59,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Yetenekler yüklenemedi.';
+        _errorMessage = context.l10n.skillsLoadError;
       });
     }
   }
@@ -65,9 +68,9 @@ class _SkillsScreenState extends State<SkillsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Yeteneklerim',
-          style: TextStyle(
+        title: Text(
+          context.l10n.skillsTitle,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -111,7 +114,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
 
                   _loadSkills();
                 },
-                child: const Text('Tekrar Dene'),
+                child: Text(context.l10n.commonRetry),
               ),
             ],
           ),
@@ -124,15 +127,15 @@ class _SkillsScreenState extends State<SkillsScreen> {
         onRefresh: _loadSkills,
         child: ListView(
           padding: const EdgeInsets.all(24),
-          children: const [
-            SizedBox(height: 140),
-            Icon(
+          children: [
+            const SizedBox(height: 140),
+            const Icon(
               Icons.insights_outlined,
               size: 48,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
-              'Uzmanlık alanın için henüz yetenek bulunmuyor.',
+              context.l10n.skillsEmpty,
               textAlign: TextAlign.center,
             ),
           ],
@@ -153,20 +156,19 @@ class _SkillsScreenState extends State<SkillsScreen> {
           child: ListView(
             padding: const EdgeInsets.all(24),
             children: [
-              const Text(
-                'Yetenek haritan',
-                style: TextStyle(
+              Text(
+                context.l10n.skillsMapTitle,
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                '${_skills.length} yetenekten $startedCount tanesinde '
-                'ilerleme kaydettin.',
+                context.l10n.skillsMapSubtitle(_skills.length, startedCount),
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey.shade600,
+                  color: context.colors.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 24),
@@ -199,7 +201,7 @@ class _SkillCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         border: Border.all(
-          color: Colors.grey.shade300,
+          color: colorScheme.outlineVariant,
         ),
         borderRadius: BorderRadius.circular(18),
       ),
@@ -247,13 +249,13 @@ class _SkillCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                '%${skill.progressPercent}',
+                context.l10n.commonPercent(skill.progressPercent),
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: skill.progressPercent > 0
                       ? colorScheme.primary
-                      : Colors.grey.shade600,
+                      : colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -279,28 +281,36 @@ class _SkillCard extends StatelessWidget {
             children: [
               _StatItem(
                 icon: Icons.menu_book_outlined,
-                label: 'İçerik: ${skill.completedContentCount} / '
-                    '${skill.totalContentCount}',
+                label: context.l10n.skillsStatContent(
+                  skill.completedContentCount,
+                  skill.totalContentCount,
+                ),
               ),
               _StatItem(
                 icon: Icons.quiz_outlined,
-                label: 'Quiz: ${skill.attemptedQuizCount} / '
-                    '${skill.totalQuizCount}',
+                label: context.l10n.skillsStatQuiz(
+                  skill.attemptedQuizCount,
+                  skill.totalQuizCount,
+                ),
               ),
               if (skill.inProgressContentCount > 0)
                 _StatItem(
                   icon: Icons.timelapse_outlined,
-                  label: 'Devam eden: ${skill.inProgressContentCount}',
+                  label: context.l10n.skillsStatInProgress(
+                    skill.inProgressContentCount,
+                  ),
                 ),
               if (skill.bestQuizScore != null)
                 _StatItem(
                   icon: Icons.emoji_events_outlined,
-                  label: 'En iyi skor: %${skill.bestQuizScore}',
+                  label: context.l10n.skillsStatBestScore(skill.bestQuizScore!),
                 ),
               if (skill.latestQuizScore != null)
                 _StatItem(
                   icon: Icons.history,
-                  label: 'Son skor: %${skill.latestQuizScore}',
+                  label: context.l10n.skillsStatLatestScore(
+                    skill.latestQuizScore!,
+                  ),
                 ),
             ],
           ),
@@ -308,9 +318,9 @@ class _SkillCard extends StatelessWidget {
           if (!skill.hasLearningMaterial) ...[
             const SizedBox(height: 12),
             Text(
-              'Bu yetenek için henüz içerik veya quiz eklenmedi.',
+              context.l10n.skillsNoMaterial,
               style: TextStyle(
-                color: Colors.grey.shade600,
+                color: colorScheme.onSurfaceVariant,
                 fontSize: 13,
                 fontStyle: FontStyle.italic,
               ),
@@ -339,7 +349,7 @@ class _StatItem extends StatelessWidget {
         Icon(
           icon,
           size: 18,
-          color: Colors.grey.shade600,
+          color: context.colors.onSurfaceVariant,
         ),
         const SizedBox(width: 6),
         // Çok dar ekranda etiket taşmak yerine alt satıra geçer.
@@ -347,7 +357,7 @@ class _StatItem extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: Colors.grey.shade700,
+              color: context.colors.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
           ),

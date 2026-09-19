@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/l10n.dart';
+import '../../../core/theme/app_theme.dart';
+
 import '../../skills/models/skill_progress_response.dart';
 
 /// Dashboard'daki "Becerilerim" özet kartı. Veriyi kendisi yüklemez;
@@ -29,23 +32,23 @@ class DashboardSkillsSummary extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         border: Border.all(
-          color: Colors.grey.shade300,
+          color: context.colors.outlineVariant,
         ),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.insights_outlined,
                 size: 20,
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
-                'Becerilerim',
-                style: TextStyle(
+                context.l10n.skillsSummaryTitle,
+                style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
                 ),
@@ -84,7 +87,7 @@ class DashboardSkillsSummary extends StatelessWidget {
           Text(errorMessage!),
           TextButton(
             onPressed: onRetry,
-            child: const Text('Tekrar Dene'),
+            child: Text(context.l10n.commonRetry),
           ),
         ],
       );
@@ -107,18 +110,17 @@ class DashboardSkillsSummary extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${skills.length} yetenek · '
-          '${started.length} tanesinde ilerleme',
+          context.l10n.skillsSummaryCounts(skills.length, started.length),
           style: TextStyle(
-            color: Colors.grey.shade600,
+            color: context.colors.onSurfaceVariant,
             fontSize: 13,
           ),
         ),
         const SizedBox(height: 14),
         if (started.isEmpty)
-          const Text(
-            'Henüz bir yetenekte ilerleme kaydetmedin.',
-            style: TextStyle(
+          Text(
+            context.l10n.skillsSummaryEmpty,
+            style: const TextStyle(
               fontSize: 15,
             ),
           )
@@ -139,7 +141,7 @@ class DashboardSkillsSummary extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Tüm Yetenekleri Gör',
+                  context.l10n.skillsViewAll,
                   style: TextStyle(
                     color: primary,
                     fontSize: 14,
@@ -188,7 +190,7 @@ class _SkillSummaryRow extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              '%${skill.progressPercent}',
+              context.l10n.commonPercent(skill.progressPercent),
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
               ),

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/l10n.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/storage/token_storage.dart';
 import '../models/login_request.dart';
 import '../services/auth_service.dart';
 import '../../dashboard/screens/dashboard_screen.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
 import '../../onboarding/services/onboarding_service.dart';
+import '../../settings/screens/settings_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -48,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
-      _showMessage('E-posta ve şifre alanlarını doldur.');
+      _showMessage(context.l10n.loginFillFields);
       return;
     }
 
@@ -81,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
-      _showMessage('Giriş başarılı.');
+      _showMessage(context.l10n.loginSuccess);
 
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
@@ -93,9 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (!mounted) return;
 
-      _showMessage(
-        'Giriş yapılamadı. E-posta veya şifreyi kontrol et.',
-      );
+      _showMessage(context.l10n.loginFailed);
     } finally {
       if (mounted) {
         setState(() {
@@ -121,8 +122,18 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  void _openSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const SettingsScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -135,20 +146,32 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'MENZİLİM',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.appName,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      // Giriş yapmadan da dil/tema seçilebilsin.
+                      IconButton(
+                        tooltip: l10n.settingsTitle,
+                        onPressed: _openSettings,
+                        icon: const Icon(Icons.settings_outlined),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 48),
 
-                  const Text(
-                    'Tekrar hoş geldin.',
-                    style: TextStyle(
+                  Text(
+                    l10n.loginTitle,
+                    style: const TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.bold,
                     ),
@@ -157,10 +180,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 12),
 
                   Text(
-                    'Gelişim yolculuğuna kaldığın yerden devam et.',
+                    l10n.loginSubtitle,
                     style: TextStyle(
                       fontSize: 17,
-                      color: Colors.grey.shade700,
+                      color: context.colors.onSurfaceVariant,
                     ),
                   ),
 
@@ -170,8 +193,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'E-posta',
-                      hintText: 'ornek@mail.com',
+                      labelText: l10n.emailLabel,
+                      hintText: l10n.emailHint,
                       prefixIcon: const Icon(
                         Icons.email_outlined,
                       ),
@@ -188,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     obscureText: _obscurePassword,
                     onSubmitted: (_) => _login(),
                     decoration: InputDecoration(
-                      labelText: 'Şifre',
+                      labelText: l10n.passwordLabel,
                       prefixIcon: const Icon(
                         Icons.lock_outline,
                       ),
@@ -225,9 +248,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Text(
-                              'Giriş Yap',
-                              style: TextStyle(
+                          : Text(
+                              l10n.loginButton,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -240,16 +263,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Hesabın yok mu? ',
+                      Flexible(
+                        child: Text(l10n.loginNoAccount),
                       ),
                       TextButton(
                         onPressed: _isLoading
                             ? null
                             : _openRegisterScreen,
-                        child: const Text(
-                          'Kayıt Ol',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.registerButton,
+                          style: const TextStyle(
                             fontWeight: FontWeight.w600,
                           ),
                         ),

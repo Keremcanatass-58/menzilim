@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/l10n.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
 import '../models/news_item.dart';
@@ -71,7 +72,7 @@ class _NewsScreenState extends State<NewsScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Haberler yüklenemedi.';
+        _errorMessage = context.l10n.newsLoadError;
       });
     }
   }
@@ -92,7 +93,7 @@ class _NewsScreenState extends State<NewsScreen> {
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: _loadNews,
-                child: const Text('Tekrar Dene'),
+                child: Text(context.l10n.commonRetry),
               ),
             ],
           ),
@@ -101,11 +102,11 @@ class _NewsScreenState extends State<NewsScreen> {
     }
 
     if (_news.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Text(
-            'Şu an alanında gösterilecek haber yok.',
+            context.l10n.newsEmpty,
             textAlign: TextAlign.center,
           ),
         ),
@@ -136,9 +137,9 @@ class _NewsScreenState extends State<NewsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Senin Alanında Gündem',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          context.l10n.newsScreenTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
       body: SafeArea(child: _buildBody(context)),

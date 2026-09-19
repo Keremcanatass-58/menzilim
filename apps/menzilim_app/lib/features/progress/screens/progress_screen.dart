@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/l10n.dart';
+import '../../../core/theme/app_theme.dart';
+
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
 import '../models/progress_response.dart';
@@ -55,7 +58,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'İlerleme yüklenemedi.';
+        _errorMessage = context.l10n.progressLoadError;
       });
     }
   }
@@ -64,9 +67,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Genel İlerleme',
-          style: TextStyle(
+        title: Text(
+          context.l10n.progressTitle,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -109,7 +112,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   });
                   _loadProgress();
                 },
-                child: const Text('Tekrar Dene'),
+                child: Text(context.l10n.commonRetry),
               ),
             ],
           ),
@@ -118,8 +121,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
     }
 
     if (_progress == null) {
-      return const Center(
-        child: Text('İlerleme verisi bulunamadı.'),
+      return Center(
+        child: Text(context.l10n.progressNoData),
       );
     }
 
@@ -152,9 +155,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Genel Bakış',
-          style: TextStyle(
+        Text(
+          context.l10n.progressOverview,
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -165,18 +168,18 @@ class _ProgressScreenState extends State<ProgressScreen> {
             Expanded(
               child: _OverviewCard(
                 icon: Icons.check_circle_outline,
-                label: 'Tamamlanan Görev',
+                label: context.l10n.progressCompletedTasks,
                 value: overview.completedTaskCount.toString(),
-                subtitle: 'toplam',
+                subtitle: context.l10n.progressUnitTotal,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _OverviewCard(
                 icon: Icons.timer_outlined,
-                label: 'Öğrenme Süresi',
+                label: context.l10n.progressLearningTime,
                 value: '${overview.estimatedLearningMinutes}',
-                subtitle: 'dakika',
+                subtitle: context.l10n.progressUnitMinutes,
               ),
             ),
           ],
@@ -187,18 +190,18 @@ class _ProgressScreenState extends State<ProgressScreen> {
             Expanded(
               child: _OverviewCard(
                 icon: Icons.calendar_today_outlined,
-                label: 'Tamamlanan Plan',
+                label: context.l10n.progressCompletedPlans,
                 value: overview.completedPlanCount.toString(),
-                subtitle: 'plan',
+                subtitle: context.l10n.progressUnitPlans,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _OverviewCard(
                 icon: Icons.local_fire_department_outlined,
-                label: 'Aktif Gün',
+                label: context.l10n.progressActiveDays,
                 value: overview.activeDayCount.toString(),
-                subtitle: 'gün',
+                subtitle: context.l10n.progressUnitDays,
               ),
             ),
           ],
@@ -213,9 +216,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Bugün',
-          style: TextStyle(
+        Text(
+          context.l10n.progressToday,
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -230,22 +233,28 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      today.hasPlan ? 'Bugünkü Plan' : 'Bugün Plan Yok',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: today.hasPlan ? Colors.blue : Colors.grey,
+                    Flexible(
+                      child: Text(
+                        today.hasPlan
+                            ? context.l10n.progressTodayPlan
+                            : context.l10n.progressNoPlanToday,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: today.hasPlan
+                              ? context.colors.primary
+                              : context.colors.onSurfaceVariant,
+                        ),
                       ),
                     ),
                     Text(
-                      '${today.progressPercent}%',
+                      context.l10n.progressPercentSuffix(today.progressPercent),
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: today.progressPercent > 0
-                            ? Colors.blue
-                            : Colors.grey,
+                            ? context.colors.primary
+                            : context.colors.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -260,7 +269,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         ? today.completedMinutes / today.totalMinutes
                         : 0,
                     minHeight: 12,
-                    backgroundColor: Colors.grey.shade200,
+                    backgroundColor: context.colors.surfaceContainerHighest,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -269,14 +278,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   children: [
                     _TodayStat(
                       icon: Icons.task_outlined,
-                      label: 'Görevler',
+                      label: context.l10n.progressTasks,
                       value: '${today.completedTasks}/${today.totalTasks}',
                     ),
                     _TodayStat(
                       icon: Icons.timer,
-                      label: 'Süre',
-                      value:
-                          '${today.completedMinutes}/${today.totalMinutes} dk',
+                      label: context.l10n.progressDuration,
+                      value: context.l10n.progressMinutesOfTotal(
+                        today.completedMinutes,
+                        today.totalMinutes,
+                      ),
                     ),
                   ],
                 ),
@@ -294,9 +305,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'İçerik İlerlemesi',
-          style: TextStyle(
+        Text(
+          context.l10n.progressContentTitle,
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -307,8 +318,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
             Expanded(
               child: _ContentCard(
                 icon: Icons.check_circle,
-                color: Colors.green,
-                label: 'Tamamlanan',
+                color: context.statusColors.success,
+                label: context.l10n.progressCompleted,
                 value: content.completedCount.toString(),
               ),
             ),
@@ -316,8 +327,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
             Expanded(
               child: _ContentCard(
                 icon: Icons.play_circle_outline,
-                color: Colors.orange,
-                label: 'Devam Eden',
+                color: context.statusColors.warning,
+                label: context.l10n.progressInProgress,
                 value: content.inProgressCount.toString(),
               ),
             ),
@@ -333,9 +344,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Quiz İlerlemesi',
-          style: TextStyle(
+        Text(
+          context.l10n.progressQuizTitle,
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -350,18 +361,20 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Quiz Özeti',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                    Flexible(
+                      child: Text(
+                        context.l10n.progressQuizSummary,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     if (quiz.attemptCount > 0)
                       Text(
-                        '${quiz.attemptCount} deneme',
+                        context.l10n.progressQuizAttempts(quiz.attemptCount),
                         style: TextStyle(
-                          color: Colors.grey,
+                          color: context.colors.onSurfaceVariant,
                           fontSize: 14,
                         ),
                       ),
@@ -369,10 +382,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 ),
                 const SizedBox(height: 16),
                 if (quiz.attemptCount == 0)
-                  const Text(
-                    'Henüz quiz denemesi yapmadın.',
+                  Text(
+                    context.l10n.progressNoQuizAttempts,
                     style: TextStyle(
-                      color: Colors.grey,
+                      color: context.colors.onSurfaceVariant,
                       fontStyle: FontStyle.italic,
                     ),
                   )
@@ -382,9 +395,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       Expanded(
                         child: _QuizStat(
                           icon: Icons.emoji_events_outlined,
-                          label: 'En İyi Skor',
+                          label: context.l10n.progressBestScore,
                           value: quiz.bestScore != null
-                              ? '%${quiz.bestScore}'
+                              ? context.l10n.commonPercent(quiz.bestScore!)
                               : '-',
                         ),
                       ),
@@ -392,9 +405,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       Expanded(
                         child: _QuizStat(
                           icon: Icons.calculate_outlined,
-                          label: 'Ortalama',
+                          label: context.l10n.progressAverage,
                           value: quiz.averageScore != null
-                              ? '%${quiz.averageScore}'
+                              ? context.l10n.commonPercent(quiz.averageScore!)
                               : '-',
                         ),
                       ),
@@ -402,9 +415,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       Expanded(
                         child: _QuizStat(
                           icon: Icons.history,
-                          label: 'Son Skor',
+                          label: context.l10n.progressLatestScore,
                           value: quiz.latestScore != null
-                              ? '%${quiz.latestScore}'
+                              ? context.l10n.commonPercent(quiz.latestScore!)
                               : '-',
                         ),
                       ),
@@ -424,51 +437,54 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Beceriler',
-          style: TextStyle(
+        Text(
+          context.l10n.progressSkillsTitle,
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          '${skills.totalCount} beceriden ${skills.startedCount} tanesinde ilerleme var',
+          context.l10n.progressSkillsSummary(
+            skills.totalCount,
+            skills.startedCount,
+          ),
           style: TextStyle(
-            color: Colors.grey.shade600,
+            color: context.colors.onSurfaceVariant,
             fontSize: 14,
           ),
         ),
         const SizedBox(height: 16),
         if (skills.strongest.isNotEmpty) ...[
-          const Text(
-            'En Güçlü Beceriler',
+          Text(
+            context.l10n.progressStrongestSkills,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.green,
+              color: context.statusColors.success,
             ),
           ),
           const SizedBox(height: 8),
           ...skills.strongest.map((skill) => _SkillCard(
                 skill: skill,
-                color: Colors.green,
+                color: context.statusColors.success,
               )),
           const SizedBox(height: 24),
         ],
         if (skills.focus.isNotEmpty) ...[
-          const Text(
-            'Odak Beceriler (İlerlemesi Düşük)',
+          Text(
+            context.l10n.progressFocusSkills,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.orange,
+              color: context.statusColors.warning,
             ),
           ),
           const SizedBox(height: 8),
           ...skills.focus.map((skill) => _SkillCard(
                 skill: skill,
-                color: Colors.orange,
+                color: context.statusColors.warning,
               )),
         ],
       ],
@@ -499,7 +515,7 @@ class _OverviewCard extends StatelessWidget {
             Icon(
               icon,
               size: 32,
-              color: Colors.blue.shade700,
+              color: context.colors.primary,
             ),
             const SizedBox(height: 8),
             Text(
@@ -512,15 +528,16 @@ class _OverviewCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
+              textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.grey.shade600,
+                color: context.colors.onSurfaceVariant,
                 fontSize: 12,
               ),
             ),
             Text(
               subtitle,
               style: TextStyle(
-                color: Colors.grey.shade400,
+                color: context.colors.outline,
                 fontSize: 10,
               ),
             ),
@@ -546,7 +563,7 @@ class _TodayStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, size: 20, color: Colors.grey.shade600),
+        Icon(icon, size: 20, color: context.colors.onSurfaceVariant),
         const SizedBox(height: 4),
         Text(
           value,
@@ -558,7 +575,7 @@ class _TodayStat extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey.shade600,
+            color: context.colors.onSurfaceVariant,
             fontSize: 12,
           ),
         ),
@@ -601,8 +618,9 @@ class _ContentCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
+              textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.grey.shade600,
+                color: context.colors.onSurfaceVariant,
                 fontSize: 12,
               ),
             ),
@@ -628,20 +646,21 @@ class _QuizStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, size: 20, color: Colors.purple.shade600),
+        Icon(icon, size: 20, color: context.colors.tertiary),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
-            color: Colors.purple,
+            color: context.colors.tertiary,
           ),
         ),
         Text(
           label,
+          textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.grey.shade600,
+            color: context.colors.onSurfaceVariant,
             fontSize: 11,
           ),
         ),
@@ -685,7 +704,7 @@ class _SkillCard extends StatelessWidget {
                     Text(
                       skill.category,
                       style: TextStyle(
-                        color: Colors.grey.shade600,
+                        color: context.colors.onSurfaceVariant,
                         fontSize: 11,
                       ),
                       maxLines: 1,
@@ -701,7 +720,7 @@ class _SkillCard extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    '${skill.progressPercent}%',
+                    context.l10n.progressPercentSuffix(skill.progressPercent),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,

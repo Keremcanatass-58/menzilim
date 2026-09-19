@@ -1,4 +1,6 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:menzilim_app/core/localization/l10n.dart';
 import 'package:menzilim_app/features/news/models/news_item.dart';
 import 'package:menzilim_app/features/news/widgets/news_card.dart';
 
@@ -46,8 +48,17 @@ void main() {
   });
 
   test('formatNewsDate Türkçe ay adıyla tarih üretir', () {
-    expect(formatNewsDate(DateTime(2025, 11, 11)), '11 Kasım 2025');
-    expect(formatNewsDate(DateTime(2025, 2, 1)), '1 Şubat 2025');
-    expect(formatNewsDate(DateTime(2024, 12, 5)), '5 Aralık 2024');
+    final tr = lookupAppLocalizations(const Locale('tr'));
+
+    expect(formatNewsDate(tr, DateTime(2025, 11, 11)), '11 Kasım 2025');
+    expect(formatNewsDate(tr, DateTime(2025, 2, 1)), '1 Şubat 2025');
+    expect(formatNewsDate(tr, DateTime(2024, 12, 5)), '5 Aralık 2024');
+  });
+
+  test('formatNewsDate İngilizce ay adı ve sırasıyla tarih üretir', () {
+    final en = lookupAppLocalizations(const Locale('en'));
+
+    expect(formatNewsDate(en, DateTime(2025, 11, 11)), 'November 11, 2025');
+    expect(formatNewsDate(en, DateTime(2025, 2, 1)), 'February 1, 2025');
   });
 }

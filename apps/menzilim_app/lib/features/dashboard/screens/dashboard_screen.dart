@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/l10n.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/storage/token_storage.dart';
 import '../../daily_plan/models/daily_plan_response.dart';
 import '../../daily_plan/services/daily_plan_service.dart';
@@ -13,6 +15,7 @@ import '../../content/screens/discover_screen.dart';
 import '../../quiz/screens/quiz_screen.dart';
 import '../../ai_coach/screens/ai_coach_screen.dart';
 import '../../progress/screens/progress_screen.dart';
+import '../../settings/screens/settings_screen.dart';
 import '../../news/models/news_item.dart';
 import '../../news/screens/news_screen.dart';
 import '../../news/services/news_link_opener.dart';
@@ -133,9 +136,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       setState(() {
         _isLoadingNews = false;
-        _newsError = 'Haberler yüklenemedi.';
+        _newsError = context.l10n.newsLoadError;
       });
     }
+  }
+
+  void _openSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const SettingsScreen(),
+      ),
+    );
   }
 
   void _openNewsScreen() {
@@ -180,7 +191,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text(_newsError!),
             TextButton(
               onPressed: _loadNews,
-              child: const Text('Tekrar Dene'),
+              child: Text(context.l10n.commonRetry),
             ),
           ],
         ),
@@ -193,7 +204,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           border: Border.all(color: colors.outlineVariant),
           borderRadius: BorderRadius.circular(18),
         ),
-        child: const Text('Şu an alanında gösterilecek haber yok.'),
+        child: Text(context.l10n.newsEmpty),
       );
     } else {
       body = Column(
@@ -218,10 +229,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         Row(
           children: [
-            const Expanded(
+            Expanded(
               child: Text(
-                'Bugün Senin Alanında',
-                style: TextStyle(
+                context.l10n.newsSectionTitle,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -230,7 +241,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             if (_news.isNotEmpty)
               TextButton(
                 onPressed: _openNewsScreen,
-                child: const Text('Tüm Haberler'),
+                child: Text(context.l10n.newsViewAll),
               ),
           ],
         ),
@@ -272,7 +283,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       setState(() {
         _isLoadingSkills = false;
-        _skillsError = 'Beceriler yüklenemedi.';
+        _skillsError = context.l10n.dashboardSkillsLoadError;
       });
     }
   }
@@ -319,7 +330,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       setState(() {
         _isLoadingRecommendations = false;
-        _recommendationsError = 'Öneriler yüklenemedi.';
+        _recommendationsError = context.l10n.dashboardRecommendationsLoadError;
       });
     }
   }
@@ -349,7 +360,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (!mounted) return;
 
       setState(() {
-        _errorMessage = 'Dashboard bilgileri yüklenemedi.';
+        _errorMessage = context.l10n.dashboardLoadError;
         _isLoading = false;
       });
     }
@@ -387,7 +398,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${task.title} tamamlandı! 🎉',
+            context.l10n.commonTaskCompleted(task.title),
           ),
           duration: const Duration(seconds: 2),
         ),
@@ -400,9 +411,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Görev tamamlanırken bir hata oluştu.',
+            context.l10n.dashboardTaskCompleteError,
           ),
         ),
       );
@@ -462,8 +473,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('İçerik açılamadı.'),
+        SnackBar(
+          content: Text(context.l10n.contentOpenError),
         ),
       );
       return;
@@ -521,7 +532,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${task.title} tamamlandı! 🎉'),
+          content: Text(context.l10n.commonTaskCompleted(task.title)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -577,7 +588,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.grey.shade300,
+            color: context.colors.outlineVariant,
           ),
           borderRadius: BorderRadius.circular(18),
         ),
@@ -588,7 +599,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text(_recommendationsError!),
             TextButton(
               onPressed: _loadRecommendations,
-              child: const Text('Tekrar Dene'),
+              child: Text(context.l10n.commonRetry),
             ),
           ],
         ),
@@ -601,12 +612,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.grey.shade300,
+            color: context.colors.outlineVariant,
           ),
           borderRadius: BorderRadius.circular(18),
         ),
-        child: const Text(
-          'Şu an sana özel yeni içerik yok.',
+        child: Text(
+          context.l10n.recommendationsEmpty,
         ),
       );
     }
@@ -681,7 +692,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                     _loadDashboard();
                   },
-                  child: const Text('Tekrar Dene'),
+                  child: Text(context.l10n.commonRetry),
                 ),
               ],
             ),
@@ -695,6 +706,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     final progress = dailyPlan.totalMinutes <= 0 ? 0.0 : (dailyPlan.completedMinutes / dailyPlan.totalMinutes).clamp(0.0, 1.0);
     final progressPercent = (progress * 100).round();
+    final l10n = context.l10n;
 
     return Scaffold(
       body: SafeArea(
@@ -710,22 +722,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   Row(
                     children: [
-                      const Text(
-                        'MENZİLİM',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Text(
+                          l10n.appName,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      const Spacer(),
                       IconButton(
-                        tooltip: 'Yeteneklerim',
+                        tooltip: l10n.skillsTitle,
                         onPressed: _openSkills,
                         icon: const Icon(
                           Icons.insights_outlined,
                         ),
                       ),
                       IconButton(
+                        tooltip: l10n.discoverTitle,
                         onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -738,9 +752,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const CircleAvatar(
-                        child: Icon(
-                          Icons.person_outline,
+                      // Profil simgesi ayarlara (dil/tema) götürür.
+                      Tooltip(
+                        message: l10n.settingsTitle,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: _openSettings,
+                          child: const CircleAvatar(
+                            child: Icon(
+                              Icons.person_outline,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -748,18 +770,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   const SizedBox(height: 48),
 
-                  const Text(
-                    'Merhaba 👋',
-                    style: TextStyle(
+                  Text(
+                    l10n.dashboardGreeting,
+                    style: const TextStyle(
                       fontSize: 18,
                     ),
                   ),
 
                   const SizedBox(height: 8),
 
-                  const Text(
-                    'Gelişim yolculuğuna devam et.',
-                    style: TextStyle(
+                  Text(
+                    l10n.dashboardHeadline,
+                    style: const TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.bold,
                     ),
@@ -768,10 +790,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(height: 12),
 
                   Text(
-                    'Bugün kendin için bir adım daha at.',
+                    l10n.dashboardSubheadline,
                     style: TextStyle(
                       fontSize: 17,
-                      color: Colors.grey.shade700,
+                      color: context.colors.onSurfaceVariant,
                     ),
                   ),
 
@@ -790,13 +812,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       crossAxisAlignment:
                           CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.track_changes),
-                            SizedBox(width: 10),
+                            Icon(
+                              Icons.track_changes,
+                              color: context.colors.onPrimaryContainer,
+                            ),
+                            const SizedBox(width: 10),
                             Text(
-                              'Bugünkü Hedef',
-                              style: TextStyle(
+                              l10n.dashboardTodayGoal,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -817,10 +842,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 8),
 
                         Text(
-                          'Günlük öğrenme hedefin: '
-                          '${dashboard.dailyLearningMinutes} dakika',
+                          l10n.dashboardDailyGoal(
+                            dashboard.dailyLearningMinutes,
+                          ),
                           style: TextStyle(
-                            color: Colors.grey.shade700,
+                            color: context.colors.onPrimaryContainer,
                           ),
                         ),
 
@@ -842,12 +868,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           mainAxisAlignment:
                               MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              '${dailyPlan.completedMinutes} '
-                              'dakika tamamlandı',
+                            Flexible(
+                              child: Text(
+                                l10n.dashboardMinutesCompleted(
+                                  dailyPlan.completedMinutes,
+                                ),
+                              ),
                             ),
                             Text(
-                              '%$progressPercent',
+                              l10n.commonPercent(progressPercent),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -860,9 +889,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   const SizedBox(height: 32),
 
-                  const Text(
-                    'Profilin',
-                    style: TextStyle(
+                  Text(
+                    l10n.dashboardProfileTitle,
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -875,7 +904,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: Colors.grey.shade300,
+                        color: context.colors.outlineVariant,
                       ),
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -884,22 +913,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           CrossAxisAlignment.start,
                       children: [
                         _ProfileRow(
-                          title: 'Meslek',
+                          title: l10n.profileProfession,
                           value: dashboard.profession,
                         ),
                         const SizedBox(height: 14),
                         _ProfileRow(
-                          title: 'Uzmanlık',
+                          title: l10n.profileSpecialization,
                           value: dashboard.specialization,
                         ),
                         const SizedBox(height: 14),
                         _ProfileRow(
-                          title: 'Seviye',
-                          value: dashboard.experienceLevel,
+                          title: l10n.profileLevel,
+                          value: l10n.experienceLevelLabel(
+                            dashboard.experienceLevel,
+                          ),
                         ),
                         const SizedBox(height: 14),
                         _ProfileRow(
-                          title: 'Kariyer hedefi',
+                          title: l10n.profileCareerGoal,
                           value: dashboard.careerGoal,
                         ),
                       ],
@@ -908,9 +939,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   const SizedBox(height: 32),
 
-                  const Text(
-                    'İlerleme',
-                    style: TextStyle(
+                  Text(
+                    l10n.dashboardProgressTitle,
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -924,7 +955,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: Colors.grey.shade300,
+                        color: context.colors.outlineVariant,
                       ),
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -932,16 +963,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       crossAxisAlignment:
                           CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.calendar_today_outlined,
                               size: 20,
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
-                              'Günlük Plan',
-                              style: TextStyle(
+                              l10n.dashboardDailyPlan,
+                              style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -973,17 +1004,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               MainAxisAlignment
                                   .spaceBetween,
                           children: [
-                            Text(
-                              '${dashboard.completedTasks} / '
-                              '${dashboard.totalTasks} '
-                              'görev tamamlandı',
-                              style: TextStyle(
-                                color:
-                                    Colors.grey.shade700,
+                            Flexible(
+                              child: Text(
+                                l10n.dashboardTasksCompleted(
+                                  dashboard.completedTasks,
+                                  dashboard.totalTasks,
+                                ),
+                                style: TextStyle(
+                                  color: context.colors.onSurfaceVariant,
+                                ),
                               ),
                             ),
                             Text(
-                              '%${dashboard.dailyProgressPercent.round()}',
+                              l10n.commonPercent(
+                                dashboard.dailyProgressPercent.round(),
+                              ),
                               style: const TextStyle(
                                 fontWeight:
                                     FontWeight.bold,
@@ -996,10 +1031,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 6),
 
                         Text(
-                          '${dashboard.completedMinutes} / '
-                          '${dashboard.totalMinutes} dakika',
+                          l10n.dashboardMinutesOfTotal(
+                            dashboard.completedMinutes,
+                            dashboard.totalMinutes,
+                          ),
                           style: TextStyle(
-                            color: Colors.grey.shade600,
+                            color: context.colors.onSurfaceVariant,
                             fontSize: 13,
                           ),
                         ),
@@ -1015,7 +1052,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: Colors.grey.shade300,
+                        color: context.colors.outlineVariant,
                       ),
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -1023,16 +1060,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       crossAxisAlignment:
                           CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.menu_book_outlined,
                               size: 20,
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
-                              'İçerik',
-                              style: TextStyle(
+                              l10n.dashboardContent,
+                              style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -1044,15 +1081,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.check_circle,
                               size: 18,
-                              color: Colors.green,
+                              color: context.statusColors.success,
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              '${dashboard.completedContentCount} '
-                              'tamamlandı',
+                              l10n.dashboardContentCompleted(
+                                dashboard.completedContentCount,
+                              ),
                               style: const TextStyle(
                                 fontSize: 15,
                               ),
@@ -1067,12 +1105,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Icon(
                               Icons.circle_outlined,
                               size: 18,
-                              color: Colors.orange.shade600,
+                              color: context.statusColors.warning,
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              '${dashboard.inProgressContentCount} '
-                              'devam ediyor',
+                              l10n.dashboardContentInProgress(
+                                dashboard.inProgressContentCount,
+                              ),
                               style: const TextStyle(
                                 fontSize: 15,
                               ),
@@ -1100,17 +1139,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     mainAxisAlignment:
                         MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Bugünün Yol Haritası',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Text(
+                          l10n.dailyPlanTitle,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       Text(
-                        '${dailyPlan.totalMinutes} dk',
+                        l10n.commonMinutesShort(dailyPlan.totalMinutes),
                         style: TextStyle(
-                          color: Colors.grey.shade600,
+                          color: context.colors.onSurfaceVariant,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1125,12 +1166,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: Colors.grey.shade300,
+                          color: context.colors.outlineVariant,
                         ),
                         borderRadius: BorderRadius.circular(18),
                       ),
-                      child: const Text(
-                        'Bugün için henüz görev bulunmuyor.',
+                      child: Text(
+                        l10n.dailyPlanEmpty,
                       ),
                     )
                   else
@@ -1144,7 +1185,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           title: task.title,
                           description:
                               task.description ??
-                              'Bugünkü gelişim planındaki görev.',
+                              l10n.dailyPlanTaskFallbackDescription,
                           estimatedMinutes:
                               task.estimatedMinutes,
                           completed: task.isCompleted,
@@ -1158,9 +1199,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   const SizedBox(height: 32),
 
-                  const Text(
-                    'Sana Özel İçerikler',
-                    style: TextStyle(
+                  Text(
+                    l10n.recommendationsTitle,
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1190,9 +1231,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: const Icon(
                         Icons.arrow_forward,
                       ),
-                      label: const Text(
-                        'Öğrenmeye Devam Et',
-                        style: TextStyle(
+                      label: Text(
+                        l10n.dashboardContinueLearning,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1216,9 +1257,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: const Icon(
                         Icons.auto_awesome,
                       ),
-                      label: const Text(
-                        "AI Koç'a Sor",
-                        style: TextStyle(
+                      label: Text(
+                        l10n.dashboardAskCoach,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1242,9 +1283,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: const Icon(
                         Icons.bar_chart_outlined,
                       ),
-                      label: const Text(
-                        'İlerlememi Gör',
-                        style: TextStyle(
+                      label: Text(
+                        l10n.dashboardViewProgress,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1281,7 +1322,7 @@ class _ProfileRow extends StatelessWidget {
           child: Text(
             title,
             style: TextStyle(
-              color: Colors.grey.shade600,
+              color: context.colors.onSurfaceVariant,
             ),
           ),
         ),
@@ -1328,7 +1369,7 @@ class _TaskCard extends StatelessWidget {
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.grey.shade300,
+            color: context.colors.outlineVariant,
           ),
           borderRadius: BorderRadius.circular(18),
         ),
@@ -1338,7 +1379,7 @@ class _TaskCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: context.colors.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(icon),
@@ -1364,16 +1405,16 @@ class _TaskCard extends StatelessWidget {
                   Text(
                     description,
                     style: TextStyle(
-                      color: Colors.grey.shade600,
+                      color: context.colors.onSurfaceVariant,
                     ),
                   ),
 
                   const SizedBox(height: 8),
 
                   Text(
-                    '$estimatedMinutes dakika',
+                    context.l10n.commonMinutes(estimatedMinutes),
                     style: TextStyle(
-                      color: Colors.grey.shade600,
+                      color: context.colors.onSurfaceVariant,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -1385,9 +1426,9 @@ class _TaskCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'İçeriğe Git',
+                          context.l10n.taskGoToContent,
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: context.colors.primary,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
@@ -1396,7 +1437,7 @@ class _TaskCard extends StatelessWidget {
                         Icon(
                           Icons.arrow_forward,
                           size: 16,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: context.colors.primary,
                         ),
                       ],
                     ),
@@ -1416,7 +1457,10 @@ class _TaskCard extends StatelessWidget {
                 ),
               )
             else if (completed)
-              const Icon(Icons.check_circle)
+              Icon(
+                Icons.check_circle,
+                color: context.statusColors.success,
+              )
             else if (opensContent)
               const Icon(Icons.chevron_right)
             else
@@ -1452,7 +1496,7 @@ class _RecommendationCard extends StatelessWidget {
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.grey.shade300,
+            color: context.colors.outlineVariant,
           ),
           borderRadius: BorderRadius.circular(18),
         ),
@@ -1462,7 +1506,7 @@ class _RecommendationCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: context.colors.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
@@ -1491,7 +1535,9 @@ class _RecommendationCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      isStarted ? 'Devam ediyor' : 'Yeni',
+                      isStarted
+                          ? context.l10n.recommendationInProgress
+                          : context.l10n.recommendationNew,
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -1519,7 +1565,7 @@ class _RecommendationCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Colors.grey.shade600,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -1534,7 +1580,7 @@ class _RecommendationCard extends StatelessWidget {
                         Icon(
                           Icons.lightbulb_outline,
                           size: 16,
-                          color: Colors.grey.shade600,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 6),
                         Expanded(
@@ -1543,7 +1589,7 @@ class _RecommendationCard extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: Colors.grey.shade600,
+                              color: colorScheme.onSurfaceVariant,
                               fontSize: 13,
                               fontStyle: FontStyle.italic,
                             ),
@@ -1559,7 +1605,9 @@ class _RecommendationCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        isStarted ? 'Devam Et' : 'Başla',
+                        isStarted
+                            ? context.l10n.commonContinue
+                            : context.l10n.recommendationStart,
                         style: TextStyle(
                           color: colorScheme.primary,
                           fontSize: 14,

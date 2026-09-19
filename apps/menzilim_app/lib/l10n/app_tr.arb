@@ -1,0 +1,463 @@
+{
+  "@@locale": "tr",
+  "appName": "MENZİLİM",
+  "@appName": {
+    "description": "Marka adı; çevrilmez."
+  },
+  "commonRetry": "Tekrar Dene",
+  "commonSessionMissing": "Oturum bilgisi bulunamadı. Lütfen tekrar giriş yap.",
+  "commonMinutes": "{minutes} dakika",
+  "@commonMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "commonMinutesShort": "{minutes} dk",
+  "@commonMinutesShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "commonPercent": "%{value}",
+  "@commonPercent": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "commonTaskCompleted": "{title} tamamlandı! 🎉",
+  "@commonTaskCompleted": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsTitle": "Ayarlar",
+  "settingsLanguage": "Dil",
+  "settingsLanguageTurkish": "Türkçe",
+  "@settingsLanguageTurkish": {
+    "description": "Dil adı kendi dilinde gösterilir."
+  },
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "Dil adı kendi dilinde gösterilir."
+  },
+  "settingsTheme": "Tema",
+  "settingsThemeSystem": "Sistem",
+  "settingsThemeLight": "Açık",
+  "settingsThemeDark": "Koyu",
+  "settingsThemeSystemHint": "Sistem seçeneği cihazının görünüm ayarını izler.",
+  "loginTitle": "Tekrar hoş geldin.",
+  "loginSubtitle": "Gelişim yolculuğuna kaldığın yerden devam et.",
+  "loginFillFields": "E-posta ve şifre alanlarını doldur.",
+  "loginSuccess": "Giriş başarılı.",
+  "loginFailed": "Giriş yapılamadı. E-posta veya şifreyi kontrol et.",
+  "loginButton": "Giriş Yap",
+  "loginNoAccount": "Hesabın yok mu? ",
+  "emailLabel": "E-posta",
+  "emailHint": "ornek@mail.com",
+  "passwordLabel": "Şifre",
+  "registerButton": "Kayıt Ol",
+  "registerTitle": "Yolculuğunu başlat.",
+  "registerSubtitle": "Hesabını oluştur ve kişisel gelişim yolculuğuna başla.",
+  "registerFillAll": "Lütfen tüm alanları doldur.",
+  "registerInvalidEmail": "Geçerli bir e-posta adresi gir.",
+  "registerPasswordTooShort": "Şifre en az 6 karakter olmalı.",
+  "registerPasswordsMismatch": "Şifreler eşleşmiyor.",
+  "registerSuccess": "Hesabın başarıyla oluşturuldu.",
+  "registerUnexpectedError": "Kayıt sırasında beklenmeyen bir hata oluştu.",
+  "registerConfirmPasswordLabel": "Şifre Tekrar",
+  "registerCreateAccount": "Hesap Oluştur",
+  "registerHaveAccount": "Zaten hesabın var mı? Giriş yap",
+  "commonErrorGeneric": "Bir hata oluştu.",
+  "commonBack": "Geri",
+  "commonContinue": "Devam Et",
+  "onboardingProfessionsLoadError": "Meslekler yüklenirken bir hata oluştu.",
+  "onboardingSpecializationsLoadError": "Uzmanlıklar yüklenirken bir hata oluştu.",
+  "onboardingSelectProfession": "Lütfen bir meslek seç.",
+  "onboardingSelectSpecialization": "Lütfen bir uzmanlık alanı seç.",
+  "onboardingSelectExperience": "Lütfen deneyim seviyeni seç.",
+  "onboardingEnterCareerGoal": "Lütfen kariyer hedefini yaz.",
+  "onboardingSelectDailyTime": "Lütfen günlük öğrenme süresini seç.",
+  "onboardingSaved": "Profilin başarıyla oluşturuldu. MENZİLİM yolculuğun başlıyor!",
+  "onboardingSaveFailed": "Profilin kaydedilemedi. Lütfen tekrar dene.",
+  "onboardingStep": "{current} / {total}",
+  "@onboardingStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingProfessionTitle": "Kariyer yolculuğuna başlayalım.",
+  "onboardingProfessionSubtitle": "Hangi alanda kendini geliştirmek istiyorsun?",
+  "onboardingSpecializationTitle": "Uzmanlık alanını seç.",
+  "onboardingSpecializationSubtitle": "{profession} alanında hangi yönde ilerlemek istiyorsun?",
+  "@onboardingSpecializationSubtitle": {
+    "placeholders": {
+      "profession": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingExperienceTitle": "Kendini hangi seviyede görüyorsun?",
+  "onboardingExperienceSubtitle": "Böylece öğrenme planını mevcut seviyene göre oluşturabiliriz.",
+  "experienceBeginner": "Başlangıç",
+  "experienceBeginnerDescription": "Temel seviyeden başlıyorum.",
+  "experienceIntermediate": "Orta",
+  "experienceIntermediateDescription": "Temelleri biliyorum, kendimi geliştiriyorum.",
+  "experienceAdvanced": "İleri",
+  "experienceAdvancedDescription": "Deneyimliyim ve uzmanlaşmak istiyorum.",
+  "onboardingCareerGoalTitle": "Kariyer hedefin nedir?",
+  "onboardingCareerGoalSubtitle": "MENZİLİM sana uygun bir yol oluşturabilsin.",
+  "onboardingCareerGoalHint": "Örn: Backend alanında profesyonelleşmek ve işe girmek istiyorum.",
+  "onboardingDailyTimeTitle": "Günde ne kadar zaman ayırabilirsin?",
+  "onboardingDailyTimeSubtitle": "Gerçekçi bir süre seç. Önemli olan sürdürülebilirlik.",
+  "dailyTime30": "30 dakika",
+  "dailyTime30Description": "Yoğun günler için",
+  "dailyTime60": "1 saat",
+  "dailyTime60Description": "Düzenli gelişim için",
+  "dailyTime90": "1,5 saat",
+  "dailyTime90Description": "Daha hızlı ilerlemek için",
+  "dailyTime120": "2 saat",
+  "dailyTime120Description": "Yoğun öğrenme için",
+  "onboardingSaving": "Kaydediliyor...",
+  "onboardingFinish": "MENZİLİM Yolculuğuna Başla",
+  "dashboardLoadError": "Dashboard bilgileri yüklenemedi.",
+  "dashboardRecommendationsLoadError": "Öneriler yüklenemedi.",
+  "dashboardSkillsLoadError": "Beceriler yüklenemedi.",
+  "dashboardTaskCompleteError": "Görev tamamlanırken bir hata oluştu.",
+  "contentOpenError": "İçerik açılamadı.",
+  "dashboardGreeting": "Merhaba 👋",
+  "dashboardHeadline": "Gelişim yolculuğuna devam et.",
+  "dashboardSubheadline": "Bugün kendin için bir adım daha at.",
+  "dashboardTodayGoal": "Bugünkü Hedef",
+  "dashboardDailyGoal": "Günlük öğrenme hedefin: {minutes} dakika",
+  "@dashboardDailyGoal": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardMinutesCompleted": "{minutes} dakika tamamlandı",
+  "@dashboardMinutesCompleted": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardProfileTitle": "Profilin",
+  "profileProfession": "Meslek",
+  "profileSpecialization": "Uzmanlık",
+  "profileLevel": "Seviye",
+  "profileCareerGoal": "Kariyer hedefi",
+  "dashboardProgressTitle": "İlerleme",
+  "dashboardDailyPlan": "Günlük Plan",
+  "dashboardTasksCompleted": "{completed} / {total} görev tamamlandı",
+  "@dashboardTasksCompleted": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardMinutesOfTotal": "{completed} / {total} dakika",
+  "@dashboardMinutesOfTotal": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardContent": "İçerik",
+  "dashboardContentCompleted": "{count} tamamlandı",
+  "@dashboardContentCompleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardContentInProgress": "{count} devam ediyor",
+  "@dashboardContentInProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dailyPlanTitle": "Bugünün Yol Haritası",
+  "dailyPlanEmpty": "Bugün için henüz görev bulunmuyor.",
+  "dailyPlanTaskFallbackDescription": "Bugünkü gelişim planındaki görev.",
+  "recommendationsTitle": "Sana Özel İçerikler",
+  "recommendationsEmpty": "Şu an sana özel yeni içerik yok.",
+  "dashboardContinueLearning": "Öğrenmeye Devam Et",
+  "dashboardAskCoach": "AI Koç'a Sor",
+  "dashboardViewProgress": "İlerlememi Gör",
+  "taskGoToContent": "İçeriğe Git",
+  "recommendationInProgress": "Devam ediyor",
+  "recommendationNew": "Yeni",
+  "recommendationStart": "Başla",
+  "skillsTitle": "Yeteneklerim",
+  "discoverTitle": "Keşfet",
+  "newsSectionTitle": "Bugün Senin Alanında",
+  "newsViewAll": "Tüm Haberler",
+  "newsLoadError": "Haberler yüklenemedi.",
+  "newsEmpty": "Şu an alanında gösterilecek haber yok.",
+  "skillsSummaryTitle": "Becerilerim",
+  "skillsSummaryCounts": "{total} yetenek · {started} tanesinde ilerleme",
+  "@skillsSummaryCounts": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "started": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsSummaryEmpty": "Henüz bir yetenekte ilerleme kaydetmedin.",
+  "skillsViewAll": "Tüm Yetenekleri Gör",
+  "skillsLoadError": "Yetenekler yüklenemedi.",
+  "skillsEmpty": "Uzmanlık alanın için henüz yetenek bulunmuyor.",
+  "skillsMapTitle": "Yetenek haritan",
+  "skillsMapSubtitle": "{total} yetenekten {started} tanesinde ilerleme kaydettin.",
+  "@skillsMapSubtitle": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "started": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsStatContent": "İçerik: {completed} / {total}",
+  "@skillsStatContent": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsStatQuiz": "Quiz: {attempted} / {total}",
+  "@skillsStatQuiz": {
+    "placeholders": {
+      "attempted": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsStatInProgress": "Devam eden: {count}",
+  "@skillsStatInProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsStatBestScore": "En iyi skor: %{score}",
+  "@skillsStatBestScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsStatLatestScore": "Son skor: %{score}",
+  "@skillsStatLatestScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsNoMaterial": "Bu yetenek için henüz içerik veya quiz eklenmedi.",
+  "progressTitle": "Genel İlerleme",
+  "progressLoadError": "İlerleme yüklenemedi.",
+  "progressNoData": "İlerleme verisi bulunamadı.",
+  "progressOverview": "Genel Bakış",
+  "progressCompletedTasks": "Tamamlanan Görev",
+  "progressUnitTotal": "toplam",
+  "progressLearningTime": "Öğrenme Süresi",
+  "progressUnitMinutes": "dakika",
+  "progressCompletedPlans": "Tamamlanan Plan",
+  "progressUnitPlans": "plan",
+  "progressActiveDays": "Aktif Gün",
+  "progressUnitDays": "gün",
+  "progressToday": "Bugün",
+  "progressTodayPlan": "Bugünkü Plan",
+  "progressNoPlanToday": "Bugün Plan Yok",
+  "progressPercentSuffix": "{value}%",
+  "@progressPercentSuffix": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "progressTasks": "Görevler",
+  "progressDuration": "Süre",
+  "progressMinutesOfTotal": "{completed}/{total} dk",
+  "@progressMinutesOfTotal": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "progressContentTitle": "İçerik İlerlemesi",
+  "progressCompleted": "Tamamlanan",
+  "progressInProgress": "Devam Eden",
+  "progressQuizTitle": "Quiz İlerlemesi",
+  "progressQuizSummary": "Quiz Özeti",
+  "progressQuizAttempts": "{count} deneme",
+  "@progressQuizAttempts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "progressNoQuizAttempts": "Henüz quiz denemesi yapmadın.",
+  "progressBestScore": "En İyi Skor",
+  "progressAverage": "Ortalama",
+  "progressLatestScore": "Son Skor",
+  "progressSkillsTitle": "Beceriler",
+  "progressSkillsSummary": "{total} beceriden {started} tanesinde ilerleme var",
+  "@progressSkillsSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "started": {
+        "type": "int"
+      }
+    }
+  },
+  "progressStrongestSkills": "En Güçlü Beceriler",
+  "progressFocusSkills": "Odak Beceriler (İlerlemesi Düşük)",
+  "quizTitle": "Quiz",
+  "quizLoadError": "Quiz yüklenirken bir hata oluştu.",
+  "quizSubmitError": "Quiz gönderilirken bir hata oluştu.",
+  "quizNotFound": "Quiz bulunamadı.",
+  "quizNoQuestions": "Bu quiz için henüz soru bulunmuyor.",
+  "quizQuestionProgress": "Soru {current} / {total}",
+  "@quizQuestionProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "quizFinish": "Quiz'i Bitir",
+  "quizNext": "Sonraki",
+  "quizResultTitle": "Quiz Sonucu",
+  "quizResultCorrectOfTotal": "{correct} / {total} Doğru",
+  "@quizResultCorrectOfTotal": {
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "quizResultSuccess": "Başarı",
+  "quizResultCorrect": "{count} Doğru",
+  "@quizResultCorrect": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quizResultWrong": "{count} Yanlış",
+  "@quizResultWrong": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quizRetake": "Tekrar Çöz",
+  "quizBackToDashboard": "Dashboard'a Dön",
+  "coachTitle": "AI Koç",
+  "coachIntro": "Kariyer hedefine göre kişisel bir yol arkadaşın. Aklına takılanı sor.",
+  "coachHint": "Sorunu buraya yaz...",
+  "coachSend": "Gönder",
+  "coachAnswering": "Yanıtlanıyor...",
+  "coachUnreachable": "AI koçuna ulaşılamadı. Lütfen tekrar deneyin.",
+  "discoverLoadError": "İçerikler yüklenemedi.",
+  "discoverEmpty": "Şu an sana uygun içerik bulunmuyor.",
+  "discoverHeadline": "Senin için seçtiklerimiz",
+  "discoverSubtitle": "Mesleğine ve gelişim yolculuğuna uygun içerikler.",
+  "contentDetailTitle": "İçerik Detayı",
+  "contentProgressLoadError": "İçerik ilerlemesi yüklenemedi.",
+  "contentCompletedToast": "İçerik tamamlandı! 🎉",
+  "contentCompleteError": "İçerik tamamlanırken bir hata oluştu.",
+  "contentInvalidLink": "Geçersiz içerik bağlantısı.",
+  "contentCompletedBadge": "Tamamlandı ✓",
+  "contentAbout": "Hakkında",
+  "contentOpen": "İçeriği Aç",
+  "contentCompletedButton": "İçerik Tamamlandı",
+  "contentMarkComplete": "Tamamladım",
+  "newsScreenTitle": "Senin Alanında Gündem",
+  "newsReadMore": "Haberi İncele",
+  "newsInvalidLink": "Geçersiz haber bağlantısı.",
+  "newsOpenError": "Haber açılamadı.",
+  "monthName": "{month, select, m1{Ocak} m2{Şubat} m3{Mart} m4{Nisan} m5{Mayıs} m6{Haziran} m7{Temmuz} m8{Ağustos} m9{Eylül} m10{Ekim} m11{Kasım} m12{Aralık} other{}}",
+  "@monthName": {
+    "description": "Ay adı; month değeri m1..m12.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "newsDate": "{day} {month} {year}",
+  "@newsDate": {
+    "description": "Haber tarihi; month, monthName ile üretilir.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "String"
+      }
+    }
+  }
+}
