@@ -30,6 +30,8 @@ using Menzilim.Application.Interfaces.AI;
 using Menzilim.Application.DTOs.AICoach;
 using Menzilim.Application.Interfaces.AICoach;
 using Menzilim.Application.Services.AICoach;
+using Menzilim.Application.Interfaces.Progress;
+using Menzilim.Application.Services.Progress;
 using Menzilim.Infrastructure.Configuration;
 using Menzilim.Infrastructure.Data;
 using Menzilim.Infrastructure.Services.AI;
@@ -73,6 +75,7 @@ builder.Services.AddScoped<IUserContentProgressRepository, UserContentProgressRe
 builder.Services.AddScoped<IQuizService, QuizService>();
 builder.Services.AddScoped<IQuizRepository, QuizRepository>();
 builder.Services.AddScoped<IAICoachService, AICoachService>();
+builder.Services.AddScoped<IProgressService, ProgressService>();
 
 
 // ==============================
@@ -938,6 +941,29 @@ app.MapPost(
         {
             return Results.BadRequest(new { message = ex.Message });
         }
+    })
+    .RequireAuthorization();
+
+// ==============================
+// PROGRESS - GET ME
+// ==============================
+
+app.MapGet(
+    "/api/progress/me",
+    async (
+        ClaimsPrincipal user,
+        IProgressService progressService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var response = await progressService.GetMyProgressAsync(userId);
+        return Results.Ok(response);
     })
     .RequireAuthorization();
 

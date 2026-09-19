@@ -49,6 +49,15 @@ public class QuizRepository : IQuizRepository
             .CountAsync(a => a.UserId == userId);
     }
 
+    public async Task<List<QuizAttempt>> GetByUserAsync(Guid userId)
+    {
+        return await _dbContext.QuizAttempts
+            .Where(a => a.UserId == userId)
+            .OrderByDescending(a => a.CompletedAt)
+            .ThenByDescending(a => a.Id)
+            .ToListAsync();
+    }
+
     public async Task SaveChangesAsync()
     {
         await _dbContext.SaveChangesAsync();

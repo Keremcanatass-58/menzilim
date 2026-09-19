@@ -13,5 +13,7 @@ public interface IDailyPlanRepository
 
     Task AddAsync(Menzilim.Domain.DailyPlan dailyPlan);
 
+    Task<List<Menzilim.Domain.DailyPlan>> GetAllByUserAsync(Guid userId);
+
     Task SaveChangesAsync();
 }
