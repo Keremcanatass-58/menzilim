@@ -97,7 +97,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _openRegisterScreen() {
-    Navigator.of(context).pushReplacement(
+    // push kullanılır: bu ekranı AuthGate gösteriyor, pushReplacement onu
+    // yığından siler ve kayıt sonrası yönlendirme yapılamaz.
+    Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => const RegisterScreen(),
       ),

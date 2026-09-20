@@ -62,10 +62,11 @@ class _MenzilimAppState extends State<MenzilimApp> {
     super.dispose();
   }
 
-  /// Oturum kapanınca açık ekranlar kapatılır: geri tuşuyla eski verilere
-  /// dönülemez.
+  /// Oturum durumu değişince açık ekranlar kapatılır ve AuthGate'e dönülür:
+  /// çıkışta geri tuşuyla eski verilere dönülemez, girişte (ör. Kayıt Ol
+  /// ekranından) yönlendirmeyi AuthGate yapabilir.
   void _onAuthChanged() {
-    if (_auth.status != AuthStatus.unauthenticated) return;
+    if (_auth.status == AuthStatus.initializing) return;
 
     _navigatorKey.currentState?.popUntil((route) => route.isFirst);
   }

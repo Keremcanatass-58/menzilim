@@ -33,6 +33,8 @@ public class MenzilimDbContext : DbContext
     public DbSet<UserContentProgress> UserContentProgresses => Set<UserContentProgress>();
     public DbSet<NewsItem> NewsItems => Set<NewsItem>();
     public DbSet<NewsItemSkill> NewsItemSkills => Set<NewsItemSkill>();
+    public DbSet<UserProject> UserProjects => Set<UserProject>();
+    public DbSet<UserProjectStep> UserProjectSteps => Set<UserProjectStep>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -133,6 +135,48 @@ public class MenzilimDbContext : DbContext
             .WithMany()
             .HasForeignKey(li => li.ContentId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<LearningItem>()
+            .HasOne(li => li.Skill)
+            .WithMany()
+            .HasForeignKey(li => li.SkillId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Living Project: şablon (LearningPath) silinirse kullanıcı projesi
+        // sahipsiz kalmasın diye Restrict; kullanıcı silinirse Cascade.
+        modelBuilder.Entity<UserProject>()
+            .HasOne(up => up.User)
+            .WithMany()
+            .HasForeignKey(up => up.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserProject>()
+            .HasOne(up => up.LearningPath)
+            .WithMany()
+            .HasForeignKey(up => up.LearningPathId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<UserProjectStep>()
+            .HasOne(s => s.UserProject)
+            .WithMany(p => p.Steps)
+            .HasForeignKey(s => s.UserProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserProjectStep>()
+            .HasOne(s => s.LearningItem)
+            .WithMany()
+            .HasForeignKey(s => s.LearningItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Bir kullanıcı bir şablondan tek proje yürütür.
+        modelBuilder.Entity<UserProject>()
+            .HasIndex(up => new { up.UserId, up.LearningPathId })
+            .IsUnique();
+
+        // Aynı adım projede iki kez oluşturulmasın.
+        modelBuilder.Entity<UserProjectStep>()
+            .HasIndex(s => new { s.UserProjectId, s.LearningItemId })
+            .IsUnique();
 
         modelBuilder.Entity<Question>()
             .HasOne(q => q.Quiz)

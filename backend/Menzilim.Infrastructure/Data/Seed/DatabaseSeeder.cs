@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Menzilim.Domain;
 
@@ -170,7 +170,8 @@ public static class DatabaseSeeder
                         OptionB = "Yalnızca Windows işletim sisteminde çalışan bir masaüstü kütüphanesidir.",
                         OptionC = "Bir ilişkisel veritabanı yönetim sistemidir.",
                         OptionD = "Bir CSS ve tasarım kütüphanesidir.",
-                        CorrectOption = "A"
+                        CorrectOption = "A",
+                        Explanation = "ASP.NET Core açık kaynaklı ve platformlar arasıdır: Windows, Linux ve macOS üzerinde çalışır."
                     },
                     new Question
                     {
@@ -180,7 +181,8 @@ public static class DatabaseSeeder
                         OptionB = "Yalnızca statik HTML sayfaları derlemek için kullanılan şablon motorudur.",
                         OptionC = "Bilgisayarın donanım sürücülerini denetleyen arabirimdir.",
                         OptionD = "Veritabanında yeni bir tablo sütunu açan komuttur.",
-                        CorrectOption = "A"
+                        CorrectOption = "A",
+                        Explanation = "Endpoint, istemcinin HTTP üzerinden veri alıp gönderdiği adrestir; her biri bir HTTP metoduyla eşleşir."
                     },
                     new Question
                     {
@@ -190,7 +192,8 @@ public static class DatabaseSeeder
                         OptionB = "Veritabanındaki SQL sorgularını otomatik olarak şifreler.",
                         OptionC = "Kullanıcı oturum şifrelerini doğrular.",
                         OptionD = "Ağ paketlerini sıkıştırarak internet hızını artırır.",
-                        CorrectOption = "A"
+                        CorrectOption = "A",
+                        Explanation = "Dependency Injection bağımlılıkları dışarıdan verir; sınıflar somut tiplere bağlı kalmaz ve test etmek kolaylaşır."
                     }
                 }
             };
@@ -200,5 +203,84 @@ public static class DatabaseSeeder
         }
 
         await SkillSeeder.SeedAsync(db, logger);
+
+        await BackfillQuizExplanationsAsync(db);
+
+        await UpdateProfessionAvailabilityAsync(db, logger);
+    }
+
+    /// <summary>
+    /// Daha önce seed edilmiş başlangıç quiz'inin sorularına eksik
+    /// açıklamaları yazar. Mevcut açıklamalara dokunmaz.
+    /// </summary>
+    private static async Task BackfillQuizExplanationsAsync(MenzilimDbContext db)
+    {
+        var explanations = new Dictionary<string, string>
+        {
+            ["ASP.NET Core nedir?"] =
+                "ASP.NET Core açık kaynaklı ve platformlar arasıdır: Windows, Linux ve macOS üzerinde çalışır.",
+            ["Web API endpoint'i nedir?"] =
+                "Endpoint, istemcinin HTTP üzerinden veri alıp gönderdiği adrestir; her biri bir HTTP metoduyla eşleşir.",
+            ["Dependency Injection ne işe yarar?"] =
+                "Dependency Injection bağımlılıkları dışarıdan verir; sınıflar somut tiplere bağlı kalmaz ve test etmek kolaylaşır."
+        };
+
+        var questions = await db.Questions
+            .Where(q => q.Explanation == null)
+            .ToListAsync();
+
+        var changed = false;
+
+        foreach (var question in questions)
+        {
+            if (explanations.TryGetValue(question.Text, out var explanation))
+            {
+                question.Explanation = explanation;
+                changed = true;
+            }
+        }
+
+        if (changed)
+        {
+            await db.SaveChangesAsync();
+        }
+    }
+
+    /// <summary>
+    /// İçerik, quiz ve proje bakımından hazır olan meslekler seçilebilir olur;
+    /// diğerleri onboarding'de "Yakında" görünür. Mevcut kayıtlar silinmez.
+    /// </summary>
+    private static async Task UpdateProfessionAvailabilityAsync(
+        MenzilimDbContext db,
+        ILogger? logger)
+    {
+        var availableNames = new[]
+        {
+            ContentSeeder.SoftwareProfessionName
+        };
+
+        var professions = await db.Professions.ToListAsync();
+        var changed = false;
+
+        foreach (var profession in professions)
+        {
+            var isAvailable = availableNames.Contains(profession.Name);
+
+            if (profession.IsAvailable != isAvailable)
+            {
+                profession.IsAvailable = isAvailable;
+                changed = true;
+
+                logger?.LogInformation(
+                    "Meslek '{Profession}' seçilebilirliği: {IsAvailable}",
+                    profession.Name,
+                    isAvailable);
+            }
+        }
+
+        if (changed)
+        {
+            await db.SaveChangesAsync();
+        }
     }
 }

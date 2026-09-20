@@ -861,4 +861,193 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sessionExpired =>
       'Your session has expired. Please sign in again.';
+
+  @override
+  String get navToday => 'Today';
+
+  @override
+  String get navPath => 'My Path';
+
+  @override
+  String get navCoach => 'Coach';
+
+  @override
+  String get todayFocusTitle => 'Today\'s main task';
+
+  @override
+  String get todayStart => 'Start';
+
+  @override
+  String get todayAllDone => 'You finished today.';
+
+  @override
+  String get todayAllDoneHint =>
+      'A new plan will be ready tomorrow. You can keep going with your project.';
+
+  @override
+  String get todayOtherSteps => 'Other steps today';
+
+  @override
+  String get dashboardProjectTitle => 'My Project';
+
+  @override
+  String get dashboardProjectSubtitle =>
+      'This is where what you learn turns into a real product.';
+
+  @override
+  String get dashboardPathTitle => 'My Path';
+
+  @override
+  String get dashboardPathSubtitle => 'Where are you on the way to your goal?';
+
+  @override
+  String get dashboardDiscoverSubtitle =>
+      'Content and updates picked from your field.';
+
+  @override
+  String get dashboardViewAll => 'View All';
+
+  @override
+  String get projectTitle => 'My Project';
+
+  @override
+  String projectStepsProgress(int completed, int total) {
+    return '$completed/$total steps';
+  }
+
+  @override
+  String get projectNextStepLabel => 'Next step';
+
+  @override
+  String get projectStepStatusLocked => 'Locked';
+
+  @override
+  String get projectStepStatusAvailable => 'Next';
+
+  @override
+  String get projectStepStatusCompleted => 'Completed';
+
+  @override
+  String get projectStepCompleteAction => 'Complete Step';
+
+  @override
+  String get projectStepLockedHint =>
+      'This step unlocks once you complete the previous one.';
+
+  @override
+  String get projectStepOpenContent => 'Open Content';
+
+  @override
+  String get projectCompleteError => 'The step could not be completed.';
+
+  @override
+  String get projectLoadError => 'Your project could not be loaded.';
+
+  @override
+  String get projectEmptyTitle => 'You don\'t have a project yet.';
+
+  @override
+  String get projectEmptyHint =>
+      'A project for your specialization is on the way. Meanwhile you can continue with today\'s plan.';
+
+  @override
+  String get projectEmptyAction => 'Go to Today';
+
+  @override
+  String get projectCompletedTitle => 'You completed your project.';
+
+  @override
+  String get projectCompletedHint =>
+      'You can add this project to your portfolio and move on to a new goal.';
+
+  @override
+  String get projectStepsTitle => 'Project steps';
+
+  @override
+  String get projectRoadmapTitle => 'The path ahead';
+
+  @override
+  String get pathIntroTitle => 'Here is your path.';
+
+  @override
+  String get pathIntroSubtitle =>
+      'Built from your goal. You can update it any time from your profile.';
+
+  @override
+  String get pathIntroGoalTitle => 'Your goal';
+
+  @override
+  String get pathIntroOutcomeTitle => 'At the end of this path';
+
+  @override
+  String get pathIntroCta => 'Start the Journey';
+
+  @override
+  String pathIntroDailyTime(int minutes) {
+    return '$minutes minutes a day';
+  }
+
+  @override
+  String get profileScreenTitle => 'Profile';
+
+  @override
+  String get profileDailyTime => 'Daily time';
+
+  @override
+  String get profileProgressTitle => 'Progress summary';
+
+  @override
+  String get profileEditTitle => 'Update your path';
+
+  @override
+  String get profileEditSubtitle =>
+      'You can change your specialization, level, goal and daily time.';
+
+  @override
+  String get profileEditAction => 'Edit';
+
+  @override
+  String get profileSaveAction => 'Save';
+
+  @override
+  String get profileSaved => 'Your profile has been updated.';
+
+  @override
+  String get profileSaveError => 'Your profile could not be updated.';
+
+  @override
+  String get profileLoadError => 'Your profile could not be loaded.';
+
+  @override
+  String get profileSettingsTitle => 'Settings and account';
+
+  @override
+  String get profileSettingsSubtitle => 'Language, theme and session.';
+
+  @override
+  String get profileOpenSettings => 'Open Settings';
+
+  @override
+  String get quizAnswerCorrectTitle => 'Correct answer';
+
+  @override
+  String get quizAnswerWrongTitle => 'That answer isn\'t right';
+
+  @override
+  String quizCorrectAnswerIs(String option) {
+    return 'Correct answer: $option';
+  }
+
+  @override
+  String get quizReviewTitle => 'Questions you missed';
+
+  @override
+  String get quizReviewAllCorrect => 'You answered every question correctly.';
+
+  @override
+  String get onboardingComingSoon => 'Coming soon';
+
+  @override
+  String get onboardingComingSoonHint =>
+      'Content for this field is on the way.';
 }

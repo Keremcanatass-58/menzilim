@@ -49,6 +49,12 @@ public sealed class SeedContentEndpointsTests : IDisposable
             var spec = await db.Specializations.SingleAsync(s => s.Name == specializationName);
             professionId = spec.ProfessionId;
             specializationId = spec.Id;
+
+            // Bu testler günlük plan davranışını her uzmanlık için ölçer;
+            // release'e hazırlık kapısı (IsAvailable) kapsam dışıdır.
+            var profession = await db.Professions.SingleAsync(p => p.Id == professionId);
+            profession.IsAvailable = true;
+            await db.SaveChangesAsync();
         }
 
         (await SendAsync(HttpMethod.Post, "/api/onboarding", token, new

@@ -38,4 +38,12 @@ class ApiConstants {
   static String get progress => '$baseUrl/api/progress/me';
 
   static String get myNews => '$baseUrl/api/news/me';
+
+  static String get myProjects => '$baseUrl/api/projects/me';
+
+  static String projectDetail(String projectId) =>
+      '$baseUrl/api/projects/me/$projectId';
+
+  static String completeProjectStep(String stepId) =>
+      '$baseUrl/api/projects/me/steps/$stepId/complete';
 }

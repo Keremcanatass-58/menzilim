@@ -125,7 +125,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _openLoginScreen() {
     if (_isLoading) return;
 
-    Navigator.of(context).pushReplacement(
+    final navigator = Navigator.of(context);
+
+    // Bu ekran Login'in üstüne açıldıysa geri dönmek yeterlidir; altta
+    // AuthGate kalır ve oturum açılınca yönlendirmeyi o yapar.
+    if (navigator.canPop()) {
+      navigator.pop();
+      return;
+    }
+
+    navigator.pushReplacement(
       MaterialPageRoute(
         builder: (_) => const LoginScreen(),
       ),

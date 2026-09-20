@@ -75,6 +75,45 @@ class QuizDetailResponse {
   }
 }
 
+/// Gönderim sonrası tek sorunun sonucu: doğru şık ve kısa açıklama.
+class QuestionResultResponse {
+  final String questionId;
+  final String text;
+  final String? selectedOption;
+  final String correctOption;
+  final String? correctOptionText;
+  final bool isCorrect;
+  final String? explanation;
+
+  QuestionResultResponse({
+    required this.questionId,
+    required this.text,
+    required this.selectedOption,
+    required this.correctOption,
+    required this.correctOptionText,
+    required this.isCorrect,
+    required this.explanation,
+  });
+
+  factory QuestionResultResponse.fromJson(Map<String, dynamic> json) {
+    final selected = json['selectedOption']?.toString();
+    final explanation = json['explanation']?.toString();
+    final correctText = json['correctOptionText']?.toString();
+
+    return QuestionResultResponse(
+      questionId: json['questionId'].toString(),
+      text: json['text']?.toString() ?? '',
+      selectedOption: selected == null || selected.isEmpty ? null : selected,
+      correctOption: json['correctOption']?.toString() ?? '',
+      correctOptionText:
+          correctText == null || correctText.isEmpty ? null : correctText,
+      isCorrect: json['isCorrect'] == true,
+      explanation:
+          explanation == null || explanation.isEmpty ? null : explanation,
+    );
+  }
+}
+
 class QuizSubmitResultResponse {
   final String attemptId;
   final String quizId;
@@ -83,6 +122,7 @@ class QuizSubmitResultResponse {
   final int wrongAnswers;
   final int totalQuestions;
   final double successRate;
+  final List<QuestionResultResponse> results;
 
   QuizSubmitResultResponse({
     required this.attemptId,
@@ -92,7 +132,12 @@ class QuizSubmitResultResponse {
     required this.wrongAnswers,
     required this.totalQuestions,
     required this.successRate,
+    this.results = const [],
   });
+
+  /// Yanlış yapılan (veya boş bırakılan) sorular.
+  List<QuestionResultResponse> get wrongResults =>
+      results.where((result) => !result.isCorrect).toList();
 
   factory QuizSubmitResultResponse.fromJson(Map<String, dynamic> json) {
     return QuizSubmitResultResponse(
@@ -103,6 +148,12 @@ class QuizSubmitResultResponse {
       wrongAnswers: (json['wrongAnswers'] as num?)?.toInt() ?? 0,
       totalQuestions: (json['totalQuestions'] as num?)?.toInt() ?? 0,
       successRate: (json['successRate'] as num?)?.toDouble() ?? 0.0,
+      results: (json['results'] as List<dynamic>? ?? const [])
+          .map(
+            (item) =>
+                QuestionResultResponse.fromJson(item as Map<String, dynamic>),
+          )
+          .toList(),
     );
   }
 }

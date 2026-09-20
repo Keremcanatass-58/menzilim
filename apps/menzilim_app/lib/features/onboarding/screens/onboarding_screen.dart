@@ -15,7 +15,11 @@ import '../services/specialization_service.dart';
 import '../../dashboard/screens/dashboard_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+  /// Onboarding tamamlandığında çağrılır. AuthGate bunu verir ve sonraki
+  /// ekrana geçişi kendisi yapar; verilmezse ekran Dashboard'ı kendisi açar.
+  final VoidCallback? onCompleted;
+
+  const OnboardingScreen({super.key, this.onCompleted});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -259,7 +263,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
       if (!mounted) return;
 
-      Navigator.of(context).pushReplacement(
+      final onCompleted = widget.onCompleted;
+      if (onCompleted != null) {
+        // Yönlendirmenin tek sahibi AuthGate'tir: profil kontrolünü
+        // yeniler ve sonraki ekranı gösterir.
+        onCompleted();
+        return;
+      }
+
+      // pushReplacement kullanılmaz: altta AuthGate kalmazsa çıkış yapınca
+      // Login'e dönülemez.
+      Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => const DashboardScreen(),
         ),
@@ -418,10 +432,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
               return _SelectionCard(
                 title: profession.name,
-                description: profession.description,
+                description: profession.isAvailable
+                    ? profession.description
+                    : context.l10n.onboardingComingSoonHint,
                 icon: Icons.work_outline,
                 isSelected:
                     _selectedProfession?.id == profession.id,
+                // Hazır olmayan meslek seçilemez: kullanıcı boş bir
+                // deneyime düşmez.
+                isDisabled: !profession.isAvailable,
+                badgeLabel: profession.isAvailable
+                    ? null
+                    : context.l10n.onboardingComingSoon,
                 onTap: () {
                   _selectProfession(profession);
                 },
@@ -704,20 +726,30 @@ class _SelectionCard extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
+  /// Seçilemeyen kart (ör. hazır olmayan meslek).
+  final bool isDisabled;
+
+  /// Kartın sağında gösterilen kısa etiket (ör. "Yakında").
+  final String? badgeLabel;
+
   const _SelectionCard({
     required this.title,
     required this.description,
     required this.icon,
     required this.isSelected,
     required this.onTap,
+    this.isDisabled = false,
+    this.badgeLabel,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colors;
 
-    return MenzilimCard(
-      onTap: onTap,
+    return Opacity(
+      opacity: isDisabled ? 0.55 : 1,
+      child: MenzilimCard(
+      onTap: isDisabled ? null : onTap,
       selected: isSelected,
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Row(
@@ -761,14 +793,18 @@ class _SelectionCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Icon(
-            isSelected ? Icons.check_circle : Icons.arrow_forward_ios,
-            size: isSelected ? 24 : 16,
-            color: isSelected
-                ? colorScheme.primary
-                : colorScheme.onSurfaceVariant,
-          ),
+          if (badgeLabel != null)
+            MenzilimChip(label: badgeLabel!)
+          else
+            Icon(
+              isSelected ? Icons.check_circle : Icons.arrow_forward_ios,
+              size: isSelected ? 24 : 16,
+              color: isSelected
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant,
+            ),
         ],
+      ),
       ),
     );
   }

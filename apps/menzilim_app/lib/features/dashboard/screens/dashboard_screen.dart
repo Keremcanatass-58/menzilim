@@ -14,7 +14,6 @@ import '../../content/models/content_response.dart';
 import '../../content/services/content_service.dart';
 import '../../content/screens/discover_screen.dart';
 import '../../quiz/screens/quiz_screen.dart';
-import '../../ai_coach/screens/ai_coach_screen.dart';
 import '../../progress/screens/progress_screen.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../news/models/news_item.dart';
@@ -22,6 +21,12 @@ import '../../news/screens/news_screen.dart';
 import '../../news/services/news_link_opener.dart';
 import '../../news/services/news_service.dart';
 import '../../news/widgets/news_card.dart';
+import '../../profile/screens/profile_screen.dart';
+import '../../projects/models/user_project.dart';
+import '../../projects/screens/project_screen.dart';
+import '../../projects/services/project_service.dart';
+import '../../projects/widgets/path_roadmap.dart';
+import '../../projects/widgets/project_card.dart';
 import '../../skills/models/skill_progress_response.dart';
 import '../../skills/screens/skills_screen.dart';
 import '../../skills/services/skill_service.dart';
@@ -35,6 +40,16 @@ class DashboardScreen extends StatefulWidget {
   final SkillService? skillService;
   final NewsService? newsService;
   final NewsLinkOpener? openNewsLink;
+  final ProjectService? projectService;
+
+  /// MainShell içindeyken kendi alt navigasyonunu çizmez.
+  final bool embedded;
+
+  /// Sekme değiştirme isteği (Yolum, Keşfet, Koç, Profil).
+  final void Function(int index)? onNavigate;
+
+  /// Değeri değişince ekran yenilenir (ör. projede adım tamamlandı).
+  final int refreshToken;
 
   const DashboardScreen({
     super.key,
@@ -44,6 +59,10 @@ class DashboardScreen extends StatefulWidget {
     this.skillService,
     this.newsService,
     this.openNewsLink,
+    this.projectService,
+    this.embedded = false,
+    this.onNavigate,
+    this.refreshToken = 0,
   });
 
   @override
@@ -69,6 +88,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   late final NewsLinkOpener _openNewsLink =
       widget.openNewsLink ?? openNewsLinkExternally;
 
+  late final ProjectService _projectService =
+      widget.projectService ?? ProjectService(ApiClient());
+
   final TokenStorage _tokenStorage = TokenStorage();
 
   DashboardResponse? _dashboard;
@@ -93,10 +115,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _skillsRequestId = 0;
 
   // Haberler de bağımsız yüklenir; hatası dashboard'u düşürmez.
-  static const int _dashboardNewsCount = 3;
+  static const int _dashboardNewsCount = 2;
   List<NewsItem> _news = [];
   bool _isLoadingNews = true;
   String? _newsError;
+
+  // Dashboard'daki öneri sayısı sınırlıdır; tamamı Keşfet'te.
+  static const int _dashboardRecommendationCount = 2;
+
+  // Living Project de bağımsız yüklenir.
+  UserProject? _project;
+  bool _isLoadingProject = true;
 
   @override
   void initState() {
@@ -105,6 +134,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadRecommendations();
     _loadSkills();
     _loadNews();
+    _loadProject();
+  }
+
+  @override
+  void didUpdateWidget(DashboardScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Başka sekmede proje ilerledi: bugün ve proje verisi tazelenir.
+    if (oldWidget.refreshToken != widget.refreshToken) {
+      _loadProject();
+      _loadDashboard();
+      _loadSkills();
+    }
+  }
+
+  Future<void> _loadProject() async {
+    if (mounted && !_isLoadingProject) {
+      setState(() {
+        _isLoadingProject = true;
+      });
+    }
+
+    try {
+      final token = await _tokenStorage.getToken();
+
+      if (token == null || token.isEmpty) {
+        throw Exception('Oturum bilgisi bulunamadı.');
+      }
+
+      final projects = await _projectService.getMyProjects(token);
+
+      if (!mounted) return;
+
+      setState(() {
+        _project = projects.isEmpty ? null : projects.first;
+        _isLoadingProject = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      // Proje yoksa/yüklenemezse dashboard çalışmaya devam eder.
+      setState(() {
+        _project = null;
+        _isLoadingProject = false;
+      });
+    }
   }
 
   Future<void> _loadNews() async {
@@ -508,6 +583,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Column(
       children: _recommendations
+          .take(_dashboardRecommendationCount)
           .map(
             (recommendation) => Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -536,6 +612,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _openDiscover() {
+    if (widget.onNavigate != null) {
+      widget.onNavigate!(2);
+      return;
+    }
+
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (_) => const DiscoverScreen()));
   }
@@ -545,9 +626,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
         .push(MaterialPageRoute(builder: (_) => const ProgressScreen()));
   }
 
-  void _openCoach() {
+  /// Kabuk içindeyken sekme değişir; tek başına açıldığında ekran push edilir.
+  void _openProject() {
+    if (widget.onNavigate != null) {
+      widget.onNavigate!(1);
+      return;
+    }
+
     Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => const AiCoachScreen()));
+        .push(MaterialPageRoute(builder: (_) => const ProjectScreen()));
+  }
+
+  void _openPath() => _openProject();
+
+  void _openProfile() {
+    if (widget.onNavigate != null) {
+      widget.onNavigate!(4);
+      return;
+    }
+
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
   }
 
   @override
@@ -587,21 +686,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       appBar: AppBar(
         title: const BrandMark(),
         actions: [
-          IconButton(
-            tooltip: l10n.skillsTitle,
-            onPressed: _openSkills,
-            icon: const Icon(Icons.insights_outlined),
-          ),
-          IconButton(
-            tooltip: l10n.discoverTitle,
-            onPressed: _openDiscover,
-            icon: const Icon(Icons.explore_outlined),
-          ),
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: IconButton(
-              tooltip: l10n.settingsTitle,
-              onPressed: _openSettings,
+              tooltip: l10n.profileScreenTitle,
+              onPressed: _openProfile,
               icon: const Icon(Icons.person_outline),
               style: IconButton.styleFrom(
                 backgroundColor: context.colors.surfaceContainerHighest,
@@ -610,12 +699,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: _DashboardNavigationBar(
-        onDiscover: _openDiscover,
-        onSkills: _openSkills,
-        onProgress: _openProgress,
-        onSettings: _openSettings,
-      ),
+      bottomNavigationBar: widget.embedded
+          ? null
+          : _DashboardNavigationBar(
+              onDiscover: _openDiscover,
+              onSkills: _openSkills,
+              onProgress: _openProgress,
+              onSettings: _openSettings,
+            ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -633,6 +724,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       _loadRecommendations(),
                       _loadSkills(),
                       _loadNews(),
+                      _loadProject(),
                     ]);
                   },
                   // Tüm bölümler kurulsun (lazy liste değil): dashboard tek
@@ -643,16 +735,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 1) Karşılama
+                        // Karşılama: kısa tutulur, asıl ağırlık "Bugün"dedir.
                         MenzilimEntrance(
                           order: 0,
                           child: _HeroSection(dashboard: dashboard),
                         ),
                         const SizedBox(height: AppSpacing.xl),
 
-                        // 2) Günlük ilerleme
+                        // 1) BUGÜN
                         MenzilimEntrance(
                           order: 1,
+                          child: _buildTodaySection(dailyPlan),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+
+                        MenzilimEntrance(
+                          order: 2,
                           child: _TodayProgressCard(
                             dashboard: dashboard,
                             dailyPlan: dailyPlan,
@@ -663,92 +761,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         const SizedBox(height: AppSpacing.section),
 
-                        // 3) Bugünün yol haritası
+                        // 2) PROJEM
                         MenzilimEntrance(
-                          order: 2,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              MenzilimSectionHeader(
-                                title: l10n.dailyPlanTitle,
-                                subtitle: l10n.dailyPlanSubtitle,
-                                trailingText: l10n.commonMinutesShort(
-                                  dailyPlan.totalMinutes,
-                                ),
-                              ),
-                              if (dailyPlan.tasks.isEmpty)
-                                MenzilimInlineEmpty(
-                                  message: l10n.dailyPlanEmpty,
-                                )
-                              else
-                                ...dailyPlan.tasks.map(
-                                  (task) => Padding(
-                                    padding: const EdgeInsets.only(
-                                      bottom: AppSpacing.md,
-                                    ),
-                                    child: _TaskCard(
-                                      icon: _getTaskIcon(task.taskType),
-                                      taskType: task.taskType,
-                                      title: task.title,
-                                      description:
-                                          task.description ??
-                                          l10n.dailyPlanTaskFallbackDescription,
-                                      estimatedMinutes: task.estimatedMinutes,
-                                      completed: task.isCompleted,
-                                      isCompleting:
-                                          _completingTaskId == task.id,
-                                      opensContent: _taskOpensContent(task),
-                                      onTap: () => _onTaskTap(task),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
+                          order: 3,
+                          child: _buildProjectSection(),
                         ),
                         const SizedBox(height: AppSpacing.section),
 
-                        // 4) Alanındaki haberler
-                        MenzilimEntrance(order: 3, child: _buildNewsSection()),
-                        const SizedBox(height: AppSpacing.section),
-
-                        // 5) Sana özel içerikler
+                        // 3) YOLUM
                         MenzilimEntrance(
                           order: 4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              MenzilimSectionHeader(
-                                title: l10n.recommendationsTitle,
-                                subtitle: l10n.recommendationsSubtitle,
-                              ),
-                              _buildRecommendationsSection(),
-                            ],
-                          ),
+                          child: _buildPathSection(dashboard),
                         ),
                         const SizedBox(height: AppSpacing.section),
 
-                        // 6) Yeteneklerim
+                        // Keşif: haber ve öneriler ana odak değildir.
                         MenzilimEntrance(
                           order: 5,
-                          child: DashboardSkillsSummary(
-                            skills: _skills,
-                            isLoading: _isLoadingSkills,
-                            errorMessage: _skillsError,
-                            onRetry: _loadSkills,
-                            onViewAll: _openSkills,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.section),
-
-                        // 7) Öğrenmeye devam et + 8) AI Koç
-                        MenzilimEntrance(
-                          order: 6,
-                          child: _ActionsSection(
-                            isWide: isWide,
-                            onContinueLearning: _openDiscover,
-                            onAskCoach: _openCoach,
-                            onViewProgress: _openProgress,
-                          ),
+                          child: _buildDiscoverySection(),
                         ),
                       ],
                     ),
@@ -759,6 +789,168 @@ class _DashboardScreenState extends State<DashboardScreen> {
           },
         ),
       ),
+    );
+  }
+
+  /// BUGÜN: tek güçlü aksiyon. Ana görev öne çıkar, kalanlar altında kalır.
+  Widget _buildTodaySection(DailyPlanResponse dailyPlan) {
+    final l10n = context.l10n;
+    final tasks = dailyPlan.tasks;
+
+    if (tasks.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          MenzilimSectionHeader(
+            title: l10n.dailyPlanTitle,
+            subtitle: l10n.dailyPlanSubtitle,
+          ),
+          MenzilimInlineEmpty(
+            message: l10n.dailyPlanEmpty,
+            hint: l10n.projectEmptyHint,
+          ),
+        ],
+      );
+    }
+
+    final pending = tasks.where((task) => !task.isCompleted).toList();
+    final mainTask = pending.isEmpty ? null : pending.first;
+    final rest = mainTask == null
+        ? tasks
+        : tasks.where((task) => task.id != mainTask.id).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        MenzilimSectionHeader(
+          title: mainTask == null ? l10n.todayAllDone : l10n.todayFocusTitle,
+          subtitle: mainTask == null
+              ? l10n.todayAllDoneHint
+              : l10n.dailyPlanSubtitle,
+          trailingText: l10n.commonMinutesShort(dailyPlan.totalMinutes),
+        ),
+        if (mainTask != null)
+          _TaskCard(
+            icon: _getTaskIcon(mainTask.taskType),
+            taskType: mainTask.taskType,
+            title: mainTask.title,
+            description: mainTask.description ??
+                l10n.dailyPlanTaskFallbackDescription,
+            estimatedMinutes: mainTask.estimatedMinutes,
+            completed: mainTask.isCompleted,
+            isCompleting: _completingTaskId == mainTask.id,
+            opensContent: _taskOpensContent(mainTask),
+            emphasized: true,
+            actionLabel: l10n.todayStart,
+            onTap: () => _onTaskTap(mainTask),
+          ),
+        if (rest.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            l10n.todayOtherSteps,
+            style: context.textStyles.labelLarge?.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          ...rest.map(
+            (task) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: _TaskCard(
+                icon: _getTaskIcon(task.taskType),
+                taskType: task.taskType,
+                title: task.title,
+                description:
+                    task.description ?? l10n.dailyPlanTaskFallbackDescription,
+                estimatedMinutes: task.estimatedMinutes,
+                completed: task.isCompleted,
+                isCompleting: _completingTaskId == task.id,
+                opensContent: _taskOpensContent(task),
+                onTap: () => _onTaskTap(task),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// PROJEM: öğrenmenin dönüştüğü ürün.
+  Widget _buildProjectSection() {
+    final l10n = context.l10n;
+
+    Widget body;
+
+    if (_isLoadingProject) {
+      body = const _SectionLoader();
+    } else if (_project == null) {
+      body = MenzilimInlineEmpty(
+        message: l10n.projectEmptyTitle,
+        hint: l10n.projectEmptyHint,
+      );
+    } else {
+      body = ProjectCard(project: _project!, onOpen: _openProject);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        MenzilimSectionHeader(
+          title: l10n.dashboardProjectTitle,
+          subtitle: l10n.dashboardProjectSubtitle,
+          actionLabel: _project == null ? null : l10n.dashboardViewAll,
+          onAction: _project == null ? null : _openProject,
+        ),
+        body,
+      ],
+    );
+  }
+
+  /// YOLUM: hedef, mevcut faz ve beceri özeti.
+  Widget _buildPathSection(DashboardResponse dashboard) {
+    final l10n = context.l10n;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        MenzilimSectionHeader(
+          title: l10n.dashboardPathTitle,
+          subtitle: l10n.dashboardPathSubtitle,
+          actionLabel: l10n.dashboardViewAll,
+          onAction: _openPath,
+        ),
+        if (_project != null) ...[
+          PathRoadmap(project: _project!),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        DashboardSkillsSummary(
+          skills: _skills,
+          isLoading: _isLoadingSkills,
+          errorMessage: _skillsError,
+          onRetry: _loadSkills,
+          onViewAll: _openSkills,
+        ),
+      ],
+    );
+  }
+
+  /// Keşif: alanındaki gelişmeler ve öneriler (ikincil ağırlık).
+  Widget _buildDiscoverySection() {
+    final l10n = context.l10n;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildNewsSection(),
+        const SizedBox(height: AppSpacing.xl),
+        MenzilimSectionHeader(
+          title: l10n.recommendationsTitle,
+          subtitle: l10n.recommendationsSubtitle,
+          actionLabel: l10n.dashboardViewAll,
+          onAction: _openDiscover,
+        ),
+        _buildRecommendationsSection(),
+      ],
     );
   }
 }
@@ -1072,145 +1264,6 @@ class _MiniStat extends StatelessWidget {
 }
 
 /// Öğrenmeye devam et + AI Koç + ilerleme eylemleri.
-class _ActionsSection extends StatelessWidget {
-  final bool isWide;
-  final VoidCallback onContinueLearning;
-  final VoidCallback onAskCoach;
-  final VoidCallback onViewProgress;
-
-  const _ActionsSection({
-    required this.isWide,
-    required this.onContinueLearning,
-    required this.onAskCoach,
-    required this.onViewProgress,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    final coachCard = MenzilimCard(
-      onTap: onAskCoach,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: context.colors.primaryContainer,
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                child: Icon(
-                  Icons.auto_awesome,
-                  size: 20,
-                  color: context.colors.onPrimaryContainer,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  l10n.coachTitle,
-                  style: context.textStyles.titleMedium,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            l10n.dashboardCoachPitch,
-            style: context.textStyles.bodyMedium?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          MenzilimButton(
-            label: l10n.dashboardAskCoach,
-            onPressed: onAskCoach,
-            icon: Icons.auto_awesome,
-            variant: MenzilimButtonVariant.secondary,
-          ),
-        ],
-      ),
-    );
-
-    final learnCard = MenzilimCard(
-      onTap: onContinueLearning,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: context.colors.secondaryContainer,
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                child: Icon(
-                  Icons.school_outlined,
-                  size: 20,
-                  color: context.colors.onSecondaryContainer,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  l10n.discoverTitle,
-                  style: context.textStyles.titleMedium,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            l10n.dashboardLearnPitch,
-            style: context.textStyles.bodyMedium?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          MenzilimButton(
-            label: l10n.dashboardContinueLearning,
-            onPressed: onContinueLearning,
-            icon: Icons.arrow_forward,
-          ),
-        ],
-      ),
-    );
-
-    return Column(
-      children: [
-        if (isWide)
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: learnCard),
-                const SizedBox(width: AppSpacing.lg),
-                Expanded(child: coachCard),
-              ],
-            ),
-          )
-        else ...[
-          learnCard,
-          const SizedBox(height: AppSpacing.md),
-          coachCard,
-        ],
-        const SizedBox(height: AppSpacing.md),
-        MenzilimButton(
-          label: l10n.dashboardViewProgress,
-          onPressed: onViewProgress,
-          icon: Icons.bar_chart_outlined,
-          variant: MenzilimButtonVariant.secondary,
-        ),
-      ],
-    );
-  }
-}
 
 /// Günlük plan görev kartı. Görev tipi renk ve ikonla ayrışır; tamamlanan
 /// görevler soluk ve üstü işaretli görünür.
@@ -1225,6 +1278,10 @@ class _TaskCard extends StatelessWidget {
   final bool opensContent;
   final VoidCallback onTap;
 
+  /// Günün ana görevi: daha güçlü görsel ağırlık ve tek net eylem.
+  final bool emphasized;
+  final String? actionLabel;
+
   const _TaskCard({
     required this.icon,
     required this.taskType,
@@ -1235,6 +1292,8 @@ class _TaskCard extends StatelessWidget {
     required this.isCompleting,
     required this.onTap,
     this.opensContent = false,
+    this.emphasized = false,
+    this.actionLabel,
   });
 
   MenzilimChipTone get _tone => switch (taskType.toLowerCase()) {
@@ -1270,7 +1329,12 @@ class _TaskCard extends StatelessWidget {
       opacity: completed ? 0.72 : 1,
       child: MenzilimCard(
         onTap: completed || isCompleting ? null : onTap,
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        tone: emphasized && !completed
+            ? MenzilimCardTone.primary
+            : MenzilimCardTone.surface,
+        padding: EdgeInsets.all(
+          emphasized ? AppSpacing.xl : AppSpacing.lg,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1321,7 +1385,15 @@ class _TaskCard extends StatelessWidget {
                       color: colors.onSurfaceVariant,
                     ),
                   ),
-                  if (opensContent && !completed) ...[
+                  if (emphasized && !completed && actionLabel != null) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    MenzilimButton(
+                      label: actionLabel!,
+                      icon: Icons.play_arrow_rounded,
+                      isLoading: isCompleting,
+                      onPressed: onTap,
+                    ),
+                  ] else if (opensContent && !completed) ...[
                     const SizedBox(height: AppSpacing.md),
                     Row(
                       mainAxisSize: MainAxisSize.min,

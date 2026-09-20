@@ -15,11 +15,15 @@ class QuizScreen extends StatefulWidget {
   final String? dailyTaskId;
   final bool isDailyTaskCompleted;
 
+  /// Testlerde sahte servis verilebilir; normalde gerçek API kullanılır.
+  final QuizService? quizService;
+
   const QuizScreen({
     super.key,
     this.quizId,
     this.dailyTaskId,
     this.isDailyTaskCompleted = false,
+    this.quizService,
   });
 
   @override
@@ -27,7 +31,8 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  final QuizService _quizService = QuizService(ApiClient());
+  late final QuizService _quizService =
+      widget.quizService ?? QuizService(ApiClient());
   final DailyPlanService _dailyPlanService = DailyPlanService(ApiClient());
   final TokenStorage _tokenStorage = TokenStorage();
 
@@ -381,6 +386,25 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
             ),
 
+            // Soru bazlı geri bildirim: quiz yalnızca ölçmez, öğretir.
+            if (result.results.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.section),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: MenzilimSectionHeader(
+                  title: result.wrongResults.isEmpty
+                      ? l10n.quizReviewAllCorrect
+                      : l10n.quizReviewTitle,
+                ),
+              ),
+              ...result.wrongResults.map(
+                (item) => Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: _QuestionReviewCard(result: item),
+                ),
+              ),
+            ],
+
             const SizedBox(height: AppSpacing.xl),
             MenzilimButton(
               label: l10n.quizRetake,
@@ -396,6 +420,75 @@ class _QuizScreenState extends State<QuizScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Yanlış yapılan sorunun özeti: doğru cevap ve kısa açıklama.
+class _QuestionReviewCard extends StatelessWidget {
+  final QuestionResultResponse result;
+
+  const _QuestionReviewCard({required this.result});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final status = context.statusColors;
+
+    final correctLabel = result.correctOptionText == null
+        ? result.correctOption
+        : '${result.correctOption} · ${result.correctOptionText}';
+
+    return MenzilimCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.close, size: 18, color: colors.error),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  l10n.quizAnswerWrongTitle,
+                  style: context.textStyles.labelLarge?.copyWith(
+                    color: colors.error,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(result.text, style: context.textStyles.titleSmall),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.check_circle_outline, size: 18, color: status.success),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  l10n.quizCorrectAnswerIs(correctLabel),
+                  style: context.textStyles.bodyMedium?.copyWith(
+                    color: status.success,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (result.explanation != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              result.explanation!,
+              style: context.textStyles.bodyMedium?.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

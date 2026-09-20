@@ -211,8 +211,10 @@ void main() {
     await tester.pumpWidget(h.build());
     await tester.pumpAndSettle();
 
-    // Practice kartı artık içeriğe gittiğini gösterir.
-    expect(find.text('İçeriğe Git'), findsNWidgets(2));
+    // Günün ana görevi tek güçlü aksiyon ("Başla") ile gösterilir;
+    // diğer adımlar içeriğe gittiklerini belirtir.
+    expect(find.text('Başla'), findsOneWidget);
+    expect(find.text('İçeriğe Git'), findsOneWidget);
 
     await _tapTask(tester, 'Uygulama Yap (Backend)');
 
@@ -228,7 +230,9 @@ void main() {
     await tester.pumpWidget(h.build());
     await tester.pumpAndSettle();
 
-    expect(find.text('İçeriğe Git'), findsOneWidget); // sadece Learn
+    // Learn ana görevdir ("Başla"); Practice'in içeriği yok.
+    expect(find.text('Başla'), findsOneWidget);
+    expect(find.text('İçeriğe Git'), findsNothing);
 
     await _tapTask(tester, 'Uygulama Yap (Backend)');
 
@@ -315,6 +319,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('İçeriğe Git'), findsNWidgets(2));
+    expect(find.text('Başla'), findsOneWidget);
+    expect(find.text('İçeriğe Git'), findsOneWidget);
   });
 }

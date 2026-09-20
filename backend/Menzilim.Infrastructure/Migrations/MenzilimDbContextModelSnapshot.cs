@@ -220,6 +220,9 @@ namespace Menzilim.Infrastructure.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("SkillId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -229,6 +232,8 @@ namespace Menzilim.Infrastructure.Migrations
                     b.HasIndex("ContentId");
 
                     b.HasIndex("LearningPathId");
+
+                    b.HasIndex("SkillId");
 
                     b.ToTable("LearningItems");
                 });
@@ -346,6 +351,9 @@ namespace Menzilim.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -363,6 +371,9 @@ namespace Menzilim.Infrastructure.Migrations
 
                     b.Property<string>("CorrectOption")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Explanation")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OptionA")
@@ -710,6 +721,86 @@ namespace Menzilim.Infrastructure.Migrations
                     b.ToTable("UserProgresses");
                 });
 
+            modelBuilder.Entity("Menzilim.Domain.UserProject", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("LearningPathId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LearningPathId");
+
+                    b.HasIndex("UserId", "LearningPathId")
+                        .IsUnique();
+
+                    b.ToTable("UserProjects");
+                });
+
+            modelBuilder.Entity("Menzilim.Domain.UserProjectStep", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EvidenceUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("LearningItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LearningItemId");
+
+                    b.HasIndex("UserProjectId", "LearningItemId")
+                        .IsUnique();
+
+                    b.ToTable("UserProjectSteps");
+                });
+
             modelBuilder.Entity("Menzilim.Domain.UserSkill", b =>
                 {
                     b.Property<Guid>("Id")
@@ -827,9 +918,16 @@ namespace Menzilim.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Menzilim.Domain.Skill", "Skill")
+                        .WithMany()
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Content");
 
                     b.Navigation("LearningPath");
+
+                    b.Navigation("Skill");
                 });
 
             modelBuilder.Entity("Menzilim.Domain.NewsItemSkill", b =>
@@ -989,6 +1087,44 @@ namespace Menzilim.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Menzilim.Domain.UserProject", b =>
+                {
+                    b.HasOne("Menzilim.Domain.LearningPath", "LearningPath")
+                        .WithMany()
+                        .HasForeignKey("LearningPathId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Menzilim.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LearningPath");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Menzilim.Domain.UserProjectStep", b =>
+                {
+                    b.HasOne("Menzilim.Domain.LearningItem", "LearningItem")
+                        .WithMany()
+                        .HasForeignKey("LearningItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Menzilim.Domain.UserProject", "UserProject")
+                        .WithMany("Steps")
+                        .HasForeignKey("UserProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LearningItem");
+
+                    b.Navigation("UserProject");
+                });
+
             modelBuilder.Entity("Menzilim.Domain.UserSkill", b =>
                 {
                     b.HasOne("Menzilim.Domain.Skill", "Skill")
@@ -1067,6 +1203,11 @@ namespace Menzilim.Infrastructure.Migrations
             modelBuilder.Entity("Menzilim.Domain.User", b =>
                 {
                     b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Menzilim.Domain.UserProject", b =>
+                {
+                    b.Navigation("Steps");
                 });
 #pragma warning restore 612, 618
         }

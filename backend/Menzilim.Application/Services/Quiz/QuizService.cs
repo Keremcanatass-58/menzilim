@@ -70,17 +70,34 @@ public class QuizService : IQuizService
             .ToDictionary(a => a.QuestionId, a => a.SelectedOption);
 
         int correctAnswers = 0;
+        var results = new List<QuestionResultResponse>();
 
         foreach (var question in questions)
         {
-            if (answersMap.TryGetValue(question.Id, out var selectedOption) &&
-                !string.IsNullOrWhiteSpace(selectedOption))
+            answersMap.TryGetValue(question.Id, out var selectedOption);
+
+            var answered = !string.IsNullOrWhiteSpace(selectedOption);
+
+            var isCorrect = answered && string.Equals(
+                selectedOption!.Trim(),
+                question.CorrectOption.Trim(),
+                StringComparison.OrdinalIgnoreCase);
+
+            if (isCorrect)
             {
-                if (string.Equals(selectedOption.Trim(), question.CorrectOption.Trim(), StringComparison.OrdinalIgnoreCase))
-                {
-                    correctAnswers++;
-                }
+                correctAnswers++;
             }
+
+            results.Add(new QuestionResultResponse
+            {
+                QuestionId = question.Id,
+                Text = question.Text,
+                SelectedOption = answered ? selectedOption!.Trim() : null,
+                CorrectOption = question.CorrectOption.Trim(),
+                CorrectOptionText = OptionText(question, question.CorrectOption),
+                IsCorrect = isCorrect,
+                Explanation = question.Explanation
+            });
         }
 
         int wrongAnswers = totalQuestions - correctAnswers;
@@ -109,7 +126,21 @@ public class QuizService : IQuizService
             CorrectAnswers = correctAnswers,
             WrongAnswers = wrongAnswers,
             TotalQuestions = totalQuestions,
-            SuccessRate = successRate
+            SuccessRate = successRate,
+            Results = results
+        };
+    }
+
+    /// <summary>Şık harfinin metnini döner ("A" → OptionA).</summary>
+    private static string? OptionText(Question question, string option)
+    {
+        return option.Trim().ToUpperInvariant() switch
+        {
+            "A" => question.OptionA,
+            "B" => question.OptionB,
+            "C" => question.OptionC,
+            "D" => question.OptionD,
+            _ => null
         };
     }
 

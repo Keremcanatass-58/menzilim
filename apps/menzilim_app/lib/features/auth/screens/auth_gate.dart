@@ -6,8 +6,9 @@ import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../dashboard/screens/dashboard_screen.dart';
+import '../../home/screens/main_shell.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
+import '../../onboarding/screens/path_intro_screen.dart';
 import '../../onboarding/services/onboarding_service.dart';
 import 'login_screen.dart';
 
@@ -62,7 +63,10 @@ class _OnboardingRouter extends StatefulWidget {
 }
 
 class _OnboardingRouterState extends State<_OnboardingRouter> {
-  late final Future<bool> _hasProfile = _check();
+  late Future<bool> _hasProfile = _check();
+
+  /// Onboarding bu oturumda tamamlandıysa önce "İşte senin yolun" gösterilir.
+  bool _showPathIntro = false;
 
   Future<bool> _check() async {
     try {
@@ -83,9 +87,30 @@ class _OnboardingRouterState extends State<_OnboardingRouter> {
           return const AuthSplashScreen();
         }
 
-        return snapshot.data == true
-            ? const DashboardScreen()
-            : const OnboardingScreen();
+        if (snapshot.data != true) {
+          return OnboardingScreen(
+            // Onboarding bitti: profil kontrolü yenilenir, sonraki ekrana
+            // geçişi bu yapı yapar.
+            onCompleted: () {
+              setState(() {
+                _showPathIntro = true;
+                _hasProfile = _check();
+              });
+            },
+          );
+        }
+
+        if (_showPathIntro) {
+          return PathIntroScreen(
+            onStart: () {
+              setState(() {
+                _showPathIntro = false;
+              });
+            },
+          );
+        }
+
+        return const MainShell();
       },
     );
   }

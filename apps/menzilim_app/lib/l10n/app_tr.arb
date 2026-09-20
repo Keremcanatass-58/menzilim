@@ -486,5 +486,87 @@
   "settingsAccount": "Hesap",
   "settingsLogout": "Çıkış Yap",
   "settingsLogoutHint": "Oturumun bu cihazda kapatılır.",
-  "sessionExpired": "Oturumun sona erdi. Lütfen tekrar giriş yap."
+  "sessionExpired": "Oturumun sona erdi. Lütfen tekrar giriş yap.",
+  "navToday": "Bugün",
+  "navPath": "Yolum",
+  "navCoach": "Koç",
+  "todayFocusTitle": "Bugünün ana görevi",
+  "todayStart": "Başla",
+  "todayAllDone": "Bugünü tamamladın.",
+  "todayAllDoneHint": "Yarın yeni bir plan hazır olacak. Dilersen projenden devam et.",
+  "todayOtherSteps": "Günün diğer adımları",
+  "dashboardProjectTitle": "Projem",
+  "dashboardProjectSubtitle": "Öğrendiklerin burada gerçek bir ürüne dönüşüyor.",
+  "dashboardPathTitle": "Yolum",
+  "dashboardPathSubtitle": "Hedefine giden yolda neredesin?",
+  "dashboardDiscoverSubtitle": "Alanından seçilmiş içerik ve gelişmeler.",
+  "dashboardViewAll": "Tümünü Gör",
+  "projectTitle": "Projem",
+  "projectStepsProgress": "{completed}/{total} adım",
+  "@projectStepsProgress": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "projectNextStepLabel": "Sonraki adım",
+  "projectStepStatusLocked": "Kilitli",
+  "projectStepStatusAvailable": "Sıradaki",
+  "projectStepStatusCompleted": "Tamamlandı",
+  "projectStepCompleteAction": "Adımı Tamamla",
+  "projectStepLockedHint": "Bu adım, önceki adımı tamamlayınca açılır.",
+  "projectStepOpenContent": "İçeriği Aç",
+  "projectCompleteError": "Adım tamamlanamadı.",
+  "projectLoadError": "Projen yüklenemedi.",
+  "projectEmptyTitle": "Henüz bir projen yok.",
+  "projectEmptyHint": "Uzmanlığın için proje hazırlanıyor. Bu arada bugünkü planından devam edebilirsin.",
+  "projectEmptyAction": "Bugüne Dön",
+  "projectCompletedTitle": "Projeni tamamladın.",
+  "projectCompletedHint": "Bu projeyi portfolyona ekleyebilir ve yeni bir hedefe geçebilirsin.",
+  "projectStepsTitle": "Proje adımları",
+  "projectRoadmapTitle": "Önündeki yol",
+  "pathIntroTitle": "İşte senin yolun.",
+  "pathIntroSubtitle": "Hedefine göre hazırlandı. İstediğin zaman profilinden güncelleyebilirsin.",
+  "pathIntroGoalTitle": "Hedefin",
+  "pathIntroOutcomeTitle": "Bu yolun sonunda",
+  "pathIntroCta": "Yolculuğa Başla",
+  "pathIntroDailyTime": "Günlük {minutes} dakika",
+  "@pathIntroDailyTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "profileScreenTitle": "Profil",
+  "profileDailyTime": "Günlük süre",
+  "profileProgressTitle": "İlerleme özeti",
+  "profileEditTitle": "Yolunu güncelle",
+  "profileEditSubtitle": "Uzmanlığını, seviyeni, hedefini ve günlük süreni değiştirebilirsin.",
+  "profileEditAction": "Düzenle",
+  "profileSaveAction": "Kaydet",
+  "profileSaved": "Profilin güncellendi.",
+  "profileSaveError": "Profil güncellenemedi.",
+  "profileLoadError": "Profil yüklenemedi.",
+  "profileSettingsTitle": "Ayarlar ve hesap",
+  "profileSettingsSubtitle": "Dil, tema ve oturum.",
+  "profileOpenSettings": "Ayarları Aç",
+  "quizAnswerCorrectTitle": "Doğru cevap",
+  "quizAnswerWrongTitle": "Bu cevap doğru değil",
+  "quizCorrectAnswerIs": "Doğru cevap: {option}",
+  "@quizCorrectAnswerIs": {
+    "placeholders": {
+      "option": {
+        "type": "String"
+      }
+    }
+  },
+  "quizReviewTitle": "Yanlış yaptığın sorular",
+  "quizReviewAllCorrect": "Tüm soruları doğru bildin.",
+  "onboardingComingSoon": "Yakında",
+  "onboardingComingSoonHint": "Bu meslek için içerikler hazırlanıyor."
 }

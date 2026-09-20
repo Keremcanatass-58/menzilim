@@ -1501,6 +1501,354 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Oturumun sona erdi. Lütfen tekrar giriş yap.'**
   String get sessionExpired;
+
+  /// No description provided for @navToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get navToday;
+
+  /// No description provided for @navPath.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yolum'**
+  String get navPath;
+
+  /// No description provided for @navCoach.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koç'**
+  String get navCoach;
+
+  /// No description provided for @todayFocusTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugünün ana görevi'**
+  String get todayFocusTitle;
+
+  /// No description provided for @todayStart.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başla'**
+  String get todayStart;
+
+  /// No description provided for @todayAllDone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugünü tamamladın.'**
+  String get todayAllDone;
+
+  /// No description provided for @todayAllDoneHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yarın yeni bir plan hazır olacak. Dilersen projenden devam et.'**
+  String get todayAllDoneHint;
+
+  /// No description provided for @todayOtherSteps.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günün diğer adımları'**
+  String get todayOtherSteps;
+
+  /// No description provided for @dashboardProjectTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Projem'**
+  String get dashboardProjectTitle;
+
+  /// No description provided for @dashboardProjectSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öğrendiklerin burada gerçek bir ürüne dönüşüyor.'**
+  String get dashboardProjectSubtitle;
+
+  /// No description provided for @dashboardPathTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yolum'**
+  String get dashboardPathTitle;
+
+  /// No description provided for @dashboardPathSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedefine giden yolda neredesin?'**
+  String get dashboardPathSubtitle;
+
+  /// No description provided for @dashboardDiscoverSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alanından seçilmiş içerik ve gelişmeler.'**
+  String get dashboardDiscoverSubtitle;
+
+  /// No description provided for @dashboardViewAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü Gör'**
+  String get dashboardViewAll;
+
+  /// No description provided for @projectTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Projem'**
+  String get projectTitle;
+
+  /// No description provided for @projectStepsProgress.
+  ///
+  /// In tr, this message translates to:
+  /// **'{completed}/{total} adım'**
+  String projectStepsProgress(int completed, int total);
+
+  /// No description provided for @projectNextStepLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonraki adım'**
+  String get projectNextStepLabel;
+
+  /// No description provided for @projectStepStatusLocked.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kilitli'**
+  String get projectStepStatusLocked;
+
+  /// No description provided for @projectStepStatusAvailable.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıradaki'**
+  String get projectStepStatusAvailable;
+
+  /// No description provided for @projectStepStatusCompleted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlandı'**
+  String get projectStepStatusCompleted;
+
+  /// No description provided for @projectStepCompleteAction.
+  ///
+  /// In tr, this message translates to:
+  /// **'Adımı Tamamla'**
+  String get projectStepCompleteAction;
+
+  /// No description provided for @projectStepLockedHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adım, önceki adımı tamamlayınca açılır.'**
+  String get projectStepLockedHint;
+
+  /// No description provided for @projectStepOpenContent.
+  ///
+  /// In tr, this message translates to:
+  /// **'İçeriği Aç'**
+  String get projectStepOpenContent;
+
+  /// No description provided for @projectCompleteError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Adım tamamlanamadı.'**
+  String get projectCompleteError;
+
+  /// No description provided for @projectLoadError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Projen yüklenemedi.'**
+  String get projectLoadError;
+
+  /// No description provided for @projectEmptyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz bir projen yok.'**
+  String get projectEmptyTitle;
+
+  /// No description provided for @projectEmptyHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uzmanlığın için proje hazırlanıyor. Bu arada bugünkü planından devam edebilirsin.'**
+  String get projectEmptyHint;
+
+  /// No description provided for @projectEmptyAction.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugüne Dön'**
+  String get projectEmptyAction;
+
+  /// No description provided for @projectCompletedTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Projeni tamamladın.'**
+  String get projectCompletedTitle;
+
+  /// No description provided for @projectCompletedHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu projeyi portfolyona ekleyebilir ve yeni bir hedefe geçebilirsin.'**
+  String get projectCompletedHint;
+
+  /// No description provided for @projectStepsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Proje adımları'**
+  String get projectStepsTitle;
+
+  /// No description provided for @projectRoadmapTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Önündeki yol'**
+  String get projectRoadmapTitle;
+
+  /// No description provided for @pathIntroTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşte senin yolun.'**
+  String get pathIntroTitle;
+
+  /// No description provided for @pathIntroSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedefine göre hazırlandı. İstediğin zaman profilinden güncelleyebilirsin.'**
+  String get pathIntroSubtitle;
+
+  /// No description provided for @pathIntroGoalTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedefin'**
+  String get pathIntroGoalTitle;
+
+  /// No description provided for @pathIntroOutcomeTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu yolun sonunda'**
+  String get pathIntroOutcomeTitle;
+
+  /// No description provided for @pathIntroCta.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yolculuğa Başla'**
+  String get pathIntroCta;
+
+  /// No description provided for @pathIntroDailyTime.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük {minutes} dakika'**
+  String pathIntroDailyTime(int minutes);
+
+  /// No description provided for @profileScreenTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil'**
+  String get profileScreenTitle;
+
+  /// No description provided for @profileDailyTime.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük süre'**
+  String get profileDailyTime;
+
+  /// No description provided for @profileProgressTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlerleme özeti'**
+  String get profileProgressTitle;
+
+  /// No description provided for @profileEditTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yolunu güncelle'**
+  String get profileEditTitle;
+
+  /// No description provided for @profileEditSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uzmanlığını, seviyeni, hedefini ve günlük süreni değiştirebilirsin.'**
+  String get profileEditSubtitle;
+
+  /// No description provided for @profileEditAction.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenle'**
+  String get profileEditAction;
+
+  /// No description provided for @profileSaveAction.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydet'**
+  String get profileSaveAction;
+
+  /// No description provided for @profileSaved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profilin güncellendi.'**
+  String get profileSaved;
+
+  /// No description provided for @profileSaveError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil güncellenemedi.'**
+  String get profileSaveError;
+
+  /// No description provided for @profileLoadError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil yüklenemedi.'**
+  String get profileLoadError;
+
+  /// No description provided for @profileSettingsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayarlar ve hesap'**
+  String get profileSettingsTitle;
+
+  /// No description provided for @profileSettingsSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dil, tema ve oturum.'**
+  String get profileSettingsSubtitle;
+
+  /// No description provided for @profileOpenSettings.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayarları Aç'**
+  String get profileOpenSettings;
+
+  /// No description provided for @quizAnswerCorrectTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Doğru cevap'**
+  String get quizAnswerCorrectTitle;
+
+  /// No description provided for @quizAnswerWrongTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu cevap doğru değil'**
+  String get quizAnswerWrongTitle;
+
+  /// No description provided for @quizCorrectAnswerIs.
+  ///
+  /// In tr, this message translates to:
+  /// **'Doğru cevap: {option}'**
+  String quizCorrectAnswerIs(String option);
+
+  /// No description provided for @quizReviewTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yanlış yaptığın sorular'**
+  String get quizReviewTitle;
+
+  /// No description provided for @quizReviewAllCorrect.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm soruları doğru bildin.'**
+  String get quizReviewAllCorrect;
+
+  /// No description provided for @onboardingComingSoon.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yakında'**
+  String get onboardingComingSoon;
+
+  /// No description provided for @onboardingComingSoonHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu meslek için içerikler hazırlanıyor.'**
+  String get onboardingComingSoonHint;
 }
 
 class _AppLocalizationsDelegate

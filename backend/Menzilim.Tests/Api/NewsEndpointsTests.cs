@@ -54,6 +54,12 @@ public sealed class NewsEndpointsTests : IDisposable
             var spec = await db.Specializations.SingleAsync(s => s.Name == specializationName);
             professionId = spec.ProfessionId;
             specializationId = spec.Id;
+
+            // Bu testler haber kişiselleştirmesini her meslek için ölçer;
+            // release'e hazırlık kapısı (IsAvailable) kapsam dışıdır.
+            var profession = await db.Professions.SingleAsync(p => p.Id == professionId);
+            profession.IsAvailable = true;
+            await db.SaveChangesAsync();
         }
 
         (await SendAsync("/api/onboarding", token, HttpMethod.Post, new

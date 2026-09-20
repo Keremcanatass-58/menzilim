@@ -809,4 +809,193 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get sessionExpired => 'Oturumun sona erdi. Lütfen tekrar giriş yap.';
+
+  @override
+  String get navToday => 'Bugün';
+
+  @override
+  String get navPath => 'Yolum';
+
+  @override
+  String get navCoach => 'Koç';
+
+  @override
+  String get todayFocusTitle => 'Bugünün ana görevi';
+
+  @override
+  String get todayStart => 'Başla';
+
+  @override
+  String get todayAllDone => 'Bugünü tamamladın.';
+
+  @override
+  String get todayAllDoneHint =>
+      'Yarın yeni bir plan hazır olacak. Dilersen projenden devam et.';
+
+  @override
+  String get todayOtherSteps => 'Günün diğer adımları';
+
+  @override
+  String get dashboardProjectTitle => 'Projem';
+
+  @override
+  String get dashboardProjectSubtitle =>
+      'Öğrendiklerin burada gerçek bir ürüne dönüşüyor.';
+
+  @override
+  String get dashboardPathTitle => 'Yolum';
+
+  @override
+  String get dashboardPathSubtitle => 'Hedefine giden yolda neredesin?';
+
+  @override
+  String get dashboardDiscoverSubtitle =>
+      'Alanından seçilmiş içerik ve gelişmeler.';
+
+  @override
+  String get dashboardViewAll => 'Tümünü Gör';
+
+  @override
+  String get projectTitle => 'Projem';
+
+  @override
+  String projectStepsProgress(int completed, int total) {
+    return '$completed/$total adım';
+  }
+
+  @override
+  String get projectNextStepLabel => 'Sonraki adım';
+
+  @override
+  String get projectStepStatusLocked => 'Kilitli';
+
+  @override
+  String get projectStepStatusAvailable => 'Sıradaki';
+
+  @override
+  String get projectStepStatusCompleted => 'Tamamlandı';
+
+  @override
+  String get projectStepCompleteAction => 'Adımı Tamamla';
+
+  @override
+  String get projectStepLockedHint =>
+      'Bu adım, önceki adımı tamamlayınca açılır.';
+
+  @override
+  String get projectStepOpenContent => 'İçeriği Aç';
+
+  @override
+  String get projectCompleteError => 'Adım tamamlanamadı.';
+
+  @override
+  String get projectLoadError => 'Projen yüklenemedi.';
+
+  @override
+  String get projectEmptyTitle => 'Henüz bir projen yok.';
+
+  @override
+  String get projectEmptyHint =>
+      'Uzmanlığın için proje hazırlanıyor. Bu arada bugünkü planından devam edebilirsin.';
+
+  @override
+  String get projectEmptyAction => 'Bugüne Dön';
+
+  @override
+  String get projectCompletedTitle => 'Projeni tamamladın.';
+
+  @override
+  String get projectCompletedHint =>
+      'Bu projeyi portfolyona ekleyebilir ve yeni bir hedefe geçebilirsin.';
+
+  @override
+  String get projectStepsTitle => 'Proje adımları';
+
+  @override
+  String get projectRoadmapTitle => 'Önündeki yol';
+
+  @override
+  String get pathIntroTitle => 'İşte senin yolun.';
+
+  @override
+  String get pathIntroSubtitle =>
+      'Hedefine göre hazırlandı. İstediğin zaman profilinden güncelleyebilirsin.';
+
+  @override
+  String get pathIntroGoalTitle => 'Hedefin';
+
+  @override
+  String get pathIntroOutcomeTitle => 'Bu yolun sonunda';
+
+  @override
+  String get pathIntroCta => 'Yolculuğa Başla';
+
+  @override
+  String pathIntroDailyTime(int minutes) {
+    return 'Günlük $minutes dakika';
+  }
+
+  @override
+  String get profileScreenTitle => 'Profil';
+
+  @override
+  String get profileDailyTime => 'Günlük süre';
+
+  @override
+  String get profileProgressTitle => 'İlerleme özeti';
+
+  @override
+  String get profileEditTitle => 'Yolunu güncelle';
+
+  @override
+  String get profileEditSubtitle =>
+      'Uzmanlığını, seviyeni, hedefini ve günlük süreni değiştirebilirsin.';
+
+  @override
+  String get profileEditAction => 'Düzenle';
+
+  @override
+  String get profileSaveAction => 'Kaydet';
+
+  @override
+  String get profileSaved => 'Profilin güncellendi.';
+
+  @override
+  String get profileSaveError => 'Profil güncellenemedi.';
+
+  @override
+  String get profileLoadError => 'Profil yüklenemedi.';
+
+  @override
+  String get profileSettingsTitle => 'Ayarlar ve hesap';
+
+  @override
+  String get profileSettingsSubtitle => 'Dil, tema ve oturum.';
+
+  @override
+  String get profileOpenSettings => 'Ayarları Aç';
+
+  @override
+  String get quizAnswerCorrectTitle => 'Doğru cevap';
+
+  @override
+  String get quizAnswerWrongTitle => 'Bu cevap doğru değil';
+
+  @override
+  String quizCorrectAnswerIs(String option) {
+    return 'Doğru cevap: $option';
+  }
+
+  @override
+  String get quizReviewTitle => 'Yanlış yaptığın sorular';
+
+  @override
+  String get quizReviewAllCorrect => 'Tüm soruları doğru bildin.';
+
+  @override
+  String get onboardingComingSoon => 'Yakında';
+
+  @override
+  String get onboardingComingSoonHint =>
+      'Bu meslek için içerikler hazırlanıyor.';
 }

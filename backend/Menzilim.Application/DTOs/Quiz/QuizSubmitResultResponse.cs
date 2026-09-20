@@ -9,4 +9,7 @@ public class QuizSubmitResultResponse
     public int WrongAnswers { get; set; }
     public int TotalQuestions { get; set; }
     public double SuccessRate { get; set; }
+
+    /// <summary>Soru bazlı sonuçlar (sonuç ekranındaki geri bildirim).</summary>
+    public List<QuestionResultResponse> Results { get; set; } = new();
 }

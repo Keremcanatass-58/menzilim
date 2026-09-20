@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Menzilim.Domain;
 
@@ -31,7 +31,8 @@ public static class ContentSeeder
         string OptionB,
         string OptionC,
         string OptionD,
-        string CorrectOption);
+        string CorrectOption,
+        string? Explanation = null);
 
     public sealed record QuizDefinition(
         string Title,
@@ -218,28 +219,32 @@ public static class ContentSeeder
                     "Blok kapsamı; yalnızca tanımlandığı { } bloğu içinde geçerlidir.",
                     "Her zaman global kapsamdadır.",
                     "Yalnızca modül dışından erişilebilen bir sabittir.",
-                    "B"),
+                    "B",
+                    "let, tanımlandığı { } bloğuyla sınırlıdır. var ise fonksiyon kapsamlıdır; bu fark özellikle döngülerde hata kaynağı olur."),
                 new QuestionDefinition(
                     "JavaScript'te '===' operatörü ne yapar?",
                     "Değeri atar.",
                     "Yalnızca tipleri karşılaştırır.",
                     "Hem değeri hem tipi, tip dönüşümü yapmadan karşılaştırır.",
                     "Tip dönüşümü yaptıktan sonra değerleri karşılaştırır.",
-                    "C"),
+                    "C",
+                    "=== tip dönüşümü yapmadan karşılaştırır. == ise tipleri dönüştürür, bu yüzden '1' == 1 doğru döner."),
                 new QuestionDefinition(
                     "CSS'te bir kapsayıcıda Flexbox düzeni hangi bildirimle başlatılır?",
                     "position: flex;",
                     "float: flex;",
                     "layout: flexbox;",
                     "display: flex;",
-                    "D"),
+                    "D",
+                    "Flexbox kapsayıcıya display: flex verilerek başlatılır; hizalama sonra justify-content ve align-items ile yapılır."),
                 new QuestionDefinition(
                     "TypeScript kodu tarayıcıda nasıl çalıştırılır?",
                     "JavaScript'e derlenir (transpile edilir) ve JavaScript olarak çalışır.",
                     "Tarayıcılar TypeScript'i doğrudan yorumlar.",
                     "WebAssembly'ye derlenmesi zorunludur.",
                     "Yalnızca sunucu tarafında çalıştırılabilir.",
-                    "A"),
+                    "A",
+                    "TypeScript tarayıcıda doğrudan çalışmaz; tsc ile JavaScript'e derlenir ve tipler derleme sonunda kaybolur."),
             }),
 
         new QuizDefinition(
@@ -254,28 +259,32 @@ public static class ContentSeeder
                     "Veritabanıyla bir oturumu temsil edip sorgulama ve değişiklikleri kaydetmeyi sağlamak.",
                     "Kullanıcı arayüzü bileşenlerini oluşturmak.",
                     "JWT token üretmek.",
-                    "B"),
+                    "B",
+                    "DbContext veritabanı oturumunu temsil eder: sorgular onun üzerinden yazılır, değişiklikler SaveChanges ile kaydedilir."),
                 new QuestionDefinition(
                     "EF Core'da model değişikliklerini veritabanı şemasına kontrollü biçimde uygulamak için ne kullanılır?",
                     "Migrations",
                     "Middleware",
                     "Razor Pages",
                     "SignalR",
-                    "A"),
+                    "A",
+                    "Migration'lar model değişikliğini sürümlenebilir adımlara çevirir; şema böylece kontrollü ve geri alınabilir şekilde güncellenir."),
                 new QuestionDefinition(
                     "SQL'de GROUP BY ile gruplanmış sonuçları bir koşula göre filtrelemek için hangi ifade kullanılır?",
                     "WHERE",
                     "ORDER BY",
                     "HAVING",
                     "DISTINCT",
-                    "C"),
+                    "C",
+                    "WHERE gruplamadan önce satırları, HAVING gruplamadan sonra grupları filtreler. COUNT gibi toplamalarla HAVING kullanılır."),
                 new QuestionDefinition(
                     "İki tablodan yalnızca her iki tabloda eşleşen satırları getiren JOIN türü hangisidir?",
                     "LEFT JOIN",
                     "FULL OUTER JOIN",
                     "CROSS JOIN",
                     "INNER JOIN",
-                    "D"),
+                    "D",
+                    "INNER JOIN yalnızca iki tarafta eşleşen satırları getirir; LEFT JOIN soldaki tüm satırları korur."),
             }),
 
         new QuizDefinition(
@@ -290,28 +299,32 @@ public static class ContentSeeder
                     "POST",
                     "DELETE",
                     "HEAD",
-                    "B"),
+                    "B",
+                    "Yeni kaynak POST ile oluşturulur. PUT belirli bir adrese yazar veya günceller, GET ise veriyi değiştirmez."),
                 new QuestionDefinition(
                     "Bir kaynak başarıyla oluşturulduğunda dönülmesi önerilen HTTP durum kodu hangisidir?",
                     "201 Created",
                     "200 OK",
                     "204 No Content",
                     "302 Found",
-                    "A"),
+                    "A",
+                    "201 Created kaynağın oluştuğunu belirtir ve genellikle Location başlığıyla yeni kaynağın adresini döner."),
                 new QuestionDefinition(
                     "İstenen kaynak bulunamadığında hangi HTTP durum kodu dönülür?",
                     "400 Bad Request",
                     "401 Unauthorized",
                     "404 Not Found",
                     "500 Internal Server Error",
-                    "C"),
+                    "C",
+                    "404 kaynağın bulunamadığını söyler. 400 isteğin hatalı, 401 ise kimliğin doğrulanmamış olduğunu belirtir."),
                 new QuestionDefinition(
                     "Aşağıdaki HTTP metotlarından hangisi idempotent'tir (aynı istek tekrarlandığında sonuç değişmez)?",
                     "POST",
                     "Hiçbiri",
                     "Yalnızca POST ve PATCH",
                     "PUT",
-                    "D"),
+                    "D",
+                    "PUT aynı veriyle tekrarlandığında sonuç değişmez; POST ise her çağrıda yeni bir kaynak oluşturabilir."),
             }),
 
         new QuizDefinition(
@@ -326,28 +339,32 @@ public static class ContentSeeder
                     "StatefulWidget",
                     "InheritedWidget",
                     "RenderObject",
-                    "A"),
+                    "A",
+                    "Kendi değişen durumu olmayan parçalar StatelessWidget'tır; veri yalnızca dışarıdan parametreyle gelir."),
                 new QuestionDefinition(
                     "StatefulWidget içinde durum değiştiğinde arayüzün yeniden çizilmesi için hangi metot çağrılır?",
                     "initState()",
                     "dispose()",
                     "setState()",
                     "build() doğrudan çağrılır",
-                    "C"),
+                    "C",
+                    "setState değişikliği çerçeveye bildirir ve build'in yeniden çalışmasını sağlar; build doğrudan çağrılmaz."),
                 new QuestionDefinition(
                     "Dart'ta 'final' ile 'const' arasındaki fark nedir?",
                     "İkisi tamamen aynıdır.",
                     "'const' derleme zamanında bilinen bir sabittir; 'final' çalışma zamanında yalnızca bir kez atanabilir.",
                     "'final' derleme zamanı sabitidir; 'const' birden fazla kez atanabilir.",
                     "'const' yalnızca sınıf alanlarında kullanılabilir.",
-                    "B"),
+                    "B",
+                    "const değer derleme zamanında bilinir; final ise çalışma zamanında bir kez atanır (ör. DateTime.now())."),
                 new QuestionDefinition(
                     "Flutter'da alt widget'ları dikey olarak alt alta dizen widget hangisidir?",
                     "Row",
                     "Stack",
                     "Wrap",
                     "Column",
-                    "D"),
+                    "D",
+                    "Column çocukları dikey, Row yatay dizer; Stack ise üst üste yerleştirir."),
             }),
     };
 
@@ -493,9 +510,11 @@ public static class ContentSeeder
 
         foreach (var definition in Quizzes)
         {
-            // Mevcut quiz (ve soruları) değiştirilmez.
+            // Mevcut quiz (ve soruları) değiştirilmez; yalnızca eksik
+            // açıklamalar tamamlanır.
             if (existingTitles.Contains(definition.Title))
             {
+                await BackfillExplanationsAsync(db, definition);
                 continue;
             }
 
@@ -527,11 +546,46 @@ public static class ContentSeeder
                     OptionC = question.OptionC,
                     OptionD = question.OptionD,
                     CorrectOption = question.CorrectOption,
+                    Explanation = question.Explanation,
                 });
             }
 
             db.Quizzes.Add(quiz);
             existingTitles.Add(quiz.Title);
+        }
+    }
+
+    /// <summary>
+    /// Daha önce seed edilmiş quiz'lerin sorularına eksik açıklamaları yazar.
+    /// Mevcut açıklamalara dokunmaz.
+    /// </summary>
+    private static async Task BackfillExplanationsAsync(
+        MenzilimDbContext db,
+        QuizDefinition definition)
+    {
+        var explanations = definition.Questions
+            .Where(q => !string.IsNullOrWhiteSpace(q.Explanation))
+            .ToDictionary(
+                q => q.Text,
+                q => q.Explanation!,
+                StringComparer.OrdinalIgnoreCase);
+
+        if (explanations.Count == 0)
+        {
+            return;
+        }
+
+        var questions = await db.Questions
+            .Where(q => q.Quiz.Title == definition.Title)
+            .Where(q => q.Explanation == null)
+            .ToListAsync();
+
+        foreach (var question in questions)
+        {
+            if (explanations.TryGetValue(question.Text, out var explanation))
+            {
+                question.Explanation = explanation;
+            }
         }
     }
 }

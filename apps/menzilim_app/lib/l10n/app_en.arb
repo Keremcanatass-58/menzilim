@@ -233,5 +233,87 @@
   "settingsAccount": "Account",
   "settingsLogout": "Log out",
   "settingsLogoutHint": "Your session on this device will be closed.",
-  "sessionExpired": "Your session has expired. Please sign in again."
+  "sessionExpired": "Your session has expired. Please sign in again.",
+  "navToday": "Today",
+  "navPath": "My Path",
+  "navCoach": "Coach",
+  "todayFocusTitle": "Today's main task",
+  "todayStart": "Start",
+  "todayAllDone": "You finished today.",
+  "todayAllDoneHint": "A new plan will be ready tomorrow. You can keep going with your project.",
+  "todayOtherSteps": "Other steps today",
+  "dashboardProjectTitle": "My Project",
+  "dashboardProjectSubtitle": "This is where what you learn turns into a real product.",
+  "dashboardPathTitle": "My Path",
+  "dashboardPathSubtitle": "Where are you on the way to your goal?",
+  "dashboardDiscoverSubtitle": "Content and updates picked from your field.",
+  "dashboardViewAll": "View All",
+  "projectTitle": "My Project",
+  "projectStepsProgress": "{completed}/{total} steps",
+  "@projectStepsProgress": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "projectNextStepLabel": "Next step",
+  "projectStepStatusLocked": "Locked",
+  "projectStepStatusAvailable": "Next",
+  "projectStepStatusCompleted": "Completed",
+  "projectStepCompleteAction": "Complete Step",
+  "projectStepLockedHint": "This step unlocks once you complete the previous one.",
+  "projectStepOpenContent": "Open Content",
+  "projectCompleteError": "The step could not be completed.",
+  "projectLoadError": "Your project could not be loaded.",
+  "projectEmptyTitle": "You don't have a project yet.",
+  "projectEmptyHint": "A project for your specialization is on the way. Meanwhile you can continue with today's plan.",
+  "projectEmptyAction": "Go to Today",
+  "projectCompletedTitle": "You completed your project.",
+  "projectCompletedHint": "You can add this project to your portfolio and move on to a new goal.",
+  "projectStepsTitle": "Project steps",
+  "projectRoadmapTitle": "The path ahead",
+  "pathIntroTitle": "Here is your path.",
+  "pathIntroSubtitle": "Built from your goal. You can update it any time from your profile.",
+  "pathIntroGoalTitle": "Your goal",
+  "pathIntroOutcomeTitle": "At the end of this path",
+  "pathIntroCta": "Start the Journey",
+  "pathIntroDailyTime": "{minutes} minutes a day",
+  "@pathIntroDailyTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "profileScreenTitle": "Profile",
+  "profileDailyTime": "Daily time",
+  "profileProgressTitle": "Progress summary",
+  "profileEditTitle": "Update your path",
+  "profileEditSubtitle": "You can change your specialization, level, goal and daily time.",
+  "profileEditAction": "Edit",
+  "profileSaveAction": "Save",
+  "profileSaved": "Your profile has been updated.",
+  "profileSaveError": "Your profile could not be updated.",
+  "profileLoadError": "Your profile could not be loaded.",
+  "profileSettingsTitle": "Settings and account",
+  "profileSettingsSubtitle": "Language, theme and session.",
+  "profileOpenSettings": "Open Settings",
+  "quizAnswerCorrectTitle": "Correct answer",
+  "quizAnswerWrongTitle": "That answer isn't right",
+  "quizCorrectAnswerIs": "Correct answer: {option}",
+  "@quizCorrectAnswerIs": {
+    "placeholders": {
+      "option": {
+        "type": "String"
+      }
+    }
+  },
+  "quizReviewTitle": "Questions you missed",
+  "quizReviewAllCorrect": "You answered every question correctly.",
+  "onboardingComingSoon": "Coming soon",
+  "onboardingComingSoonHint": "Content for this field is on the way."
 }

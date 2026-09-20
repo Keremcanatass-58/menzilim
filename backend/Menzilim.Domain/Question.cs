@@ -11,5 +11,8 @@ public class Question
     public string OptionD { get; set; } = string.Empty;
     public string CorrectOption { get; set; } = string.Empty;
 
+    /// <summary>Cevaptan sonra gösterilen kısa açıklama (opsiyonel).</summary>
+    public string? Explanation { get; set; }
+
     public Quiz Quiz { get; set; } = null!;
 }

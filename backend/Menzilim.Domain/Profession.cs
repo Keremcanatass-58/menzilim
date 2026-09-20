@@ -10,6 +10,12 @@ public class Profession
 
     public bool IsActive { get; set; } = true;
 
+    /// <summary>
+    /// İçerik, quiz ve proje bakımından hazır mı? Hazır değilse onboarding'de
+    /// "Yakında" olarak görünür ve seçilemez (boş dashboard oluşmaz).
+    /// </summary>
+    public bool IsAvailable { get; set; } = true;
+
     public DateTime CreatedAt { get; set; }
 
     public ICollection<Specialization> Specializations { get; set; } = new List<Specialization>();

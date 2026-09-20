@@ -63,15 +63,25 @@ class MenzilimErrorView extends StatelessWidget {
   }
 }
 
-/// Ekran ortasında boş durum.
+/// Ekran ortasında boş durum. Yalnızca "boş" demez: nedenini açıklar ve
+/// mümkünse bir sonraki adımı verir.
 class MenzilimEmptyView extends StatelessWidget {
   final IconData icon;
   final String message;
+
+  /// Neden boş olduğunu ve sonraki adımı anlatan kısa cümle.
+  final String? hint;
+
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   const MenzilimEmptyView({
     super.key,
     required this.icon,
     required this.message,
+    this.hint,
+    this.actionLabel,
+    this.onAction,
   });
 
   @override
@@ -100,10 +110,22 @@ class MenzilimEmptyView extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: context.textStyles.bodyLarge?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                ),
+                style: context.textStyles.titleMedium,
               ),
+              if (hint != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  hint!,
+                  textAlign: TextAlign.center,
+                  style: context.textStyles.bodyMedium?.copyWith(
+                    color: context.colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+              if (actionLabel != null && onAction != null) ...[
+                const SizedBox(height: AppSpacing.lg),
+                MenzilimButton(label: actionLabel!, onPressed: onAction),
+              ],
             ],
           ),
         ),
@@ -146,20 +168,49 @@ class MenzilimInlineError extends StatelessWidget {
   }
 }
 
-/// Bölüm içinde boş durum satırı.
+/// Bölüm içinde boş durum satırı. Mesaj neyin eksik olduğunu, ipucu ve
+/// eylem sonraki adımı söyler.
 class MenzilimInlineEmpty extends StatelessWidget {
   final String message;
+  final String? hint;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
-  const MenzilimInlineEmpty({super.key, required this.message});
+  const MenzilimInlineEmpty({
+    super.key,
+    required this.message,
+    this.hint,
+    this.actionLabel,
+    this.onAction,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MenzilimCard(
-      child: Text(
-        message,
-        style: context.textStyles.bodyMedium?.copyWith(
-          color: context.colors.onSurfaceVariant,
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(message, style: context.textStyles.titleSmall),
+          if (hint != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              hint!,
+              style: context.textStyles.bodyMedium?.copyWith(
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+          ],
+          if (actionLabel != null && onAction != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: onAction,
+                child: Text(actionLabel!),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

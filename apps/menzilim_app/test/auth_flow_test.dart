@@ -12,7 +12,8 @@ import 'package:menzilim_app/features/auth/screens/auth_gate.dart';
 import 'package:menzilim_app/features/auth/screens/login_screen.dart';
 import 'package:menzilim_app/features/auth/screens/register_screen.dart';
 import 'package:menzilim_app/features/auth/services/auth_service.dart';
-import 'package:menzilim_app/features/dashboard/screens/dashboard_screen.dart';
+import 'package:menzilim_app/features/home/screens/main_shell.dart';
+import 'package:menzilim_app/features/onboarding/screens/path_intro_screen.dart';
 import 'package:menzilim_app/features/onboarding/screens/onboarding_screen.dart';
 import 'package:menzilim_app/features/onboarding/services/onboarding_service.dart';
 import 'package:menzilim_app/features/settings/screens/settings_screen.dart';
@@ -22,7 +23,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/auth/auth_controller_test.dart' show fakeJwt;
 
 class _FakeOnboardingService extends OnboardingService {
-  final bool hasProfileResult;
+  /// Onboarding kaydedildikten sonra değişebilir.
+  bool hasProfileResult;
   final Object? error;
 
   _FakeOnboardingService({this.hasProfileResult = true, this.error})
@@ -88,7 +90,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(LoginScreen), findsOneWidget);
-      expect(find.byType(DashboardScreen), findsNothing);
+      expect(find.byType(MainShell), findsNothing);
     });
 
     testWidgets('geçerli token ve onboarding varsa Dashboard açılır',
@@ -107,7 +109,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(DashboardScreen), findsOneWidget);
+      expect(find.byType(MainShell), findsOneWidget);
       expect(find.byType(LoginScreen), findsNothing);
     });
 
@@ -248,6 +250,77 @@ void main() {
 
       expect(find.byType(OnboardingScreen), findsOneWidget);
     });
+
+    testWidgets('Login üstünde açılan kayıt ekranı oturum açılınca kapanır',
+        (tester) async {
+      final auth = AuthController();
+      await auth.restore();
+
+      await tester.pumpWidget(
+        _app(
+          auth: auth,
+          home: AuthGate(
+            onboardingService: _FakeOnboardingService(hasProfileResult: false),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(LoginScreen), findsOneWidget);
+
+      await tester.tap(find.text('Kayıt Ol'));
+      await tester.pumpAndSettle();
+      expect(find.byType(RegisterScreen), findsOneWidget);
+
+      // Kayıt başarılı: AuthGate altta kaldığı için yönlendirme yapılabilir.
+      await auth.signIn(
+        token: fakeJwt(expiresIn: const Duration(hours: 1)),
+        userId: 'user-1',
+        email: 'yeni@menzilim.test',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(RegisterScreen), findsNothing);
+      expect(find.byType(OnboardingScreen), findsOneWidget);
+    });
+
+    testWidgets('onboarding tamamlanınca önce yol ekranı, sonra ana kabuk açılır',
+        (tester) async {
+      SharedPreferences.setMockInitialValues({
+        'auth_token': fakeJwt(expiresIn: const Duration(hours: 2)),
+      });
+      final auth = AuthController();
+      final onboardingService =
+          _FakeOnboardingService(hasProfileResult: false);
+
+      await tester.pumpWidget(
+        _app(auth: auth, home: AuthGate(onboardingService: onboardingService)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(OnboardingScreen), findsOneWidget);
+
+      // Onboarding kaydedildi: profil artık var.
+      onboardingService.hasProfileResult = true;
+      tester
+          .widget<OnboardingScreen>(find.byType(OnboardingScreen))
+          .onCompleted!();
+      await tester.pumpAndSettle();
+
+      // Önce "İşte senin yolun" ekranı gösterilir.
+      expect(find.byType(PathIntroScreen), findsOneWidget);
+      expect(find.byType(OnboardingScreen), findsNothing);
+
+      await tester.tap(find.text('Yolculuğa Başla'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MainShell), findsOneWidget);
+
+      // Kabuğu AuthGate gösterdiği için çıkışta Login'e dönülür.
+      await auth.logout();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LoginScreen), findsOneWidget);
+      expect(find.byType(MainShell), findsNothing);
+    });
   });
 
   group('Oturum kapatma', () {
@@ -267,7 +340,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byType(DashboardScreen), findsOneWidget);
+      expect(find.byType(MainShell), findsOneWidget);
 
       // Dashboard'un üstüne ayarlar açılır (uygulamadaki gibi push ile).
       tester.state<NavigatorState>(find.byType(Navigator).last).push(
@@ -295,7 +368,7 @@ void main() {
       expect(find.byType(LoginScreen), findsOneWidget);
       // Yığın temizlendi: geri dönülebilecek Dashboard/Ayarlar yok.
       expect(find.byType(SettingsScreen), findsNothing);
-      expect(find.byType(DashboardScreen), findsNothing);
+      expect(find.byType(MainShell), findsNothing);
       expect(await TokenStorage().getToken(), isNull);
     });
 
@@ -315,14 +388,14 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byType(DashboardScreen), findsOneWidget);
+      expect(find.byType(MainShell), findsOneWidget);
 
       // Korumalı bir çağrı 401 döndü.
       await ApiClient.onUnauthorized!();
       await tester.pumpAndSettle();
 
       expect(find.byType(LoginScreen), findsOneWidget);
-      expect(find.byType(DashboardScreen), findsNothing);
+      expect(find.byType(MainShell), findsNothing);
       expect(await TokenStorage().getToken(), isNull);
     });
   });

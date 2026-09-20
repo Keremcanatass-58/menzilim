@@ -114,7 +114,7 @@ void main() {
     SharedPreferences.setMockInitialValues({'auth_token': 'test-token'});
   });
 
-  testWidgets('en fazla 3 haber gösterir ve tümünü görme bağlantısı sunar',
+  testWidgets('en fazla 2 haber gösterir ve tümünü görme bağlantısı sunar',
       (tester) async {
     final news = _FakeNewsService([
       () async => [
@@ -131,7 +131,7 @@ void main() {
     expect(find.text('Bugün Senin Alanında'), findsOneWidget);
     expect(find.text('Haber A'), findsOneWidget);
     expect(find.text('Haber B'), findsOneWidget);
-    expect(find.text('Haber C'), findsOneWidget);
+    expect(find.text('Haber C'), findsNothing);
     expect(find.text('Haber D'), findsNothing);
     expect(find.text('Tüm Haberler'), findsOneWidget);
   });

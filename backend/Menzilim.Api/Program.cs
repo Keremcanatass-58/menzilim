@@ -34,6 +34,8 @@ using Menzilim.Application.Interfaces.Progress;
 using Menzilim.Application.Services.Progress;
 using Menzilim.Application.Interfaces.News;
 using Menzilim.Application.Services.News;
+using Menzilim.Application.Interfaces.Projects;
+using Menzilim.Application.Services.Projects;
 using Menzilim.Infrastructure.Configuration;
 using Menzilim.Infrastructure.Data;
 using Menzilim.Infrastructure.Services.AI;
@@ -80,6 +82,8 @@ builder.Services.AddScoped<IAICoachService, AICoachService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
 builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
+builder.Services.AddScoped<IUserProjectService, UserProjectService>();
+builder.Services.AddScoped<IUserProjectRepository, UserProjectRepository>();
 
 
 // ==============================
@@ -202,6 +206,9 @@ using (var scope = app.Services.CreateScope())
 
     // Haberler de skill'lere bağlanır.
     await NewsSeeder.SeedAsync(db, seedLogger);
+
+    // Proje şablonları içerik ve skill'lere bağlandığı için en sonda çalışır.
+    await ProjectSeeder.SeedAsync(db, seedLogger);
 }
 
 
@@ -246,14 +253,18 @@ app.MapGet("/", () => new
 
 app.MapGet("/api/professions", async (MenzilimDbContext db) =>
 {
+    // Hazır olmayan meslekler de dönülür; istemci bunları "Yakında" olarak
+    // gösterir ve seçtirmez (boş dashboard oluşmaz).
     var professions = await db.Professions
         .Where(x => x.IsActive)
-        .OrderBy(x => x.Name)
+        .OrderByDescending(x => x.IsAvailable)
+        .ThenBy(x => x.Name)
         .Select(x => new
         {
             x.Id,
             x.Name,
-            x.Description
+            x.Description,
+            x.IsAvailable
         })
         .ToListAsync();
 
@@ -449,7 +460,8 @@ app.MapPost(
     async (
         OnboardingRequest request,
         ClaimsPrincipal user,
-        IOnboardingService onboardingService) =>
+        IOnboardingService onboardingService,
+        MenzilimDbContext db) =>
     {
         var userIdClaim =
             user.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -457,6 +469,21 @@ app.MapPost(
         if (!Guid.TryParse(userIdClaim, out var userId))
         {
             return Results.Unauthorized();
+        }
+
+        // Hazır olmayan meslek seçilemez: kullanıcı boş bir deneyime düşmesin.
+        var professionIsAvailable = await db.Professions
+            .AnyAsync(p =>
+                p.Id == request.ProfessionId &&
+                p.IsActive &&
+                p.IsAvailable);
+
+        if (!professionIsAvailable)
+        {
+            return Results.BadRequest(new
+            {
+                message = "Bu meslek henüz kullanıma açık değil."
+            });
         }
 
         try
@@ -1001,6 +1028,111 @@ app.MapGet(
         // Onboarding yapılmamışsa kişiselleştirilecek alan yok: boş liste.
         var response = await newsService.GetForUserAsync(userId);
         return Results.Ok(response);
+    })
+    .RequireAuthorization();
+
+// ==============================
+// PROJECTS (LIVING PROJECT)
+// ==============================
+
+app.MapGet(
+    "/api/projects/me",
+    async (
+        ClaimsPrincipal user,
+        IUserProjectService projectService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        try
+        {
+            // Uzmanlığa uygun şablon varsa proje ilk çağrıda oluşturulur.
+            var response = await projectService.GetMyProjectsAsync(userId);
+
+            return Results.Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(new
+            {
+                message = ex.Message
+            });
+        }
+    })
+    .RequireAuthorization();
+
+app.MapGet(
+    "/api/projects/me/{projectId:guid}",
+    async (
+        Guid projectId,
+        ClaimsPrincipal user,
+        IUserProjectService projectService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var response = await projectService.GetByIdAsync(userId, projectId);
+
+        // Başkasının projesi de bulunamadı sayılır (varlık sızdırılmaz).
+        if (response is null)
+        {
+            return Results.NotFound(new
+            {
+                message = "Proje bulunamadı."
+            });
+        }
+
+        return Results.Ok(response);
+    })
+    .RequireAuthorization();
+
+app.MapPost(
+    "/api/projects/me/steps/{stepId:guid}/complete",
+    async (
+        Guid stepId,
+        ClaimsPrincipal user,
+        IUserProjectService projectService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        try
+        {
+            var response =
+                await projectService.CompleteStepAsync(userId, stepId);
+
+            if (response is null)
+            {
+                return Results.NotFound(new
+                {
+                    message = "Adım bulunamadı."
+                });
+            }
+
+            return Results.Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new
+            {
+                message = ex.Message
+            });
+        }
     })
     .RequireAuthorization();
 
