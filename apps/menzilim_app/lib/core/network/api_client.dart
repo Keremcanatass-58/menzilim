@@ -3,16 +3,27 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiClient {
+  /// Oturumlu bir istek 401 dönerse çağrılır (AuthController bağlar).
+  /// Token gönderilmeyen isteklerde (giriş/kayıt) tetiklenmez.
+  static Future<void> Function()? onUnauthorized;
+
+  /// Testlerde sahte istemci verilebilir; normalde http paketi kullanılır.
+  final http.Client? _client;
+
+  ApiClient({this._client});
+
   Future<dynamic> get(
     String endpoint, {
     String? token,
   }) async {
-    final response = await http.get(
-      Uri.parse(endpoint),
-      headers: _headers(token),
-    );
+    final uri = Uri.parse(endpoint);
+    final headers = _headers(token);
 
-    return _handleResponse(response);
+    final response = _client == null
+        ? await http.get(uri, headers: headers)
+        : await _client.get(uri, headers: headers);
+
+    return _handleResponse(response, token);
   }
 
   Future<dynamic> post(
@@ -20,13 +31,15 @@ class ApiClient {
     Map<String, dynamic>? body,
     String? token,
   }) async {
-    final response = await http.post(
-      Uri.parse(endpoint),
-      headers: _headers(token),
-      body: body == null ? null : jsonEncode(body),
-    );
+    final uri = Uri.parse(endpoint);
+    final headers = _headers(token);
+    final payload = body == null ? null : jsonEncode(body);
 
-    return _handleResponse(response);
+    final response = _client == null
+        ? await http.post(uri, headers: headers, body: payload)
+        : await _client.post(uri, headers: headers, body: payload);
+
+    return _handleResponse(response, token);
   }
 
   Map<String, String> _headers(String? token) {
@@ -41,13 +54,19 @@ class ApiClient {
     return headers;
   }
 
-  dynamic _handleResponse(http.Response response) {
+  dynamic _handleResponse(http.Response response, String? token) {
     final data = response.body.isEmpty
         ? null
         : jsonDecode(response.body);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return data;
+    }
+
+    // Oturum süresi dolmuş/geçersiz: uygulama girişe döner. Giriş denemesinin
+    // 401'i (token'sız istek) bu akışı tetiklemez.
+    if (response.statusCode == 401 && token != null && token.isNotEmpty) {
+      onUnauthorized?.call();
     }
 
     throw ApiException(

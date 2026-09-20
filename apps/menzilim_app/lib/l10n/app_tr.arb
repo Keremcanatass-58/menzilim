@@ -482,5 +482,9 @@
   "coachSuggestion3": "Günlük 30 dakikayla nasıl ilerleyebilirim?",
   "settingsAppearance": "Görünüm",
   "settingsAppearanceSubtitle": "Dil ve tema tercihleri cihazında saklanır.",
-  "appTagline": "Hedefini belir. Yolunu keşfet."
+  "appTagline": "Hedefini belir. Yolunu keşfet.",
+  "settingsAccount": "Hesap",
+  "settingsLogout": "Çıkış Yap",
+  "settingsLogoutHint": "Oturumun bu cihazda kapatılır.",
+  "sessionExpired": "Oturumun sona erdi. Lütfen tekrar giriş yap."
 }

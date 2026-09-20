@@ -797,4 +797,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get appTagline => 'Hedefini belir. Yolunu keşfet.';
+
+  @override
+  String get settingsAccount => 'Hesap';
+
+  @override
+  String get settingsLogout => 'Çıkış Yap';
+
+  @override
+  String get settingsLogoutHint => 'Oturumun bu cihazda kapatılır.';
+
+  @override
+  String get sessionExpired => 'Oturumun sona erdi. Lütfen tekrar giriş yap.';
 }

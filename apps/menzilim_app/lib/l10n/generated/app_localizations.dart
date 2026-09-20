@@ -1477,6 +1477,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Hedefini belir. Yolunu keşfet.'**
   String get appTagline;
+
+  /// No description provided for @settingsAccount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap'**
+  String get settingsAccount;
+
+  /// No description provided for @settingsLogout.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıkış Yap'**
+  String get settingsLogout;
+
+  /// No description provided for @settingsLogoutHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oturumun bu cihazda kapatılır.'**
+  String get settingsLogoutHint;
+
+  /// No description provided for @sessionExpired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oturumun sona erdi. Lütfen tekrar giriş yap.'**
+  String get sessionExpired;
 }
 
 class _AppLocalizationsDelegate

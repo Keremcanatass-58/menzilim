@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/auth/auth_scope.dart';
 import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/settings/app_settings_scope.dart';
@@ -84,6 +85,47 @@ class SettingsScreen extends StatelessWidget {
                             onSelectionChanged: (selection) =>
                                 settings.setThemeMode(selection.first),
                           ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.section),
+                  MenzilimSectionHeader(title: l10n.settingsAccount),
+                  MenzilimCard(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.logout,
+                              size: 20,
+                              color: context.colors.error,
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Text(
+                                l10n.settingsLogout,
+                                style: context.textStyles.titleMedium,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          l10n.settingsLogoutHint,
+                          style: context.textStyles.bodySmall?.copyWith(
+                            color: context.colors.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        // Oturumu kapatır; yönlendirmeyi AuthGate yapar.
+                        MenzilimButton(
+                          label: l10n.settingsLogout,
+                          icon: Icons.logout,
+                          variant: MenzilimButtonVariant.secondary,
+                          onPressed: () => AuthScope.of(context).logout(),
                         ),
                       ],
                     ),

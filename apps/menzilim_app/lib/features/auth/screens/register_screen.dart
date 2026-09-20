@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/auth/auth_scope.dart';
 import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 
 import '../../../core/network/api_client.dart';
-import '../../../core/storage/token_storage.dart';
 import '../models/register_request.dart';
 import '../services/auth_service.dart';
-import '../../onboarding/screens/onboarding_screen.dart';
 import 'login_screen.dart' show LoginScreen, AuthBrandMark;
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  /// Testlerde sahte servis verilebilir; normalde gerçek API kullanılır.
+  final AuthService? authService;
+
+  const RegisterScreen({super.key, this.authService});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -24,7 +26,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
 
   final ApiClient _apiClient = ApiClient();
-  final TokenStorage _tokenStorage = TokenStorage();
 
   late final AuthService _authService;
 
@@ -35,7 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
-    _authService = AuthService(_apiClient);
+    _authService = widget.authService ?? AuthService(_apiClient);
   }
 
   @override
@@ -83,24 +84,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       );
 
-      await _tokenStorage.saveAuth(
-        token: response.token,
-        userId: response.userId,
-        email: response.email,
-      );
-
       if (!mounted) return;
 
       _showMessage(context.l10n.registerSuccess);
 
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      if (!mounted) return;
-
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => const OnboardingScreen(),
-        ),
+      // Yeni hesapta profil yoktur; AuthGate Onboarding'e yönlendirir.
+      await AuthScope.of(context).signIn(
+        token: response.token,
+        userId: response.userId,
+        email: response.email,
       );
     } catch (e) {
       if (!mounted) return;

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/auth/auth_scope.dart';
 import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/storage/token_storage.dart';
 import '../models/login_request.dart';
 import '../services/auth_service.dart';
-import '../../dashboard/screens/dashboard_screen.dart';
-import '../../onboarding/screens/onboarding_screen.dart';
-import '../../onboarding/services/onboarding_service.dart';
 import '../../settings/screens/settings_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  /// Testlerde sahte servis verilebilir; normalde gerçek API kullanılır.
+  final AuthService? authService;
+
+  const LoginScreen({super.key, this.authService});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -25,10 +25,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
 
   final ApiClient _apiClient = ApiClient();
-  final TokenStorage _tokenStorage = TokenStorage();
 
   late final AuthService _authService;
-  late final OnboardingService _onboardingService;
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -36,8 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _authService = AuthService(_apiClient);
-    _onboardingService = OnboardingService(_apiClient);
+    _authService = widget.authService ?? AuthService(_apiClient);
   }
 
   @override
@@ -68,31 +65,15 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
-      await _tokenStorage.saveAuth(
-        token: response.token,
-        userId: response.userId,
-        email: response.email,
-      );
-
-      // Onboarding'i tamamlamış kullanıcı doğrudan dashboard'a gider.
-      // Profil kontrolü başarısız olursa onboarding'e düşülür.
-      var hasProfile = false;
-      try {
-        hasProfile = await _onboardingService.hasProfile(response.token);
-      } catch (_) {
-        hasProfile = false;
-      }
-
       if (!mounted) return;
 
       _showMessage(context.l10n.loginSuccess);
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => hasProfile
-              ? const DashboardScreen()
-              : const OnboardingScreen(),
-        ),
+      // Oturumu kur; Dashboard/Onboarding yönlendirmesini AuthGate yapar.
+      await AuthScope.of(context).signIn(
+        token: response.token,
+        userId: response.userId,
+        email: response.email,
       );
     } catch (e) {
       if (!mounted) return;

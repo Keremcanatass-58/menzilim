@@ -847,4 +847,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appTagline => 'Set your goal. Discover your path.';
+
+  @override
+  String get settingsAccount => 'Account';
+
+  @override
+  String get settingsLogout => 'Log out';
+
+  @override
+  String get settingsLogoutHint =>
+      'Your session on this device will be closed.';
+
+  @override
+  String get sessionExpired =>
+      'Your session has expired. Please sign in again.';
 }

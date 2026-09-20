@@ -229,5 +229,9 @@
   "coachSuggestion3": "How can I progress with 30 minutes a day?",
   "settingsAppearance": "Appearance",
   "settingsAppearanceSubtitle": "Language and theme preferences are stored on your device.",
-  "appTagline": "Set your goal. Discover your path."
+  "appTagline": "Set your goal. Discover your path.",
+  "settingsAccount": "Account",
+  "settingsLogout": "Log out",
+  "settingsLogoutHint": "Your session on this device will be closed.",
+  "sessionExpired": "Your session has expired. Please sign in again."
 }
