@@ -180,6 +180,33 @@ public sealed class SeedContentEndpointsTests : IDisposable
     }
 
     [Fact]
+    public async Task ContentWriteEndpoints_RequireAuthentication()
+    {
+        var create = await _client.PostAsJsonAsync("/api/content", new
+        {
+            title = "Anonim içerik",
+            url = "https://example.com/anonim",
+            source = "Test",
+            publishedAt = DateTime.UtcNow,
+            readingTimeMinutes = 5,
+            level = "Beginner",
+        });
+
+        var assign = await _client.PostAsJsonAsync("/api/content/profession", new
+        {
+            contentId = Guid.NewGuid(),
+            professionId = Guid.NewGuid(),
+        });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, create.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, assign.StatusCode);
+
+        // Katalog anonim yazmaya kapalı.
+        await using var db = _factory.CreateDbContext();
+        Assert.False(await db.Contents.AnyAsync(c => c.Title == "Anonim içerik"));
+    }
+
+    [Fact]
     public async Task Quizzes_ListsAllSeededQuizzes_AndActiveQuizStaysAspNet()
     {
         var all = await _client.GetFromJsonAsync<List<QuizSummaryResponse>>("/api/quizzes");

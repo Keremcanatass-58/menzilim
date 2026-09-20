@@ -285,16 +285,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
         throw Exception('Oturum bilgisi bulunamadı.');
       }
 
-      final results = await Future.wait([
-        _dashboardService.getDashboard(token),
-        _dailyPlanService.getToday(token),
-      ]);
+      // Günlük plan önce istenir: günün ilk açılışında planı bu çağrı
+      // oluşturur. Paralel istekte özet kartı planı henüz görmediği için
+      // kısa süre "0 / 0 görev" gösteriyordu.
+      final dailyPlan = await _dailyPlanService.getToday(token);
+      final dashboard = await _dashboardService.getDashboard(token);
 
       if (!mounted) return;
 
       setState(() {
-        _dashboard = results[0] as DashboardResponse;
-        _dailyPlan = results[1] as DailyPlanResponse;
+        _dashboard = dashboard;
+        _dailyPlan = dailyPlan;
         _isLoading = false;
         _errorMessage = null;
       });

@@ -101,7 +101,10 @@ public sealed class SkillEndpointsTests : IDisposable
                 s => s.SetProperty(c => c.IsActive, false));
         }
 
-        var response = await _client.PostAsJsonAsync("/api/content", new CreateContentRequest
+        // Katalog yazma ucu artık kimlik doğrulaması ister.
+        var token = await RegisterAsync();
+
+        var response = await SendAsync(HttpMethod.Post, "/api/content", token, new CreateContentRequest
         {
             Title = "ASP.NET Core Web API Development",
             Description = "Learn the basics of building Web APIs with ASP.NET Core.",

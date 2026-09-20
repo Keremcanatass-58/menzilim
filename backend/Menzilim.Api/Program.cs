@@ -616,6 +616,7 @@ app.MapGet(
     });
 
  // CONTENT - CREATE
+// Katalog yazma uçları: anonim erişime kapalı (kimliği doğrulanmış çağrı).
 app.MapPost(
     "/api/content",
     async (
@@ -627,7 +628,8 @@ app.MapPost(
         return Results.Created(
             $"/api/content/{response.Id}",
             response);
-    });
+    })
+    .RequireAuthorization();
 
 // ==============================
 // CONTENT - PROFESSION ASSIGN
@@ -650,7 +652,8 @@ app.MapPost(
             {
                 message = "Bu içerik zaten bu meslek ile eşleştirilmiş."
             });
-    });
+    })
+    .RequireAuthorization();
 
 // ==============================
 // CONTENT - RECOMMENDATIONS

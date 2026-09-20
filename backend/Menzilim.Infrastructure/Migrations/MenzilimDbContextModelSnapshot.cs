@@ -78,9 +78,10 @@ namespace Menzilim.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ContentId");
-
                     b.HasIndex("ProfessionId");
+
+                    b.HasIndex("ContentId", "ProfessionId")
+                        .IsUnique();
 
                     b.ToTable("ContentProfessions");
                 });
@@ -628,7 +629,8 @@ namespace Menzilim.Infrastructure.Migrations
 
                     b.HasIndex("ContentId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "ContentId")
+                        .IsUnique();
 
                     b.ToTable("UserContentProgresses");
                 });
@@ -783,6 +785,15 @@ namespace Menzilim.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Content");
+                });
+
+            modelBuilder.Entity("Menzilim.Domain.DailyPlan", b =>
+                {
+                    b.HasOne("Menzilim.Domain.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Menzilim.Domain.DailyTask", b =>

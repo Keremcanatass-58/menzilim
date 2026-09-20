@@ -176,6 +176,14 @@ public class MenzilimDbContext : DbContext
             .HasForeignKey(ns => ns.SkillId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // DailyPlan.UserId için ilişki tanımlı değildi: kullanıcı silinince
+        // planlar ve görevleri sahipsiz kalıyordu.
+        modelBuilder.Entity<DailyPlan>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(dp => dp.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<UserProgress>()
             .HasOne(up => up.User)
             .WithMany()
@@ -210,6 +218,16 @@ public class MenzilimDbContext : DbContext
 
         modelBuilder.Entity<NewsItemSkill>()
             .HasIndex(ns => new { ns.NewsItemId, ns.SkillId })
+            .IsUnique();
+
+        // Bir kullanıcının bir içerik için tek ilerleme kaydı olur.
+        modelBuilder.Entity<UserContentProgress>()
+            .HasIndex(p => new { p.UserId, p.ContentId })
+            .IsUnique();
+
+        // Aynı içerik bir mesleğe yalnızca bir kez bağlanır.
+        modelBuilder.Entity<ContentProfession>()
+            .HasIndex(cp => new { cp.ContentId, cp.ProfessionId })
             .IsUnique();
 
         // Aynı haber iki kez eklenmesin (seed ve ileride feed alımı).
