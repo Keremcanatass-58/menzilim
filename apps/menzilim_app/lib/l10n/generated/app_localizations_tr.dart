@@ -724,4 +724,77 @@ class AppLocalizationsTr extends AppLocalizations {
   String newsDate(int day, String month, String year) {
     return '$day $month $year';
   }
+
+  @override
+  String get newsSectionSubtitle => 'Alanındaki güncel gelişmeler.';
+
+  @override
+  String get recommendationsSubtitle => 'Profiline ve ilerlemene göre seçildi.';
+
+  @override
+  String get dailyPlanSubtitle => 'Bugünü tamamlamak için küçük adımlar.';
+
+  @override
+  String get dashboardTasksShort => 'Görev';
+
+  @override
+  String get dashboardCoachPitch =>
+      'Takıldığın yeri sor, hedefine göre yanıt al.';
+
+  @override
+  String get dashboardLearnPitch =>
+      'Alanına uygun içeriklerle öğrenmeye devam et.';
+
+  @override
+  String get taskTypeLearn => 'Öğren';
+
+  @override
+  String get taskTypePractice => 'Uygula';
+
+  @override
+  String get taskTypeQuiz => 'Test';
+
+  @override
+  String get taskTypeReview => 'Tekrar';
+
+  @override
+  String get navHome => 'Ana Sayfa';
+
+  @override
+  String get navDiscover => 'Keşfet';
+
+  @override
+  String get navSkills => 'Yetenekler';
+
+  @override
+  String get navProgress => 'İlerleme';
+
+  @override
+  String get navProfile => 'Profil';
+
+  @override
+  String get coachEmptyTitle => 'Yol arkadaşın hazır.';
+
+  @override
+  String get coachSuggestionsTitle => 'Örnek sorular';
+
+  @override
+  String get coachSuggestion1 => 'Bu hafta neye odaklanmalıyım?';
+
+  @override
+  String get coachSuggestion2 =>
+      'Hedefime ulaşmak için hangi becerileri geliştirmeliyim?';
+
+  @override
+  String get coachSuggestion3 => 'Günlük 30 dakikayla nasıl ilerleyebilirim?';
+
+  @override
+  String get settingsAppearance => 'Görünüm';
+
+  @override
+  String get settingsAppearanceSubtitle =>
+      'Dil ve tema tercihleri cihazında saklanır.';
+
+  @override
+  String get appTagline => 'Hedefini belir. Yolunu keşfet.';
 }

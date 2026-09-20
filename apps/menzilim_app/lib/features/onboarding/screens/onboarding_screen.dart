@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -292,12 +293,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(
-              maxWidth: 760,
+              maxWidth: AppBreakpoints.maxReadingWidth,
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 24,
+              padding: AppSpacing.screen(
+                MediaQuery.sizeOf(context).width,
               ),
               child: Column(
                 children: [
@@ -345,21 +345,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildHeader() {
     return Row(
       children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: context.colors.primary,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+          ),
+          alignment: Alignment.center,
+          child: Icon(
+            Icons.explore_outlined,
+            size: 18,
+            color: context.colors.onPrimary,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.md),
         Text(
           context.l10n.appName,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+          style: context.textStyles.titleMedium?.copyWith(
             letterSpacing: 0.5,
           ),
         ),
         const Spacer(),
-        Text(
-          context.l10n.onboardingStep(_currentStep + 1, 5),
-          style: TextStyle(
-            color: context.colors.onSurfaceVariant,
-            fontWeight: FontWeight.w500,
-          ),
+        MenzilimChip(
+          label: context.l10n.onboardingStep(_currentStep + 1, 5),
         ),
       ],
     );
@@ -410,16 +419,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       children: [
         Text(
           context.l10n.onboardingProfessionTitle,
-          style: const TextStyle(
-            fontSize: 34,
-            fontWeight: FontWeight.bold,
-          ),
+          style: context.textStyles.headlineMedium,
         ),
         const SizedBox(height: 12),
         Text(
           context.l10n.onboardingProfessionSubtitle,
-          style: TextStyle(
-            fontSize: 18,
+          style: context.textStyles.bodyLarge?.copyWith(
             color: context.colors.onSurfaceVariant,
           ),
         ),
@@ -540,16 +545,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         const SizedBox(height: 24),
         Text(
           context.l10n.onboardingCareerGoalTitle,
-          style: const TextStyle(
-            fontSize: 34,
-            fontWeight: FontWeight.bold,
-          ),
+          style: context.textStyles.headlineMedium,
         ),
         const SizedBox(height: 12),
         Text(
           context.l10n.onboardingCareerGoalSubtitle,
-          style: TextStyle(
-            fontSize: 18,
+          style: context.textStyles.bodyLarge?.copyWith(
             color: context.colors.onSurfaceVariant,
           ),
         ),
@@ -562,10 +563,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           },
           decoration: InputDecoration(
             hintText: context.l10n.onboardingCareerGoalHint,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            contentPadding: const EdgeInsets.all(20),
           ),
         ),
         const Spacer(),
@@ -591,16 +588,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         const SizedBox(height: 24),
         Text(
           l10n.onboardingDailyTimeTitle,
-          style: const TextStyle(
-            fontSize: 34,
-            fontWeight: FontWeight.bold,
-          ),
+          style: context.textStyles.headlineMedium,
         ),
         const SizedBox(height: 12),
         Text(
           l10n.onboardingDailyTimeSubtitle,
-          style: TextStyle(
-            fontSize: 18,
+          style: context.textStyles.bodyLarge?.copyWith(
             color: context.colors.onSurfaceVariant,
           ),
         ),
@@ -647,16 +640,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         const SizedBox(height: 24),
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 34,
-            fontWeight: FontWeight.bold,
-          ),
+          style: context.textStyles.headlineMedium,
         ),
         const SizedBox(height: 12),
         Text(
           subtitle,
-          style: TextStyle(
-            fontSize: 18,
+          style: context.textStyles.bodyLarge?.copyWith(
             color: context.colors.onSurfaceVariant,
           ),
         ),
@@ -681,20 +670,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }) {
     final canContinue = _canContinue();
 
-    return SizedBox(
-      width: double.infinity,
-      height: 54,
-      child: ElevatedButton(
-        onPressed:
-            canContinue && !_isSaving ? _goNext : null,
-        child: Text(
-          text ?? context.l10n.commonContinue,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+    return MenzilimButton(
+      label: text ?? context.l10n.commonContinue,
+      onPressed: canContinue && !_isSaving ? _goNext : null,
+      icon: Icons.arrow_forward,
     );
   }
 
@@ -731,26 +710,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildErrorState({
     required VoidCallback onRetry,
   }) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.error_outline,
-            size: 48,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _errorMessage ?? context.l10n.commonErrorGeneric,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: onRetry,
-            child: Text(context.l10n.commonRetry),
-          ),
-        ],
-      ),
+    return MenzilimErrorView(
+      message: _errorMessage ?? context.l10n.commonErrorGeneric,
+      onRetry: onRetry,
     );
   }
 }
@@ -772,83 +734,61 @@ class _SelectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = context.colors;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? colorScheme.primaryContainer
-                : Colors.transparent,
-            border: Border.all(
+    return MenzilimCard(
+      onTap: onTap,
+      selected: isSelected,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Row(
+        children: [
+          AnimatedContainer(
+            duration: AppDurations.fast,
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
               color: isSelected
                   ? colorScheme.primary
-                  : colorScheme.outlineVariant,
-              width: isSelected ? 2 : 1,
+                  : colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
-            borderRadius: BorderRadius.circular(18),
+            child: Icon(
+              icon,
+              color: isSelected
+                  ? colorScheme.onPrimary
+                  : colorScheme.onPrimaryContainer,
+            ),
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(14),
+          const SizedBox(width: AppSpacing.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: context.textStyles.titleMedium,
                 ),
-                child: Icon(
-                  icon,
-                  color: isSelected
-                      ? colorScheme.onPrimary
-                      : colorScheme.onPrimaryContainer,
-                ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
+                if (description != null && description!.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    description!,
+                    style: context.textStyles.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
-                    if (description != null &&
-                        description!.isNotEmpty) ...[
-                      const SizedBox(height: 5),
-                      Text(
-                        description!,
-                        style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              Icon(
-                isSelected
-                    ? Icons.check_circle
-                    : Icons.arrow_forward_ios,
-                size: isSelected ? 25 : 18,
-                color: isSelected
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-              ),
-            ],
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
+          const SizedBox(width: AppSpacing.sm),
+          Icon(
+            isSelected ? Icons.check_circle : Icons.arrow_forward_ios,
+            size: isSelected ? 24 : 16,
+            color: isSelected
+                ? colorScheme.primary
+                : colorScheme.onSurfaceVariant,
+          ),
+        ],
       ),
     );
   }
@@ -864,13 +804,13 @@ class _ProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      height: 5,
+      duration: AppDurations.medium,
+      height: 6,
       decoration: BoxDecoration(
         color: isActive
             ? context.colors.primary
-            : context.colors.outlineVariant,
-        borderRadius: BorderRadius.circular(10),
+            : context.colors.surfaceContainerHighest,
+        borderRadius: AppRadius.pillRadius,
       ),
     );
   }

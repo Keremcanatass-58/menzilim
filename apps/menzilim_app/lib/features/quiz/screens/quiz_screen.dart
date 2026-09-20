@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -148,70 +149,52 @@ class _QuizScreenState extends State<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     if (_isLoading) {
       return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_errorMessage != null || _quiz == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(context.l10n.quizTitle),
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 48,
-                  color: context.colors.error,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  _errorMessage ?? context.l10n.quizNotFound,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _loadQuiz,
-                  child: Text(context.l10n.commonRetry),
-                ),
-              ],
-            ),
-          ),
+        appBar: AppBar(title: Text(l10n.quizTitle)),
+        body: MenzilimErrorView(
+          message: _errorMessage ?? l10n.quizNotFound,
+          onRetry: _loadQuiz,
         ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_quiz!.title),
-      ),
+      appBar: AppBar(title: Text(_quiz!.title)),
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 1000,
+        child: LayoutBuilder(
+          builder: (context, constraints) => Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppBreakpoints.maxReadingWidth,
+              ),
+              child: _result != null
+                  ? _buildResultView(constraints)
+                  : _buildQuizView(constraints),
             ),
-            child: _result != null ? _buildResultView() : _buildQuizView(),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildQuizView() {
+  Widget _buildQuizView(BoxConstraints constraints) {
+    final l10n = context.l10n;
     final questions = _quiz!.questions;
+
     if (questions.isEmpty) {
-      return Center(
-        child: Text(context.l10n.quizNoQuestions),
+      return MenzilimEmptyView(
+        icon: Icons.quiz_outlined,
+        message: l10n.quizNoQuestions,
       );
     }
 
@@ -228,71 +211,51 @@ class _QuizScreenState extends State<QuizScreen> {
     ];
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: AppSpacing.screen(constraints.maxWidth),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Soru Numarası ve İlerleme
+          // Soru ilerlemesi
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Flexible(
                 child: Text(
-                  context.l10n.quizQuestionProgress(
+                  l10n.quizQuestionProgress(
                     _currentIndex + 1,
                     questions.length,
                   ),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                  style: context.textStyles.labelLarge?.copyWith(
                     color: context.colors.onSurfaceVariant,
                   ),
                 ),
               ),
+              const Spacer(),
               Text(
-                context.l10n.commonPercent(
+                l10n.commonPercent(
                   (((_currentIndex + 1) / questions.length) * 100).round(),
                 ),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: context.textStyles.labelLarge,
               ),
             ],
           ),
-
-          const SizedBox(height: 12),
-
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: (_currentIndex + 1) / questions.length,
-              minHeight: 8,
-            ),
+          const SizedBox(height: AppSpacing.md),
+          MenzilimProgressBar(
+            value: (_currentIndex + 1) / questions.length,
           ),
+          const SizedBox(height: AppSpacing.xl),
 
-          const SizedBox(height: 32),
-
-          // Soru Metni
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: context.colors.primaryContainer,
-              borderRadius: BorderRadius.circular(20),
-            ),
+          // Soru
+          MenzilimCard(
+            tone: MenzilimCardTone.primary,
             child: Text(
               currentQuestion.text,
-              style: TextStyle(
+              style: context.textStyles.headlineSmall?.copyWith(
                 color: context.colors.onPrimaryContainer,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                height: 1.4,
+                height: 1.35,
               ),
             ),
           ),
-
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.xl),
 
           // Seçenekler
           ...options.map((option) {
@@ -301,288 +264,199 @@ class _QuizScreenState extends State<QuizScreen> {
             final isSelected = selectedOption == key;
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: InkWell(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: _QuizOption(
+                optionKey: key,
+                text: text,
+                isSelected: isSelected,
                 onTap: _isSubmitting
                     ? null
                     : () => _onOptionSelected(currentQuestion.IdKey, key),
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 18,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? context.colors.primary.withValues(alpha: 0.1)
-                        : Colors.transparent,
-                    border: Border.all(
-                      color: isSelected
-                          ? context.colors.primary
-                          : context.colors.outlineVariant,
-                      width: isSelected ? 2 : 1,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isSelected
-                              ? context.colors.primary
-                              : context.colors.surfaceContainerHighest,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          key,
-                          style: TextStyle(
-                            color: isSelected
-                                ? context.colors.onPrimary
-                                : context.colors.onSurface,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          text,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ),
             );
           }),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.lg),
 
-          // Sonraki / Quiz'i Bitir Butonu
-          SizedBox(
-            width: double.infinity,
-            height: 54,
-            child: ElevatedButton(
-              onPressed: !hasAnswered || _isSubmitting
-                  ? null
-                  : () {
-                      if (isLastQuestion) {
-                        _submitQuiz();
-                      } else {
-                        _nextQuestion();
-                      }
-                    },
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: _isSubmitting
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : Text(
-                      isLastQuestion
-                          ? context.l10n.quizFinish
-                          : context.l10n.quizNext,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-            ),
+          MenzilimButton(
+            label: isLastQuestion ? l10n.quizFinish : l10n.quizNext,
+            isLoading: _isSubmitting,
+            onPressed: !hasAnswered
+                ? null
+                : () {
+                    if (isLastQuestion) {
+                      _submitQuiz();
+                    } else {
+                      _nextQuestion();
+                    }
+                  },
+            icon: isLastQuestion ? Icons.check : Icons.arrow_forward,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildResultView() {
+  Widget _buildResultView(BoxConstraints constraints) {
+    final l10n = context.l10n;
     final result = _result!;
+    final status = context.statusColors;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        children: [
-          const SizedBox(height: 20),
-
-          Icon(
-            Icons.emoji_events_outlined,
-            size: 72,
-            color: context.statusColors.warning,
-          ),
-
-          const SizedBox(height: 16),
-
-          Text(
-            context.l10n.quizResultTitle,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          Text(
-            context.l10n.quizResultCorrectOfTotal(
-              result.correctAnswers,
-              result.totalQuestions,
-            ),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: context.colors.onSurfaceVariant,
-            ),
-          ),
-
-          const SizedBox(height: 32),
-
-          // Başarı Kartı
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: context.colors.outlineVariant,
+      padding: AppSpacing.screen(constraints.maxWidth),
+      child: MenzilimEntrance(
+        child: Column(
+          children: [
+            const SizedBox(height: AppSpacing.lg),
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: status.warningContainer,
+                shape: BoxShape.circle,
               ),
-              borderRadius: BorderRadius.circular(20),
+              child: Icon(
+                Icons.emoji_events_outlined,
+                size: 36,
+                color: status.warning,
+              ),
             ),
-            child: Column(
-              children: [
-                Text(
-                  context.l10n.quizResultSuccess,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: context.colors.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  context.l10n.commonPercent(result.score),
-                  style: TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    color: context.colors.primary,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const Divider(),
-                const SizedBox(height: 16),
-                Wrap(
-                  alignment: WrapAlignment.spaceEvenly,
-                  spacing: 24,
-                  runSpacing: 12,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.check,
-                          color: context.statusColors.success,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          context.l10n.quizResultCorrect(result.correctAnswers),
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            color: context.statusColors.success,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.close,
-                          color: context.colors.error,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          context.l10n.quizResultWrong(result.wrongAnswers),
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.error,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              l10n.quizResultTitle,
+              style: context.textStyles.headlineMedium,
+              textAlign: TextAlign.center,
             ),
-          ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n.quizResultCorrectOfTotal(
+                result.correctAnswers,
+                result.totalQuestions,
+              ),
+              textAlign: TextAlign.center,
+              style: context.textStyles.bodyLarge?.copyWith(
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
 
-          const SizedBox(height: 36),
+            // Başarı kartı
+            MenzilimCard(
+              child: Column(
+                children: [
+                  Text(
+                    l10n.quizResultSuccess,
+                    style: context.textStyles.bodyMedium?.copyWith(
+                      color: context.colors.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    l10n.commonPercent(result.score),
+                    style: context.textStyles.displaySmall?.copyWith(
+                      color: context.colors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  MenzilimProgressBar(value: result.score / 100, height: 10),
+                  const SizedBox(height: AppSpacing.lg),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: AppSpacing.md,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      MenzilimChip(
+                        label: l10n.quizResultCorrect(result.correctAnswers),
+                        icon: Icons.check,
+                        tone: MenzilimChipTone.success,
+                      ),
+                      MenzilimChip(
+                        label: l10n.quizResultWrong(result.wrongAnswers),
+                        icon: Icons.close,
+                        tone: MenzilimChipTone.neutral,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
 
-          // Tekrar Çöz Butonu
-          SizedBox(
-            width: double.infinity,
-            height: 54,
-            child: ElevatedButton.icon(
+            const SizedBox(height: AppSpacing.xl),
+            MenzilimButton(
+              label: l10n.quizRetake,
               onPressed: _loadQuiz,
-              icon: const Icon(Icons.refresh),
-              label: Text(
-                context.l10n.quizRetake,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+              icon: Icons.refresh,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            MenzilimButton(
+              label: l10n.quizBackToDashboard,
+              onPressed: () => Navigator.of(context).pop(),
+              icon: Icons.arrow_back,
+              variant: MenzilimButtonVariant.secondary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Quiz seçeneği: harf rozeti, metin ve seçili durumu.
+class _QuizOption extends StatelessWidget {
+  final String optionKey;
+  final String text;
+  final bool isSelected;
+  final VoidCallback? onTap;
+
+  const _QuizOption({
+    required this.optionKey,
+    required this.text,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return MenzilimCard(
+      onTap: onTap,
+      selected: isSelected,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.lg,
+      ),
+      child: Row(
+        children: [
+          AnimatedContainer(
+            duration: AppDurations.fast,
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isSelected
+                  ? colors.primary
+                  : colors.surfaceContainerHighest,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              optionKey,
+              style: context.textStyles.labelLarge?.copyWith(
+                color: isSelected ? colors.onPrimary : colors.onSurfaceVariant,
               ),
             ),
           ),
-
-          const SizedBox(height: 14),
-
-          // Dashboard'a Dön Butonu
-          SizedBox(
-            width: double.infinity,
-            height: 54,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: const Icon(Icons.arrow_back),
-              label: Text(
-                context.l10n.quizBackToDashboard,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+          const SizedBox(width: AppSpacing.lg),
+          Expanded(
+            child: Text(
+              text,
+              style: context.textStyles.bodyLarge?.copyWith(
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
           ),
+          if (isSelected)
+            Icon(Icons.check_circle, size: 20, color: colors.primary),
         ],
       ),
     );

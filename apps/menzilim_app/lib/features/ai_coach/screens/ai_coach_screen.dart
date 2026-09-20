@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -24,6 +25,9 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
   String? _errorMessage;
   AiCoachResponse? _response;
 
+  /// Yalnızca görünüm için: sorulan son soru balonda gösterilir.
+  String? _askedPrompt;
+
   @override
   void dispose() {
     _promptController.dispose();
@@ -40,6 +44,7 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
       _isLoading = true;
       _errorMessage = null;
       _response = null;
+      _askedPrompt = prompt;
     });
 
     try {
@@ -73,108 +78,33 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     }
   }
 
+  void _useSuggestion(String prompt) {
+    _promptController.text = prompt;
+    _ask();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.coachTitle),
-      ),
+      appBar: AppBar(title: Text(l10n.coachTitle)),
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 800,
-            ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+        child: LayoutBuilder(
+          builder: (context, constraints) => Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppBreakpoints.maxReadingWidth,
+              ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Başlık kartı
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: context.colors.primaryContainer,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.auto_awesome,
-                          size: 28,
-                          color: context.colors.onPrimaryContainer,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            context.l10n.coachIntro,
-                            style: TextStyle(
-                              color: context.colors.onPrimaryContainer,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              height: 1.4,
-                            ),
-                          ),
-                        ),
-                      ],
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: AppSpacing.screen(constraints.maxWidth),
+                      child: _buildConversation(),
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Soru girişi
-                  TextField(
-                    controller: _promptController,
-                    minLines: 3,
-                    maxLines: 6,
-                    enabled: !_isLoading,
-                    textInputAction: TextInputAction.newline,
-                    decoration: InputDecoration(
-                      hintText: context.l10n.coachHint,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Gönder butonu
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton.icon(
-                      onPressed: _isLoading ? null : _ask,
-                      icon: _isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Icon(Icons.send_outlined),
-                      label: Text(
-                        _isLoading
-                            ? context.l10n.coachAnswering
-                            : context.l10n.coachSend,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  _buildResultArea(),
+                  _buildComposer(constraints.maxWidth),
                 ],
               ),
             ),
@@ -184,35 +114,82 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
     );
   }
 
-  Widget _buildResultArea() {
-    if (_isLoading) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 32),
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
+  Widget _buildConversation() {
+    final l10n = context.l10n;
 
-    if (_errorMessage != null) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          border: Border.all(color: context.colors.error),
-          color: context.colors.errorContainer,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
+    // Henüz soru sorulmadı: karşılama + örnek sorular.
+    if (_askedPrompt == null && _errorMessage == null) {
+      return MenzilimEntrance(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.error_outline, color: context.colors.error),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                _errorMessage!,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: context.colors.onErrorContainer,
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: context.colors.primaryContainer,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Icon(
+                Icons.auto_awesome,
+                size: 28,
+                color: context.colors.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              l10n.coachEmptyTitle,
+              style: context.textStyles.headlineSmall,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n.coachIntro,
+              style: context.textStyles.bodyLarge?.copyWith(
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            Text(
+              l10n.coachSuggestionsTitle,
+              style: context.textStyles.titleSmall?.copyWith(
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            ...[
+              l10n.coachSuggestion1,
+              l10n.coachSuggestion2,
+              l10n.coachSuggestion3,
+            ].map(
+              (suggestion) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: MenzilimCard(
+                  onTap: _isLoading ? null : () => _useSuggestion(suggestion),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.chat_bubble_outline,
+                        size: 18,
+                        color: context.colors.primary,
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Text(
+                          suggestion,
+                          style: context.textStyles.bodyMedium,
+                        ),
+                      ),
+                      Icon(
+                        Icons.north_east,
+                        size: 16,
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -221,14 +198,161 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
       );
     }
 
-    if (_response != null) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          border: Border.all(color: context.colors.outlineVariant),
-          borderRadius: BorderRadius.circular(16),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_askedPrompt != null) _UserBubble(text: _askedPrompt!),
+        const SizedBox(height: AppSpacing.md),
+        if (_isLoading)
+          const _CoachTypingBubble()
+        else if (_errorMessage != null)
+          _CoachErrorBubble(message: _errorMessage!)
+        else if (_response != null)
+          _CoachBubble(answer: _response!.answer),
+      ],
+    );
+  }
+
+  Widget _buildComposer(double width) {
+    final l10n = context.l10n;
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.screen(width).left,
+        AppSpacing.md,
+        AppSpacing.screen(width).right,
+        AppSpacing.lg,
+      ),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        border: Border(
+          top: BorderSide(color: context.colors.outlineVariant),
         ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _promptController,
+              minLines: 1,
+              maxLines: 4,
+              enabled: !_isLoading,
+              textInputAction: TextInputAction.send,
+              onSubmitted: (_) => _ask(),
+              decoration: InputDecoration(
+                hintText: l10n.coachHint,
+                border: OutlineInputBorder(
+                  borderRadius: AppRadius.pillRadius,
+                  borderSide: BorderSide(color: context.colors.outlineVariant),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: AppRadius.pillRadius,
+                  borderSide: BorderSide(color: context.colors.outlineVariant),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: AppRadius.pillRadius,
+                  borderSide: BorderSide(
+                    color: context.colors.primary,
+                    width: 1.5,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          SizedBox(
+            width: 52,
+            height: 52,
+            child: IconButton.filled(
+              tooltip: l10n.coachSend,
+              onPressed: _isLoading ? null : _ask,
+              icon: _isLoading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.arrow_upward),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UserBubble extends StatelessWidget {
+  final String text;
+
+  const _UserBubble({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            color: context.colors.primary,
+            borderRadius: BorderRadius.circular(AppRadius.lg).copyWith(
+              bottomRight: const Radius.circular(AppRadius.sm),
+            ),
+          ),
+          child: Text(
+            text,
+            style: context.textStyles.bodyLarge?.copyWith(
+              color: context.colors.onPrimary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CoachBubbleShell extends StatelessWidget {
+  final Widget child;
+  final Color? background;
+
+  const _CoachBubbleShell({required this.child, this.background});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 620),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: background ?? context.colors.surfaceContainerLow,
+            border: Border.all(color: context.colors.outlineVariant),
+            borderRadius: BorderRadius.circular(AppRadius.lg).copyWith(
+              bottomLeft: const Radius.circular(AppRadius.sm),
+            ),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _CoachBubble extends StatelessWidget {
+  final String answer;
+
+  const _CoachBubble({required this.answer});
+
+  @override
+  Widget build(BuildContext context) {
+    return MenzilimEntrance(
+      child: _CoachBubbleShell(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -236,33 +360,116 @@ class _AiCoachScreenState extends State<AiCoachScreen> {
               children: [
                 Icon(
                   Icons.auto_awesome,
-                  size: 20,
+                  size: 18,
                   color: context.colors.primary,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   context.l10n.coachTitle,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                  style: context.textStyles.labelLarge?.copyWith(
                     color: context.colors.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             SelectableText(
-              _response!.answer,
-              style: const TextStyle(
-                fontSize: 16,
-                height: 1.5,
-              ),
+              answer,
+              style: context.textStyles.bodyLarge?.copyWith(height: 1.55),
             ),
           ],
         ),
-      );
-    }
+      ),
+    );
+  }
+}
 
-    return const SizedBox.shrink();
+class _CoachErrorBubble extends StatelessWidget {
+  final String message;
+
+  const _CoachErrorBubble({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return _CoachBubbleShell(
+      background: context.colors.errorContainer,
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: context.colors.error),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(
+              message,
+              style: context.textStyles.bodyLarge?.copyWith(
+                color: context.colors.onErrorContainer,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Yanıt beklenirken yanıp sönen üç nokta.
+class _CoachTypingBubble extends StatefulWidget {
+  const _CoachTypingBubble();
+
+  @override
+  State<_CoachTypingBubble> createState() => _CoachTypingBubbleState();
+}
+
+class _CoachTypingBubbleState extends State<_CoachTypingBubble>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _CoachBubbleShell(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < 3; i++)
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, _) {
+                  final t = (_controller.value * 3 - i).clamp(0.0, 1.0);
+                  final opacity = 0.35 + 0.65 * (1 - (t - 0.5).abs() * 2);
+
+                  return Opacity(
+                    opacity: opacity.clamp(0.35, 1.0),
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: context.colors.onSurfaceVariant,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            context.l10n.coachAnswering,
+            style: context.textStyles.bodyMedium?.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

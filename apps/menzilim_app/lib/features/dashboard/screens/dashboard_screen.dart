@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_theme.dart';
@@ -142,77 +143,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _openSettings() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const SettingsScreen(),
-      ),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
   }
 
   void _openNewsScreen() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => NewsScreen(
-          newsService: _newsService,
-          openLink: _openNewsLink,
-        ),
+        builder: (_) =>
+            NewsScreen(newsService: _newsService, openLink: _openNewsLink),
       ),
     );
   }
 
   Widget _buildNewsSection() {
-    final colors = Theme.of(context).colorScheme;
-
     Widget body;
 
     if (_isLoadingNews) {
-      body = const Padding(
-        padding: EdgeInsets.symmetric(vertical: 16),
-        child: Center(
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      );
+      body = const _SectionLoader();
     } else if (_newsError != null) {
-      body = Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          border: Border.all(color: colors.outlineVariant),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 8,
-          children: [
-            Text(_newsError!),
-            TextButton(
-              onPressed: _loadNews,
-              child: Text(context.l10n.commonRetry),
-            ),
-          ],
-        ),
-      );
+      body = MenzilimInlineError(message: _newsError!, onRetry: _loadNews);
     } else if (_news.isEmpty) {
-      body = Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          border: Border.all(color: colors.outlineVariant),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Text(context.l10n.newsEmpty),
-      );
+      body = MenzilimInlineEmpty(message: context.l10n.newsEmpty);
     } else {
       body = Column(
         children: _news
             .take(_dashboardNewsCount)
             .map(
               (item) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
                 child: NewsCard(
                   item: item,
                   compact: true,
@@ -227,25 +186,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                context.l10n.newsSectionTitle,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            if (_news.isNotEmpty)
-              TextButton(
-                onPressed: _openNewsScreen,
-                child: Text(context.l10n.newsViewAll),
-              ),
-          ],
+        MenzilimSectionHeader(
+          title: context.l10n.newsSectionTitle,
+          subtitle: context.l10n.newsSectionSubtitle,
+          actionLabel: _news.isEmpty ? null : context.l10n.newsViewAll,
+          onAction: _news.isEmpty ? null : _openNewsScreen,
         ),
-        const SizedBox(height: 16),
         body,
       ],
     );
@@ -289,11 +235,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _openSkills() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const SkillsScreen(),
-      ),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const SkillsScreen()));
   }
 
   Future<void> _loadRecommendations() async {
@@ -315,8 +258,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         throw Exception('Oturum bilgisi bulunamadı.');
       }
 
-      final recommendations =
-          await _contentService.getRecommendations(token);
+      final recommendations = await _contentService.getRecommendations(token);
 
       if (!mounted || requestId != _recommendationsRequestId) return;
 
@@ -382,11 +324,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
 
     try {
-      final updatedPlan =
-          await _dailyPlanService.completeTask(
-        token,
-        task.id,
-      );
+      final updatedPlan = await _dailyPlanService.completeTask(token, task.id);
 
       if (!mounted) return;
 
@@ -397,9 +335,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            context.l10n.commonTaskCompleted(task.title),
-          ),
+          content: Text(context.l10n.commonTaskCompleted(task.title)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -411,11 +347,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.l10n.dashboardTaskCompleteError,
-          ),
-        ),
+        SnackBar(content: Text(context.l10n.dashboardTaskCompleteError)),
       );
     }
   }
@@ -472,11 +404,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _openingContentId = null;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.contentOpenError),
-        ),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(context.l10n.contentOpenError)));
       return;
     }
 
@@ -489,9 +418,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // Mevcut ContentDetailScreen kullanılır; start/complete ilerleme
     // davranışı orada aynen çalışır.
     await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ContentDetailScreen(content: content),
-      ),
+      MaterialPageRoute(builder: (_) => ContentDetailScreen(content: content)),
     );
 
     if (!mounted) return;
@@ -521,8 +448,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (task.isCompleted) return;
 
     try {
-      final progress =
-          await _contentService.getProgress(token, contentId);
+      final progress = await _contentService.getProgress(token, contentId);
 
       if (progress['isCompleted'] != true) return;
 
@@ -559,82 +485,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     // Quiz sonucunda günlük görev backend'de tamamlanmış olabilir;
     // dashboard, günlük plan ve (quiz skoru nedeniyle) beceri özetini yenile.
-    await Future.wait([
-      _loadDashboard(),
-      _loadSkills(),
-    ]);
+    await Future.wait([_loadDashboard(), _loadSkills()]);
   }
 
   Widget _buildRecommendationsSection() {
     // Yenileme sırasında mevcut liste korunur; spinner yalnızca liste boşken.
     if (_isLoadingRecommendations && _recommendations.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 16),
-        child: Center(
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-            ),
-          ),
-        ),
-      );
+      return const _SectionLoader();
     }
 
     if (_recommendationsError != null) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: context.colors.outlineVariant,
-          ),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 8,
-          children: [
-            Text(_recommendationsError!),
-            TextButton(
-              onPressed: _loadRecommendations,
-              child: Text(context.l10n.commonRetry),
-            ),
-          ],
-        ),
+      return MenzilimInlineError(
+        message: _recommendationsError!,
+        onRetry: _loadRecommendations,
       );
     }
 
     if (_recommendations.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: context.colors.outlineVariant,
-          ),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Text(
-          context.l10n.recommendationsEmpty,
-        ),
-      );
+      return MenzilimInlineEmpty(message: context.l10n.recommendationsEmpty);
     }
 
     return Column(
       children: _recommendations
           .map(
             (recommendation) => Padding(
-              padding: const EdgeInsets.only(
-                bottom: 12,
-              ),
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: _RecommendationCard(
                 recommendation: recommendation,
-                isOpening:
-                    _openingContentId == recommendation.contentId,
-                onTap: () =>
-                    _openContentById(recommendation.contentId),
+                isOpening: _openingContentId == recommendation.contentId,
+                onTap: () => _openContentById(recommendation.contentId),
               ),
             ),
           )
@@ -655,48 +534,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  void _openDiscover() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const DiscoverScreen()));
+  }
+
+  void _openProgress() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const ProgressScreen()));
+  }
+
+  void _openCoach() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const AiCoachScreen()));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (_errorMessage != null) {
       return Scaffold(
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 48,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  _errorMessage!,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _isLoading = true;
-                      _errorMessage = null;
-                    });
+        appBar: AppBar(title: const BrandMark()),
+        body: MenzilimErrorView(
+          message: _errorMessage!,
+          onRetry: () {
+            setState(() {
+              _isLoading = true;
+              _errorMessage = null;
+            });
 
-                    _loadDashboard();
-                  },
-                  child: Text(context.l10n.commonRetry),
-                ),
-              ],
-            ),
-          ),
+            _loadDashboard();
+          },
         ),
       );
     }
@@ -704,634 +577,221 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final dashboard = _dashboard!;
     final dailyPlan = _dailyPlan!;
 
-    final progress = dailyPlan.totalMinutes <= 0 ? 0.0 : (dailyPlan.completedMinutes / dailyPlan.totalMinutes).clamp(0.0, 1.0);
+    final progress = dailyPlan.totalMinutes <= 0
+        ? 0.0
+        : (dailyPlan.completedMinutes / dailyPlan.totalMinutes).clamp(0.0, 1.0);
     final progressPercent = (progress * 100).round();
-    final l10n = context.l10n;
 
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 1000,
-            ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          l10n.appName,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        tooltip: l10n.skillsTitle,
-                        onPressed: _openSkills,
-                        icon: const Icon(
-                          Icons.insights_outlined,
-                        ),
-                      ),
-                      IconButton(
-                        tooltip: l10n.discoverTitle,
-                        onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const DiscoverScreen(),
-                          ),
-                        );
-                      },
-                        icon: const Icon(
-                          Icons.notifications_none_outlined,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Profil simgesi ayarlara (dil/tema) götürür.
-                      Tooltip(
-                        message: l10n.settingsTitle,
-                        child: InkWell(
-                          customBorder: const CircleBorder(),
-                          onTap: _openSettings,
-                          child: const CircleAvatar(
-                            child: Icon(
-                              Icons.person_outline,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 48),
-
-                  Text(
-                    l10n.dashboardGreeting,
-                    style: const TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Text(
-                    l10n.dashboardHeadline,
-                    style: const TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  Text(
-                    l10n.dashboardSubheadline,
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: context.colors.onSurfaceVariant,
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primaryContainer,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.track_changes,
-                              color: context.colors.onPrimaryContainer,
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              l10n.dashboardTodayGoal,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        Text(
-                          dashboard.specialization,
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        Text(
-                          l10n.dashboardDailyGoal(
-                            dashboard.dailyLearningMinutes,
-                          ),
-                          style: TextStyle(
-                            color: context.colors.onPrimaryContainer,
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        ClipRRect(
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(10),
-                          ),
-                          child: LinearProgressIndicator(
-                            value: progress,
-                            minHeight: 10,
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                l10n.dashboardMinutesCompleted(
-                                  dailyPlan.completedMinutes,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              l10n.commonPercent(progressPercent),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  Text(
-                    l10n.dashboardProfileTitle,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: context.colors.outlineVariant,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        _ProfileRow(
-                          title: l10n.profileProfession,
-                          value: dashboard.profession,
-                        ),
-                        const SizedBox(height: 14),
-                        _ProfileRow(
-                          title: l10n.profileSpecialization,
-                          value: dashboard.specialization,
-                        ),
-                        const SizedBox(height: 14),
-                        _ProfileRow(
-                          title: l10n.profileLevel,
-                          value: l10n.experienceLevelLabel(
-                            dashboard.experienceLevel,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        _ProfileRow(
-                          title: l10n.profileCareerGoal,
-                          value: dashboard.careerGoal,
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  Text(
-                    l10n.dashboardProgressTitle,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Günlük Plan İlerlemesi
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: context.colors.outlineVariant,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.calendar_today_outlined,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              l10n.dashboardDailyPlan,
-                              style: const TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        ClipRRect(
-                          borderRadius:
-                              const BorderRadius.all(
-                            Radius.circular(10),
-                          ),
-                          child: LinearProgressIndicator(
-                            value: dashboard.totalMinutes <= 0
-                                ? 0.0
-                                : (dashboard.completedMinutes /
-                                        dashboard.totalMinutes)
-                                    .clamp(0.0, 1.0),
-                            minHeight: 12,
-                          ),
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment
-                                  .spaceBetween,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                l10n.dashboardTasksCompleted(
-                                  dashboard.completedTasks,
-                                  dashboard.totalTasks,
-                                ),
-                                style: TextStyle(
-                                  color: context.colors.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              l10n.commonPercent(
-                                dashboard.dailyProgressPercent.round(),
-                              ),
-                              style: const TextStyle(
-                                fontWeight:
-                                    FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 6),
-
-                        Text(
-                          l10n.dashboardMinutesOfTotal(
-                            dashboard.completedMinutes,
-                            dashboard.totalMinutes,
-                          ),
-                          style: TextStyle(
-                            color: context.colors.onSurfaceVariant,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // İçerik İlerlemesi
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: context.colors.outlineVariant,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.menu_book_outlined,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              l10n.dashboardContent,
-                              style: const TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.check_circle,
-                              size: 18,
-                              color: context.statusColors.success,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              l10n.dashboardContentCompleted(
-                                dashboard.completedContentCount,
-                              ),
-                              style: const TextStyle(
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.circle_outlined,
-                              size: 18,
-                              color: context.statusColors.warning,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              l10n.dashboardContentInProgress(
-                                dashboard.inProgressContentCount,
-                              ),
-                              style: const TextStyle(
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Beceri Özeti
-                  DashboardSkillsSummary(
-                    skills: _skills,
-                    isLoading: _isLoadingSkills,
-                    errorMessage: _skillsError,
-                    onRetry: _loadSkills,
-                    onViewAll: _openSkills,
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          l10n.dailyPlanTitle,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        l10n.commonMinutesShort(dailyPlan.totalMinutes),
-                        style: TextStyle(
-                          color: context.colors.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  if (dailyPlan.tasks.isEmpty)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: context.colors.outlineVariant,
-                        ),
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Text(
-                        l10n.dailyPlanEmpty,
-                      ),
-                    )
-                  else
-                    ...dailyPlan.tasks.map(
-                      (task) => Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: 12,
-                        ),
-                        child: _TaskCard(
-                          icon: _getTaskIcon(task.taskType),
-                          title: task.title,
-                          description:
-                              task.description ??
-                              l10n.dailyPlanTaskFallbackDescription,
-                          estimatedMinutes:
-                              task.estimatedMinutes,
-                          completed: task.isCompleted,
-                          isCompleting:
-                              _completingTaskId == task.id,
-                          opensContent: _taskOpensContent(task),
-                          onTap: () => _onTaskTap(task),
-                        ),
-                      ),
-                    ),
-
-                  const SizedBox(height: 32),
-
-                  Text(
-                    l10n.recommendationsTitle,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  _buildRecommendationsSection(),
-
-                  const SizedBox(height: 32),
-
-                  _buildNewsSection(),
-
-                  const SizedBox(height: 20),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const DiscoverScreen(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.arrow_forward,
-                      ),
-                      label: Text(
-                        l10n.dashboardContinueLearning,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const AiCoachScreen(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.auto_awesome,
-                      ),
-                      label: Text(
-                        l10n.dashboardAskCoach,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const ProgressScreen(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.bar_chart_outlined,
-                      ),
-                      label: Text(
-                        l10n.dashboardViewProgress,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+      appBar: AppBar(
+        title: const BrandMark(),
+        actions: [
+          IconButton(
+            tooltip: l10n.skillsTitle,
+            onPressed: _openSkills,
+            icon: const Icon(Icons.insights_outlined),
+          ),
+          IconButton(
+            tooltip: l10n.discoverTitle,
+            onPressed: _openDiscover,
+            icon: const Icon(Icons.explore_outlined),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            child: IconButton(
+              tooltip: l10n.settingsTitle,
+              onPressed: _openSettings,
+              icon: const Icon(Icons.person_outline),
+              style: IconButton.styleFrom(
+                backgroundColor: context.colors.surfaceContainerHighest,
               ),
             ),
           ),
+        ],
+      ),
+      bottomNavigationBar: _DashboardNavigationBar(
+        onDiscover: _openDiscover,
+        onSkills: _openSkills,
+        onProgress: _openProgress,
+        onSettings: _openSettings,
+      ),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= AppBreakpoints.tablet;
+
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: AppBreakpoints.maxContentWidth,
+                ),
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    await Future.wait([
+                      _loadDashboard(),
+                      _loadRecommendations(),
+                      _loadSkills(),
+                      _loadNews(),
+                    ]);
+                  },
+                  // Tüm bölümler kurulsun (lazy liste değil): dashboard tek
+                  // sayfa olarak okunur ve testler bölümleri bulabilir.
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: AppSpacing.screen(constraints.maxWidth),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 1) Karşılama
+                        MenzilimEntrance(
+                          order: 0,
+                          child: _HeroSection(dashboard: dashboard),
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+
+                        // 2) Günlük ilerleme
+                        MenzilimEntrance(
+                          order: 1,
+                          child: _TodayProgressCard(
+                            dashboard: dashboard,
+                            dailyPlan: dailyPlan,
+                            progress: progress,
+                            progressPercent: progressPercent,
+                            isWide: isWide,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.section),
+
+                        // 3) Bugünün yol haritası
+                        MenzilimEntrance(
+                          order: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              MenzilimSectionHeader(
+                                title: l10n.dailyPlanTitle,
+                                subtitle: l10n.dailyPlanSubtitle,
+                                trailingText: l10n.commonMinutesShort(
+                                  dailyPlan.totalMinutes,
+                                ),
+                              ),
+                              if (dailyPlan.tasks.isEmpty)
+                                MenzilimInlineEmpty(
+                                  message: l10n.dailyPlanEmpty,
+                                )
+                              else
+                                ...dailyPlan.tasks.map(
+                                  (task) => Padding(
+                                    padding: const EdgeInsets.only(
+                                      bottom: AppSpacing.md,
+                                    ),
+                                    child: _TaskCard(
+                                      icon: _getTaskIcon(task.taskType),
+                                      taskType: task.taskType,
+                                      title: task.title,
+                                      description:
+                                          task.description ??
+                                          l10n.dailyPlanTaskFallbackDescription,
+                                      estimatedMinutes: task.estimatedMinutes,
+                                      completed: task.isCompleted,
+                                      isCompleting:
+                                          _completingTaskId == task.id,
+                                      opensContent: _taskOpensContent(task),
+                                      onTap: () => _onTaskTap(task),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.section),
+
+                        // 4) Alanındaki haberler
+                        MenzilimEntrance(order: 3, child: _buildNewsSection()),
+                        const SizedBox(height: AppSpacing.section),
+
+                        // 5) Sana özel içerikler
+                        MenzilimEntrance(
+                          order: 4,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              MenzilimSectionHeader(
+                                title: l10n.recommendationsTitle,
+                                subtitle: l10n.recommendationsSubtitle,
+                              ),
+                              _buildRecommendationsSection(),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.section),
+
+                        // 6) Yeteneklerim
+                        MenzilimEntrance(
+                          order: 5,
+                          child: DashboardSkillsSummary(
+                            skills: _skills,
+                            isLoading: _isLoadingSkills,
+                            errorMessage: _skillsError,
+                            onRetry: _loadSkills,
+                            onViewAll: _openSkills,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.section),
+
+                        // 7) Öğrenmeye devam et + 8) AI Koç
+                        MenzilimEntrance(
+                          order: 6,
+                          child: _ActionsSection(
+                            isWide: isWide,
+                            onContinueLearning: _openDiscover,
+                            onAskCoach: _openCoach,
+                            onViewProgress: _openProgress,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
 }
 
-class _ProfileRow extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const _ProfileRow({
-    required this.title,
-    required this.value,
-  });
+/// Marka alanı. Logo görseli hazır olduğunda yalnızca bu widget değişir.
+class BrandMark extends StatelessWidget {
+  const BrandMark({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          width: 130,
-          child: Text(
-            title,
-            style: TextStyle(
-              color: context.colors.onSurfaceVariant,
-            ),
+        // Logo yerleşimi: görsel geldiğinde bu kutunun içine konur.
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: context.colors.primary,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+          ),
+          alignment: Alignment.center,
+          child: Icon(
+            Icons.explore_outlined,
+            size: 18,
+            color: context.colors.onPrimary,
           ),
         ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-            ),
+        const SizedBox(width: AppSpacing.md),
+        Text(
+          context.l10n.appName,
+          style: context.textStyles.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.4,
           ),
         ),
       ],
@@ -1339,8 +799,450 @@ class _ProfileRow extends StatelessWidget {
   }
 }
 
+class _SectionLoader extends StatelessWidget {
+  const _SectionLoader();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+      child: Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+    );
+  }
+}
+
+/// Alt gezinme: ana bölümlere hızlı erişim. Home zaten bu ekran olduğundan
+/// seçili kalır; diğerleri mevcut push tabanlı akışla açılır.
+class _DashboardNavigationBar extends StatelessWidget {
+  final VoidCallback onDiscover;
+  final VoidCallback onSkills;
+  final VoidCallback onProgress;
+  final VoidCallback onSettings;
+
+  const _DashboardNavigationBar({
+    required this.onDiscover,
+    required this.onSkills,
+    required this.onProgress,
+    required this.onSettings,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return NavigationBar(
+      selectedIndex: 0,
+      onDestinationSelected: (index) {
+        switch (index) {
+          case 1:
+            onDiscover();
+          case 2:
+            onSkills();
+          case 3:
+            onProgress();
+          case 4:
+            onSettings();
+        }
+      },
+      destinations: [
+        NavigationDestination(
+          icon: const Icon(Icons.home_outlined),
+          selectedIcon: const Icon(Icons.home),
+          label: l10n.navHome,
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.explore_outlined),
+          label: l10n.navDiscover,
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.insights_outlined),
+          label: l10n.navSkills,
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.bar_chart_outlined),
+          label: l10n.navProgress,
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.person_outline),
+          label: l10n.navProfile,
+        ),
+      ],
+    );
+  }
+}
+
+/// Karşılama alanı: selam, başlık ve profil bilgileri (rozetler).
+class _HeroSection extends StatelessWidget {
+  final DashboardResponse dashboard;
+
+  const _HeroSection({required this.dashboard});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.dashboardGreeting,
+          style: context.textStyles.titleMedium?.copyWith(
+            color: context.colors.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(l10n.dashboardHeadline, style: context.textStyles.headlineMedium),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          l10n.dashboardSubheadline,
+          style: context.textStyles.bodyLarge?.copyWith(
+            color: context.colors.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        // Profil bilgileri kompakt rozetler olarak.
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            MenzilimChip(
+              label: dashboard.profession,
+              icon: Icons.work_outline,
+              tone: MenzilimChipTone.primary,
+            ),
+            MenzilimChip(
+              label: dashboard.specialization,
+              icon: Icons.alt_route_outlined,
+              tone: MenzilimChipTone.secondary,
+            ),
+            MenzilimChip(
+              label: l10n.experienceLevelLabel(dashboard.experienceLevel),
+              icon: Icons.stairs_outlined,
+            ),
+            if (dashboard.careerGoal.isNotEmpty)
+              MenzilimChip(
+                label: dashboard.careerGoal,
+                icon: Icons.flag_outlined,
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Günün hedefi ve ilerleme özeti.
+class _TodayProgressCard extends StatelessWidget {
+  final DashboardResponse dashboard;
+  final DailyPlanResponse dailyPlan;
+  final double progress;
+  final int progressPercent;
+  final bool isWide;
+
+  const _TodayProgressCard({
+    required this.dashboard,
+    required this.dailyPlan,
+    required this.progress,
+    required this.progressPercent,
+    required this.isWide,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+
+    final stats = [
+      _MiniStat(
+        icon: Icons.checklist_outlined,
+        label: l10n.dashboardTasksShort,
+        value: '${dashboard.completedTasks}/${dashboard.totalTasks}',
+      ),
+      _MiniStat(
+        icon: Icons.schedule_outlined,
+        label: l10n.progressDuration,
+        value: l10n.progressMinutesOfTotal(
+          dashboard.completedMinutes,
+          dashboard.totalMinutes,
+        ),
+      ),
+      _MiniStat(
+        icon: Icons.menu_book_outlined,
+        label: l10n.dashboardContent,
+        value:
+            '${dashboard.completedContentCount}/'
+            '${dashboard.completedContentCount + dashboard.inProgressContentCount}',
+      ),
+    ];
+
+    return MenzilimCard(
+      tone: MenzilimCardTone.primary,
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.track_changes,
+                size: 20,
+                color: colors.onPrimaryContainer,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  l10n.dashboardTodayGoal,
+                  style: context.textStyles.titleMedium?.copyWith(
+                    color: colors.onPrimaryContainer,
+                  ),
+                ),
+              ),
+              Text(
+                l10n.commonPercent(progressPercent),
+                style: context.textStyles.titleLarge?.copyWith(
+                  color: colors.onPrimaryContainer,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            dashboard.specialization,
+            style: context.textStyles.headlineSmall?.copyWith(
+              color: colors.onPrimaryContainer,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n.dashboardDailyGoal(dashboard.dailyLearningMinutes),
+            style: context.textStyles.bodyMedium?.copyWith(
+              color: colors.onPrimaryContainer.withValues(alpha: 0.8),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          MenzilimProgressBar(
+            value: progress,
+            height: 10,
+            color: colors.onPrimaryContainer,
+            trackColor: colors.onPrimaryContainer.withValues(alpha: 0.18),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            l10n.dashboardMinutesCompleted(dailyPlan.completedMinutes),
+            style: context.textStyles.bodySmall?.copyWith(
+              color: colors.onPrimaryContainer.withValues(alpha: 0.85),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Divider(color: colors.onPrimaryContainer.withValues(alpha: 0.18)),
+          const SizedBox(height: AppSpacing.md),
+          if (isWide)
+            Row(children: [for (final stat in stats) Expanded(child: stat)])
+          else
+            Wrap(
+              spacing: AppSpacing.xl,
+              runSpacing: AppSpacing.md,
+              children: stats,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _MiniStat({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = context.colors.onPrimaryContainer;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: color.withValues(alpha: 0.85)),
+        const SizedBox(width: AppSpacing.sm),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              value,
+              style: context.textStyles.titleSmall?.copyWith(color: color),
+            ),
+            Text(
+              label,
+              style: context.textStyles.bodySmall?.copyWith(
+                color: color.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Öğrenmeye devam et + AI Koç + ilerleme eylemleri.
+class _ActionsSection extends StatelessWidget {
+  final bool isWide;
+  final VoidCallback onContinueLearning;
+  final VoidCallback onAskCoach;
+  final VoidCallback onViewProgress;
+
+  const _ActionsSection({
+    required this.isWide,
+    required this.onContinueLearning,
+    required this.onAskCoach,
+    required this.onViewProgress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    final coachCard = MenzilimCard(
+      onTap: onAskCoach,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: context.colors.primaryContainer,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: Icon(
+                  Icons.auto_awesome,
+                  size: 20,
+                  color: context.colors.onPrimaryContainer,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  l10n.coachTitle,
+                  style: context.textStyles.titleMedium,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            l10n.dashboardCoachPitch,
+            style: context.textStyles.bodyMedium?.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          MenzilimButton(
+            label: l10n.dashboardAskCoach,
+            onPressed: onAskCoach,
+            icon: Icons.auto_awesome,
+            variant: MenzilimButtonVariant.secondary,
+          ),
+        ],
+      ),
+    );
+
+    final learnCard = MenzilimCard(
+      onTap: onContinueLearning,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: context.colors.secondaryContainer,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: Icon(
+                  Icons.school_outlined,
+                  size: 20,
+                  color: context.colors.onSecondaryContainer,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  l10n.discoverTitle,
+                  style: context.textStyles.titleMedium,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            l10n.dashboardLearnPitch,
+            style: context.textStyles.bodyMedium?.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          MenzilimButton(
+            label: l10n.dashboardContinueLearning,
+            onPressed: onContinueLearning,
+            icon: Icons.arrow_forward,
+          ),
+        ],
+      ),
+    );
+
+    return Column(
+      children: [
+        if (isWide)
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: learnCard),
+                const SizedBox(width: AppSpacing.lg),
+                Expanded(child: coachCard),
+              ],
+            ),
+          )
+        else ...[
+          learnCard,
+          const SizedBox(height: AppSpacing.md),
+          coachCard,
+        ],
+        const SizedBox(height: AppSpacing.md),
+        MenzilimButton(
+          label: l10n.dashboardViewProgress,
+          onPressed: onViewProgress,
+          icon: Icons.bar_chart_outlined,
+          variant: MenzilimButtonVariant.secondary,
+        ),
+      ],
+    );
+  }
+}
+
+/// Günlük plan görev kartı. Görev tipi renk ve ikonla ayrışır; tamamlanan
+/// görevler soluk ve üstü işaretli görünür.
 class _TaskCard extends StatelessWidget {
   final IconData icon;
+  final String taskType;
   final String title;
   final String description;
   final int estimatedMinutes;
@@ -1351,6 +1253,7 @@ class _TaskCard extends StatelessWidget {
 
   const _TaskCard({
     required this.icon,
+    required this.taskType,
     required this.title,
     required this.description,
     required this.estimatedMinutes,
@@ -1360,84 +1263,106 @@ class _TaskCard extends StatelessWidget {
     this.opensContent = false,
   });
 
+  MenzilimChipTone get _tone => switch (taskType.toLowerCase()) {
+    'learn' => MenzilimChipTone.primary,
+    'practice' => MenzilimChipTone.secondary,
+    'quiz' => MenzilimChipTone.warning,
+    _ => MenzilimChipTone.neutral,
+  };
+
+  String _typeLabel(BuildContext context) {
+    final l10n = context.l10n;
+
+    return switch (taskType.toLowerCase()) {
+      'learn' => l10n.taskTypeLearn,
+      'practice' => l10n.taskTypePractice,
+      'quiz' => l10n.taskTypeQuiz,
+      'review' => l10n.taskTypeReview,
+      _ => taskType,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: completed || isCompleting ? null : onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: context.colors.outlineVariant,
-          ),
-          borderRadius: BorderRadius.circular(18),
-        ),
+    final colors = context.colors;
+    final status = context.statusColors;
+
+    final iconBackground = completed
+        ? status.successContainer
+        : colors.surfaceContainerHighest;
+    final iconColor = completed ? status.success : colors.onSurfaceVariant;
+
+    return Opacity(
+      opacity: completed ? 0.72 : 1,
+      child: MenzilimCard(
+        onTap: completed || isCompleting ? null : onTap,
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 48,
-              height: 48,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: context.colors.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(14),
+                color: iconBackground,
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
-              child: Icon(icon),
+              child: Icon(
+                completed ? Icons.check : icon,
+                size: 22,
+                color: iconColor,
+              ),
             ),
-
-            const SizedBox(width: 16),
-
+            const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.xs,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      MenzilimChip(label: _typeLabel(context), tone: _tone),
+                      MenzilimChip(
+                        label: context.l10n.commonMinutesShort(
+                          estimatedMinutes,
+                        ),
+                        icon: Icons.schedule_outlined,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                    style: context.textStyles.titleMedium?.copyWith(
+                      decoration: completed ? TextDecoration.lineThrough : null,
+                      decorationColor: colors.onSurfaceVariant,
                     ),
                   ),
-
-                  const SizedBox(height: 5),
-
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     description,
-                    style: TextStyle(
-                      color: context.colors.onSurfaceVariant,
+                    style: context.textStyles.bodyMedium?.copyWith(
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
-
-                  const SizedBox(height: 8),
-
-                  Text(
-                    context.l10n.commonMinutes(estimatedMinutes),
-                    style: TextStyle(
-                      color: context.colors.onSurfaceVariant,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-
                   if (opensContent && !completed) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.md),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           context.l10n.taskGoToContent,
-                          style: TextStyle(
-                            color: context.colors.primary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                          style: context.textStyles.labelLarge?.copyWith(
+                            color: colors.primary,
                           ),
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: AppSpacing.xs),
                         Icon(
                           Icons.arrow_forward,
                           size: 16,
-                          color: context.colors.primary,
+                          color: colors.primary,
                         ),
                       ],
                     ),
@@ -1445,26 +1370,19 @@ class _TaskCard extends StatelessWidget {
                 ],
               ),
             ),
-
-            const SizedBox(width: 12),
-
+            const SizedBox(width: AppSpacing.md),
             if (isCompleting)
               const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                ),
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(strokeWidth: 2),
               )
             else if (completed)
-              Icon(
-                Icons.check_circle,
-                color: context.statusColors.success,
-              )
+              Icon(Icons.check_circle, color: status.success)
             else if (opensContent)
-              const Icon(Icons.chevron_right)
+              Icon(Icons.chevron_right, color: colors.onSurfaceVariant)
             else
-              const Icon(Icons.circle_outlined),
+              Icon(Icons.circle_outlined, color: colors.onSurfaceVariant),
           ],
         ),
       ),
@@ -1472,6 +1390,7 @@ class _TaskCard extends StatelessWidget {
   }
 }
 
+/// Öneri kartı: durum rozeti, başlık, açıklama, gerekçe ve eylem.
 class _RecommendationCard extends StatelessWidget {
   final ContentRecommendationResponse recommendation;
   final bool isOpening;
@@ -1485,161 +1404,117 @@ class _RecommendationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final colors = context.colors;
+    final l10n = context.l10n;
     final isStarted = recommendation.isStarted;
     final description = recommendation.description;
 
-    return InkWell(
+    return MenzilimCard(
       onTap: isOpening ? null : onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: context.colors.outlineVariant,
-          ),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: context.colors.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(
-                isStarted
-                    ? Icons.play_circle_outline
-                    : Icons.auto_stories_outlined,
-              ),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
-
-            const SizedBox(width: 16),
-
-            Expanded(
-              child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isStarted
-                          ? colorScheme.secondaryContainer
-                          : colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      isStarted
-                          ? context.l10n.recommendationInProgress
-                          : context.l10n.recommendationNew,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
+            child: Icon(
+              isStarted
+                  ? Icons.play_circle_outline
+                  : Icons.auto_stories_outlined,
+              size: 22,
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MenzilimChip(
+                  label: isStarted
+                      ? l10n.recommendationInProgress
+                      : l10n.recommendationNew,
+                  tone: isStarted
+                      ? MenzilimChipTone.secondary
+                      : MenzilimChipTone.primary,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  recommendation.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.titleMedium,
+                ),
+                if (description != null && description.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
-                    recommendation.title,
+                    description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                    style: context.textStyles.bodyMedium?.copyWith(
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
-
-                  if (description != null &&
-                      description.isNotEmpty) ...[
-                    const SizedBox(height: 5),
-                    Text(
-                      description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
+                ],
+                if (recommendation.recommendationReason.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.lightbulb_outline,
+                        size: 16,
+                        color: colors.onSurfaceVariant,
                       ),
-                    ),
-                  ],
-
-                  if (recommendation
-                      .recommendationReason.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.lightbulb_outline,
-                          size: 16,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            recommendation.recommendationReason,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: colorScheme.onSurfaceVariant,
-                              fontSize: 13,
-                              fontStyle: FontStyle.italic,
-                            ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          recommendation.recommendationReason,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textStyles.bodySmall?.copyWith(
+                            color: colors.onSurfaceVariant,
+                            fontStyle: FontStyle.italic,
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-
-                  const SizedBox(height: 10),
-
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        isStarted
-                            ? context.l10n.commonContinue
-                            : context.l10n.recommendationStart,
-                        style: TextStyle(
-                          color: colorScheme.primary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_forward,
-                        size: 16,
-                        color: colorScheme.primary,
                       ),
                     ],
                   ),
                 ],
-              ),
-            ),
-
-            const SizedBox(width: 12),
-
-            if (isOpening)
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      isStarted
+                          ? l10n.commonContinue
+                          : l10n.recommendationStart,
+                      style: context.textStyles.labelLarge?.copyWith(
+                        color: colors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Icon(Icons.arrow_forward, size: 16, color: colors.primary),
+                  ],
                 ),
-              )
-            else
-              const Icon(Icons.chevron_right),
-          ],
-        ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          if (isOpening)
+            const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
+        ],
       ),
     );
   }

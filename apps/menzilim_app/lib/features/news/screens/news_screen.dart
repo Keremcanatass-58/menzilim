@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
@@ -83,51 +84,52 @@ class _NewsScreenState extends State<NewsScreen> {
     }
 
     if (_errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(_errorMessage!, textAlign: TextAlign.center),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: _loadNews,
-                child: Text(context.l10n.commonRetry),
-              ),
-            ],
-          ),
-        ),
+      return MenzilimErrorView(
+        message: _errorMessage!,
+        onRetry: _loadNews,
       );
     }
 
     if (_news.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            context.l10n.newsEmpty,
-            textAlign: TextAlign.center,
-          ),
-        ),
+      return MenzilimEmptyView(
+        icon: Icons.feed_outlined,
+        message: context.l10n.newsEmpty,
       );
     }
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 760),
-        child: ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-          itemCount: _news.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final item = _news[index];
+    return LayoutBuilder(
+      builder: (context, constraints) => Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: AppBreakpoints.maxReadingWidth,
+          ),
+          child: RefreshIndicator(
+            onRefresh: _loadNews,
+            child: ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: AppSpacing.screen(constraints.maxWidth),
+              itemCount: _news.length + 1,
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return MenzilimSectionHeader(
+                    title: context.l10n.newsSectionTitle,
+                    subtitle: context.l10n.newsSectionSubtitle,
+                  );
+                }
 
-            return NewsCard(
-              item: item,
-              onOpen: () => openNewsItem(context, item, _openLink),
-            );
-          },
+                final item = _news[index - 1];
+
+                return MenzilimEntrance(
+                  order: index,
+                  child: NewsCard(
+                    item: item,
+                    onOpen: () => openNewsItem(context, item, _openLink),
+                  ),
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
@@ -136,12 +138,7 @@ class _NewsScreenState extends State<NewsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          context.l10n.newsScreenTitle,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
+      appBar: AppBar(title: Text(context.l10n.newsScreenTitle)),
       body: SafeArea(child: _buildBody(context)),
     );
   }

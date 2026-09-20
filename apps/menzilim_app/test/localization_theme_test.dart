@@ -248,7 +248,13 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('AI Coach'), findsOneWidget);
-      expect(find.text('Send'), findsOneWidget);
+      // Gönder eylemi ikon butondur; etiketi ipucunda (tooltip) yer alır.
+      expect(find.byTooltip('Send'), findsOneWidget);
+      expect(find.text('Your companion is ready.'), findsOneWidget);
+      expect(
+        find.text('What should I focus on this week?'),
+        findsOneWidget,
+      );
     });
   });
 }

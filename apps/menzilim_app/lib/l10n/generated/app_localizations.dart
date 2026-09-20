@@ -1339,6 +1339,144 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'{day} {month} {year}'**
   String newsDate(int day, String month, String year);
+
+  /// No description provided for @newsSectionSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alanındaki güncel gelişmeler.'**
+  String get newsSectionSubtitle;
+
+  /// No description provided for @recommendationsSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profiline ve ilerlemene göre seçildi.'**
+  String get recommendationsSubtitle;
+
+  /// No description provided for @dailyPlanSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugünü tamamlamak için küçük adımlar.'**
+  String get dailyPlanSubtitle;
+
+  /// No description provided for @dashboardTasksShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev'**
+  String get dashboardTasksShort;
+
+  /// No description provided for @dashboardCoachPitch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takıldığın yeri sor, hedefine göre yanıt al.'**
+  String get dashboardCoachPitch;
+
+  /// No description provided for @dashboardLearnPitch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alanına uygun içeriklerle öğrenmeye devam et.'**
+  String get dashboardLearnPitch;
+
+  /// No description provided for @taskTypeLearn.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öğren'**
+  String get taskTypeLearn;
+
+  /// No description provided for @taskTypePractice.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygula'**
+  String get taskTypePractice;
+
+  /// No description provided for @taskTypeQuiz.
+  ///
+  /// In tr, this message translates to:
+  /// **'Test'**
+  String get taskTypeQuiz;
+
+  /// No description provided for @taskTypeReview.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrar'**
+  String get taskTypeReview;
+
+  /// No description provided for @navHome.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ana Sayfa'**
+  String get navHome;
+
+  /// No description provided for @navDiscover.
+  ///
+  /// In tr, this message translates to:
+  /// **'Keşfet'**
+  String get navDiscover;
+
+  /// No description provided for @navSkills.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yetenekler'**
+  String get navSkills;
+
+  /// No description provided for @navProgress.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlerleme'**
+  String get navProgress;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil'**
+  String get navProfile;
+
+  /// No description provided for @coachEmptyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yol arkadaşın hazır.'**
+  String get coachEmptyTitle;
+
+  /// No description provided for @coachSuggestionsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örnek sorular'**
+  String get coachSuggestionsTitle;
+
+  /// No description provided for @coachSuggestion1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hafta neye odaklanmalıyım?'**
+  String get coachSuggestion1;
+
+  /// No description provided for @coachSuggestion2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedefime ulaşmak için hangi becerileri geliştirmeliyim?'**
+  String get coachSuggestion2;
+
+  /// No description provided for @coachSuggestion3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük 30 dakikayla nasıl ilerleyebilirim?'**
+  String get coachSuggestion3;
+
+  /// No description provided for @settingsAppearance.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görünüm'**
+  String get settingsAppearance;
+
+  /// No description provided for @settingsAppearanceSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dil ve tema tercihleri cihazında saklanır.'**
+  String get settingsAppearanceSubtitle;
+
+  /// No description provided for @appTagline.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedefini belir. Yolunu keşfet.'**
+  String get appTagline;
 }
 
 class _AppLocalizationsDelegate

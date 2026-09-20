@@ -773,4 +773,78 @@ class AppLocalizationsEn extends AppLocalizations {
   String newsDate(int day, String month, String year) {
     return '$month $day, $year';
   }
+
+  @override
+  String get newsSectionSubtitle => 'The latest in your field.';
+
+  @override
+  String get recommendationsSubtitle =>
+      'Chosen from your profile and progress.';
+
+  @override
+  String get dailyPlanSubtitle => 'Small steps to finish today.';
+
+  @override
+  String get dashboardTasksShort => 'Tasks';
+
+  @override
+  String get dashboardCoachPitch =>
+      'Ask where you are stuck and get an answer tuned to your goal.';
+
+  @override
+  String get dashboardLearnPitch =>
+      'Keep learning with content picked for your field.';
+
+  @override
+  String get taskTypeLearn => 'Learn';
+
+  @override
+  String get taskTypePractice => 'Practice';
+
+  @override
+  String get taskTypeQuiz => 'Quiz';
+
+  @override
+  String get taskTypeReview => 'Review';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navDiscover => 'Discover';
+
+  @override
+  String get navSkills => 'Skills';
+
+  @override
+  String get navProgress => 'Progress';
+
+  @override
+  String get navProfile => 'Profile';
+
+  @override
+  String get coachEmptyTitle => 'Your companion is ready.';
+
+  @override
+  String get coachSuggestionsTitle => 'Example questions';
+
+  @override
+  String get coachSuggestion1 => 'What should I focus on this week?';
+
+  @override
+  String get coachSuggestion2 =>
+      'Which skills should I build to reach my goal?';
+
+  @override
+  String get coachSuggestion3 => 'How can I progress with 30 minutes a day?';
+
+  @override
+  String get settingsAppearance => 'Appearance';
+
+  @override
+  String get settingsAppearanceSubtitle =>
+      'Language and theme preferences are stored on your device.';
+
+  @override
+  String get appTagline => 'Set your goal. Discover your path.';
 }

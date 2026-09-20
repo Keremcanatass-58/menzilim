@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_theme.dart';
@@ -136,155 +137,154 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(32),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 460,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+        child: LayoutBuilder(
+          builder: (context, constraints) => Center(
+            child: SingleChildScrollView(
+              padding: AppSpacing.screen(constraints.maxWidth),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: MenzilimEntrance(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          l10n.appName,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                      Row(
+                        children: [
+                          const Expanded(child: AuthBrandMark()),
+                          // Giriş yapmadan da dil/tema seçilebilsin.
+                          IconButton(
+                            tooltip: l10n.settingsTitle,
+                            onPressed: _openSettings,
+                            icon: const Icon(Icons.settings_outlined),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.section),
+                      Text(
+                        l10n.loginTitle,
+                        style: context.textStyles.headlineLarge,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        l10n.loginSubtitle,
+                        style: context.textStyles.bodyLarge?.copyWith(
+                          color: context.colors.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xxl),
+                      TextField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          labelText: l10n.emailLabel,
+                          hintText: l10n.emailHint,
+                          prefixIcon: const Icon(Icons.email_outlined),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      TextField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        onSubmitted: (_) => _login(),
+                        decoration: InputDecoration(
+                          labelText: l10n.passwordLabel,
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
                           ),
                         ),
                       ),
-                      // Giriş yapmadan da dil/tema seçilebilsin.
-                      IconButton(
-                        tooltip: l10n.settingsTitle,
-                        onPressed: _openSettings,
-                        icon: const Icon(Icons.settings_outlined),
+                      const SizedBox(height: AppSpacing.xl),
+                      MenzilimButton(
+                        label: l10n.loginButton,
+                        isLoading: _isLoading,
+                        onPressed: _login,
                       ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 48),
-
-                  Text(
-                    l10n.loginTitle,
-                    style: const TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  Text(
-                    l10n.loginSubtitle,
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: context.colors.onSurfaceVariant,
-                    ),
-                  ),
-
-                  const SizedBox(height: 36),
-
-                  TextField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: l10n.emailLabel,
-                      hintText: l10n.emailHint,
-                      prefixIcon: const Icon(
-                        Icons.email_outlined,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    onSubmitted: (_) => _login(),
-                    decoration: InputDecoration(
-                      labelText: l10n.passwordLabel,
-                      prefixIcon: const Icon(
-                        Icons.lock_outline,
-                      ),
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _login,
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              l10n.loginButton,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                      const SizedBox(height: AppSpacing.lg),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              l10n.loginNoAccount,
+                              style: context.textStyles.bodyMedium?.copyWith(
+                                color: context.colors.onSurfaceVariant,
                               ),
                             ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Text(l10n.loginNoAccount),
-                      ),
-                      TextButton(
-                        onPressed: _isLoading
-                            ? null
-                            : _openRegisterScreen,
-                        child: Text(
-                          l10n.registerButton,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
                           ),
-                        ),
+                          TextButton(
+                            onPressed:
+                                _isLoading ? null : _openRegisterScreen,
+                            child: Text(l10n.registerButton),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Giriş/kayıt ekranlarındaki marka alanı. Logo görseli hazır olduğunda
+/// yalnızca bu widget değişir.
+class AuthBrandMark extends StatelessWidget {
+  const AuthBrandMark({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            // Logo yerleşimi.
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: context.colors.primary,
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.explore_outlined,
+                size: 20,
+                color: context.colors.onPrimary,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Flexible(
+              child: Text(
+                context.l10n.appName,
+                style: context.textStyles.titleLarge?.copyWith(
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          context.l10n.appTagline,
+          style: context.textStyles.bodySmall?.copyWith(
+            color: context.colors.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }

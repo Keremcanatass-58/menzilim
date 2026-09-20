@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -73,58 +74,27 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          context.l10n.discoverTitle,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: _buildBody(),
-      ),
+      appBar: AppBar(title: Text(context.l10n.discoverTitle)),
+      body: SafeArea(child: _buildBody()),
     );
   }
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 48,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                _errorMessage!,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _isLoading = true;
-                    _errorMessage = null;
-                  });
+      return MenzilimErrorView(
+        message: _errorMessage!,
+        onRetry: () {
+          setState(() {
+            _isLoading = true;
+            _errorMessage = null;
+          });
 
-                  _loadContent();
-                },
-                child: Text(context.l10n.commonRetry),
-              ),
-            ],
-          ),
-        ),
+          _loadContent();
+        },
       );
     }
 
@@ -133,54 +103,78 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         onRefresh: _loadContent,
         child: ListView(
           children: [
-            const SizedBox(height: 180),
-            Center(
-              child: Text(
-                context.l10n.discoverEmpty,
-                textAlign: TextAlign.center,
-              ),
+            const SizedBox(height: 120),
+            MenzilimEmptyView(
+              icon: Icons.local_library_outlined,
+              message: context.l10n.discoverEmpty,
             ),
           ],
         ),
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: _loadContent,
-      child: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          Text(
-            context.l10n.discoverHeadline,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            context.l10n.discoverSubtitle,
-            style: TextStyle(
-              fontSize: 16,
-              color: context.colors.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ..._contents.map(
-            (content) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: _ContentCard(
-                content: content,
-                onTap: () => _openDetail(content),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= AppBreakpoints.tablet;
+
+        return RefreshIndicator(
+          onRefresh: _loadContent,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppBreakpoints.maxContentWidth,
+              ),
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: AppSpacing.screen(constraints.maxWidth),
+                children: [
+                  MenzilimSectionHeader(
+                    title: context.l10n.discoverHeadline,
+                    subtitle: context.l10n.discoverSubtitle,
+                  ),
+                  if (isWide)
+                    Wrap(
+                      spacing: AppSpacing.md,
+                      runSpacing: AppSpacing.md,
+                      children: [
+                        for (final content in _contents)
+                          SizedBox(
+                            width: (constraints.maxWidth.clamp(
+                                          0,
+                                          AppBreakpoints.maxContentWidth,
+                                        ) -
+                                        AppSpacing.screenWide.horizontal -
+                                        AppSpacing.md) /
+                                    2 -
+                                0.01,
+                            child: _ContentCard(
+                              content: content,
+                              onTap: () => _openDetail(content),
+                            ),
+                          ),
+                      ],
+                    )
+                  else
+                    ..._contents.map(
+                      (content) => Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                        child: _ContentCard(
+                          content: content,
+                          onTap: () => _openDetail(content),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
+/// Öğrenme kitaplığındaki içerik kartı.
 class _ContentCard extends StatelessWidget {
   final ContentResponse content;
   final VoidCallback onTap;
@@ -192,106 +186,79 @@ class _ContentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    final colors = context.colors;
+
+    return MenzilimCard(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: context.colors.outlineVariant,
-          ),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: context.colors.primaryContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    context.l10n.experienceLevelLabel(content.level),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Flexible(
+                child: MenzilimChip(
+                  label: context.l10n.experienceLevelLabel(content.level),
+                  tone: MenzilimChipTone.primary,
                 ),
-                const Spacer(),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: context.colors.onSurfaceVariant,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              content.title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
               ),
-            ),
-            if (content.description != null &&
-                content.description!.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                content.description!,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: context.colors.onSurfaceVariant,
-                  height: 1.4,
-                ),
+              const Spacer(),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: colors.onSurfaceVariant,
               ),
             ],
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Icon(
-                  Icons.public,
-                  size: 18,
-                  color: context.colors.onSurfaceVariant,
-                ),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    content.source,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: context.colors.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Icon(
-                  Icons.schedule_outlined,
-                  size: 18,
-                  color: context.colors.onSurfaceVariant,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  context.l10n.commonMinutesShort(content.readingTimeMinutes),
-                  style: TextStyle(
-                    color: context.colors.onSurfaceVariant,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            content.title,
+            style: context.textStyles.titleLarge,
+          ),
+          if (content.description != null &&
+              content.description!.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              content.description!,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.bodyMedium?.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Icon(Icons.public, size: 18, color: colors.onSurfaceVariant),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: Text(
+                  content.source,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              Icon(
+                Icons.schedule_outlined,
+                size: 18,
+                color: colors.onSurfaceVariant,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                context.l10n.commonMinutesShort(content.readingTimeMinutes),
+                style: context.textStyles.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -447,156 +414,115 @@ class _ContentDetailScreenState extends State<ContentDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.contentDetailTitle),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
+      appBar: AppBar(title: Text(l10n.contentDetailTitle)),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) => Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppBreakpoints.maxReadingWidth,
               ),
-              decoration: BoxDecoration(
-                color: context.colors.primaryContainer,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                _isCompleted
-                    ? context.l10n.contentCompletedBadge
-                    : context.l10n.experienceLevelLabel(content.level),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              content.title,
-              style: const TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Icon(
-                  Icons.public,
-                  size: 20,
-                  color: context.colors.onSurfaceVariant,
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    content.source,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: context.colors.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 20),
-                Icon(
-                  Icons.schedule_outlined,
-                  size: 20,
-                  color: context.colors.onSurfaceVariant,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  context.l10n.commonMinutes(content.readingTimeMinutes),
-                  style: TextStyle(
-                    color: context.colors.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            if (content.description != null &&
-                content.description!.isNotEmpty) ...[
-              Text(
-                context.l10n.contentAbout,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                content.description!,
-                style: const TextStyle(
-                  fontSize: 17,
-                  height: 1.6,
-                ),
-              ),
-              const SizedBox(height: 32),
-            ],
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton.icon(
-                onPressed: _isLoadingProgress
-                    ? null
-                    : () => _openUrl(context),
-                icon: const Icon(Icons.open_in_new),
-                label: Text(
-                  context.l10n.contentOpen,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: OutlinedButton.icon(
-                onPressed: _isLoadingProgress ||
-                        _isCompleting ||
-                        _isCompleted
-                    ? null
-                    : _completeContent,
-                icon: _isCompleting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
+              child: SingleChildScrollView(
+                padding: AppSpacing.screen(constraints.maxWidth),
+                child: MenzilimEntrance(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Hero: durum/seviye rozeti ve başlık
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
+                        children: [
+                          MenzilimChip(
+                            label: _isCompleted
+                                ? l10n.contentCompletedBadge
+                                : l10n.experienceLevelLabel(content.level),
+                            icon: _isCompleted ? Icons.check_circle : null,
+                            tone: _isCompleted
+                                ? MenzilimChipTone.success
+                                : MenzilimChipTone.primary,
+                          ),
+                          MenzilimChip(
+                            label: content.source,
+                            icon: Icons.public,
+                          ),
+                          MenzilimChip(
+                            label: l10n.commonMinutes(
+                              content.readingTimeMinutes,
+                            ),
+                            icon: Icons.schedule_outlined,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      Text(
+                        content.title,
+                        style: context.textStyles.headlineMedium,
+                      ),
+
+                      if (content.description != null &&
+                          content.description!.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.xl),
+                        Text(
+                          l10n.contentAbout,
+                          style: context.textStyles.titleMedium,
                         ),
-                      )
-                    : Icon(
-                        _isCompleted
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          content.description!,
+                          style: context.textStyles.bodyLarge?.copyWith(
+                            height: 1.6,
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+
+                      const SizedBox(height: AppSpacing.xl),
+
+                      // Birincil eylem
+                      MenzilimButton(
+                        label: l10n.contentOpen,
+                        onPressed: _isLoadingProgress
+                            ? null
+                            : () => _openUrl(context),
+                        icon: Icons.open_in_new,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      MenzilimButton(
+                        label: _isCompleted
+                            ? l10n.contentCompletedButton
+                            : l10n.contentMarkComplete,
+                        isLoading: _isCompleting,
+                        onPressed:
+                            _isLoadingProgress || _isCompleting || _isCompleted
+                                ? null
+                                : _completeContent,
+                        icon: _isCompleted
                             ? Icons.check_circle
                             : Icons.check_circle_outline,
+                        variant: MenzilimButtonVariant.secondary,
                       ),
-                label: Text(
-                  _isCompleted
-                      ? context.l10n.contentCompletedButton
-                      : context.l10n.contentMarkComplete,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+
+                      if (_errorMessage != null) ...[
+                        const SizedBox(height: AppSpacing.lg),
+                        Text(
+                          _errorMessage!,
+                          style: context.textStyles.bodyMedium?.copyWith(
+                            color: colors.error,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ),
             ),
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 16),
-              Text(
-                _errorMessage!,
-                style: TextStyle(
-                  color: context.colors.error,
-                ),
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );

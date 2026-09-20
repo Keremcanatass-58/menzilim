@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
+import '../../../core/theme/app_theme.dart';
 import '../models/news_item.dart';
 import '../services/news_link_opener.dart';
 
@@ -58,18 +60,12 @@ class NewsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
+    final colors = context.colors;
     final host = item.sourceHost;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerLow,
-        border: Border.all(color: colors.outlineVariant),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      clipBehavior: Clip.antiAlias,
+    return MenzilimCard(
+      onTap: onOpen,
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -84,68 +80,67 @@ class NewsCard extends StatelessWidget {
               ),
             ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 16, 18, 8),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.sm,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colors.secondaryContainer,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          item.sourceName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: colors.onSecondaryContainer,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                      child: MenzilimChip(
+                        label: item.sourceName,
+                        tone: MenzilimChipTone.secondary,
                       ),
                     ),
                     if (item.publishedAt != null) ...[
-                      const SizedBox(width: 10),
-                      Text(
-                        formatNewsDate(context.l10n, item.publishedAt!),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colors.onSurfaceVariant,
+                      const SizedBox(width: AppSpacing.md),
+                      Flexible(
+                        child: Text(
+                          formatNewsDate(context.l10n, item.publishedAt!),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textStyles.bodySmall?.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
                         ),
                       ),
                     ],
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.md),
                 Text(
                   item.title,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: context.textStyles.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
+                    height: 1.3,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   item.summary,
                   maxLines: compact ? 2 : 4,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  style: context.textStyles.bodyMedium?.copyWith(
                     color: colors.onSurfaceVariant,
-                    height: 1.4,
                   ),
                 ),
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 12, 8),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.sm,
+              0,
+              AppSpacing.lg,
+              AppSpacing.sm,
+            ),
             child: Row(
               children: [
                 TextButton.icon(
@@ -154,7 +149,7 @@ class NewsCard extends StatelessWidget {
                   label: Text(context.l10n.newsReadMore),
                 ),
                 if (host != null) ...[
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.xs),
                   // Kaynak adresi açıkça gösterilir.
                   Expanded(
                     child: Text(
@@ -162,7 +157,7 @@ class NewsCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.end,
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: context.textStyles.bodySmall?.copyWith(
                         color: colors.onSurfaceVariant,
                       ),
                     ),

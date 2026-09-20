@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -67,58 +68,27 @@ class _SkillsScreenState extends State<SkillsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          context.l10n.skillsTitle,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: _buildBody(),
-      ),
+      appBar: AppBar(title: Text(context.l10n.skillsTitle)),
+      body: SafeArea(child: _buildBody()),
     );
   }
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 48,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                _errorMessage!,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _isLoading = true;
-                    _errorMessage = null;
-                  });
+      return MenzilimErrorView(
+        message: _errorMessage!,
+        onRetry: () {
+          setState(() {
+            _isLoading = true;
+            _errorMessage = null;
+          });
 
-                  _loadSkills();
-                },
-                child: Text(context.l10n.commonRetry),
-              ),
-            ],
-          ),
-        ),
+          _loadSkills();
+        },
       );
     }
 
@@ -126,17 +96,11 @@ class _SkillsScreenState extends State<SkillsScreen> {
       return RefreshIndicator(
         onRefresh: _loadSkills,
         child: ListView(
-          padding: const EdgeInsets.all(24),
           children: [
-            const SizedBox(height: 140),
-            const Icon(
-              Icons.insights_outlined,
-              size: 48,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              context.l10n.skillsEmpty,
-              textAlign: TextAlign.center,
+            const SizedBox(height: 120),
+            MenzilimEmptyView(
+              icon: Icons.insights_outlined,
+              message: context.l10n.skillsEmpty,
             ),
           ],
         ),
@@ -146,42 +110,61 @@ class _SkillsScreenState extends State<SkillsScreen> {
     final startedCount =
         _skills.where((skill) => skill.progressPercent > 0).length;
 
-    return RefreshIndicator(
-      onRefresh: _loadSkills,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: 1000,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= AppBreakpoints.tablet;
+
+        return RefreshIndicator(
+          onRefresh: _loadSkills,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppBreakpoints.maxContentWidth,
+              ),
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: AppSpacing.screen(constraints.maxWidth),
+                children: [
+                  MenzilimSectionHeader(
+                    title: context.l10n.skillsMapTitle,
+                    subtitle: context.l10n.skillsMapSubtitle(
+                      _skills.length,
+                      startedCount,
+                    ),
+                  ),
+                  // Geniş ekranda iki kolon; dar ekranda tek kolon.
+                  if (isWide)
+                    Wrap(
+                      spacing: AppSpacing.md,
+                      runSpacing: AppSpacing.md,
+                      children: [
+                        for (final skill in _skills)
+                          SizedBox(
+                            width: (constraints.maxWidth.clamp(
+                                          0,
+                                          AppBreakpoints.maxContentWidth,
+                                        ) -
+                                        AppSpacing.screenWide.horizontal -
+                                        AppSpacing.md) /
+                                    2 -
+                                0.01,
+                            child: _SkillCard(skill: skill),
+                          ),
+                      ],
+                    )
+                  else
+                    ..._skills.map(
+                      (skill) => Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                        child: _SkillCard(skill: skill),
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
-          child: ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              Text(
-                context.l10n.skillsMapTitle,
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.l10n.skillsMapSubtitle(_skills.length, startedCount),
-                style: TextStyle(
-                  fontSize: 16,
-                  color: context.colors.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ..._skills.map(
-                (skill) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _SkillCard(skill: skill),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -195,16 +178,11 @@ class _SkillCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final colors = context.colors;
+    final started = skill.progressPercent > 0;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: colorScheme.outlineVariant,
-        ),
-        borderRadius: BorderRadius.circular(18),
-      ),
+    return MenzilimCard(
+      padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -219,65 +197,36 @@ class _SkillCard extends StatelessWidget {
                       skill.skillName,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: context.textStyles.titleMedium,
                     ),
                     if (skill.category.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          skill.category,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                      const SizedBox(height: AppSpacing.sm),
+                      MenzilimChip(
+                        label: skill.category,
+                        tone: MenzilimChipTone.primary,
                       ),
                     ],
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Text(
                 context.l10n.commonPercent(skill.progressPercent),
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: skill.progressPercent > 0
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
+                style: context.textStyles.headlineSmall?.copyWith(
+                  color: started ? colors.primary : colors.onSurfaceVariant,
                 ),
               ),
             ],
           ),
-
-          const SizedBox(height: 16),
-
-          ClipRRect(
-            borderRadius: const BorderRadius.all(
-              Radius.circular(10),
-            ),
-            child: LinearProgressIndicator(
-              value: skill.progressPercent / 100,
-              minHeight: 10,
-            ),
+          const SizedBox(height: AppSpacing.lg),
+          MenzilimProgressBar(
+            value: skill.progressPercent / 100,
+            height: 10,
           ),
-
-          const SizedBox(height: 16),
-
+          const SizedBox(height: AppSpacing.lg),
           Wrap(
-            spacing: 16,
-            runSpacing: 8,
+            spacing: AppSpacing.lg,
+            runSpacing: AppSpacing.sm,
             children: [
               _StatItem(
                 icon: Icons.menu_book_outlined,
@@ -314,14 +263,12 @@ class _SkillCard extends StatelessWidget {
                 ),
             ],
           ),
-
           if (!skill.hasLearningMaterial) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Text(
               context.l10n.skillsNoMaterial,
-              style: TextStyle(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: 13,
+              style: context.textStyles.bodySmall?.copyWith(
+                color: colors.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -346,17 +293,13 @@ class _StatItem extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          size: 18,
-          color: context.colors.onSurfaceVariant,
-        ),
-        const SizedBox(width: 6),
+        Icon(icon, size: 18, color: context.colors.onSurfaceVariant),
+        const SizedBox(width: AppSpacing.sm),
         // Çok dar ekranda etiket taşmak yerine alt satıra geçer.
         Flexible(
           child: Text(
             label,
-            style: TextStyle(
+            style: context.textStyles.bodyMedium?.copyWith(
               color: context.colors.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),

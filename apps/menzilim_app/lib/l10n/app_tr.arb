@@ -459,5 +459,28 @@
         "type": "String"
       }
     }
-  }
+  },
+  "newsSectionSubtitle": "Alanındaki güncel gelişmeler.",
+  "recommendationsSubtitle": "Profiline ve ilerlemene göre seçildi.",
+  "dailyPlanSubtitle": "Bugünü tamamlamak için küçük adımlar.",
+  "dashboardTasksShort": "Görev",
+  "dashboardCoachPitch": "Takıldığın yeri sor, hedefine göre yanıt al.",
+  "dashboardLearnPitch": "Alanına uygun içeriklerle öğrenmeye devam et.",
+  "taskTypeLearn": "Öğren",
+  "taskTypePractice": "Uygula",
+  "taskTypeQuiz": "Test",
+  "taskTypeReview": "Tekrar",
+  "navHome": "Ana Sayfa",
+  "navDiscover": "Keşfet",
+  "navSkills": "Yetenekler",
+  "navProgress": "İlerleme",
+  "navProfile": "Profil",
+  "coachEmptyTitle": "Yol arkadaşın hazır.",
+  "coachSuggestionsTitle": "Örnek sorular",
+  "coachSuggestion1": "Bu hafta neye odaklanmalıyım?",
+  "coachSuggestion2": "Hedefime ulaşmak için hangi becerileri geliştirmeliyim?",
+  "coachSuggestion3": "Günlük 30 dakikayla nasıl ilerleyebilirim?",
+  "settingsAppearance": "Görünüm",
+  "settingsAppearanceSubtitle": "Dil ve tema tercihleri cihazında saklanır.",
+  "appTagline": "Hedefini belir. Yolunu keşfet."
 }

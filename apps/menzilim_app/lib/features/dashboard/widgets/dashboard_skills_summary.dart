@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -27,35 +28,27 @@ class DashboardSkillsSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: context.colors.outlineVariant,
-        ),
-        borderRadius: BorderRadius.circular(20),
-      ),
+    return MenzilimCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.insights_outlined,
                 size: 20,
+                color: context.colors.primary,
               ),
-              const SizedBox(width: 8),
-              Text(
-                context.l10n.skillsSummaryTitle,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  context.l10n.skillsSummaryTitle,
+                  style: context.textStyles.titleMedium,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           _buildBody(context),
         ],
       ),
@@ -66,14 +59,12 @@ class DashboardSkillsSummary extends StatelessWidget {
     // Yenileme sırasında mevcut veri korunur; spinner yalnızca veri yokken.
     if (isLoading && skills.isEmpty) {
       return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 8),
+        padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
         child: Center(
           child: SizedBox(
             width: 24,
             height: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-            ),
+            child: CircularProgressIndicator(strokeWidth: 2),
           ),
         ),
       );
@@ -82,7 +73,7 @@ class DashboardSkillsSummary extends StatelessWidget {
     if (errorMessage != null) {
       return Wrap(
         crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 8,
+        spacing: AppSpacing.sm,
         children: [
           Text(errorMessage!),
           TextButton(
@@ -104,58 +95,36 @@ class DashboardSkillsSummary extends StatelessWidget {
             : a.skillName.compareTo(b.skillName);
       });
 
-    final primary = Theme.of(context).colorScheme.primary;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           context.l10n.skillsSummaryCounts(skills.length, started.length),
-          style: TextStyle(
+          style: context.textStyles.bodySmall?.copyWith(
             color: context.colors.onSurfaceVariant,
-            fontSize: 13,
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.lg),
         if (started.isEmpty)
           Text(
             context.l10n.skillsSummaryEmpty,
-            style: const TextStyle(
-              fontSize: 15,
-            ),
+            style: context.textStyles.bodyMedium,
           )
         else
           ...started.take(maxSkills).map(
                 (skill) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
                   child: _SkillSummaryRow(skill: skill),
                 ),
               ),
-        const SizedBox(height: 4),
-        InkWell(
-          onTap: onViewAll,
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  context.l10n.skillsViewAll,
-                  style: TextStyle(
-                    color: primary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.arrow_forward,
-                  size: 16,
-                  color: primary,
-                ),
-              ],
-            ),
+        const SizedBox(height: AppSpacing.xs),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: onViewAll,
+            iconAlignment: IconAlignment.end,
+            icon: const Icon(Icons.arrow_forward, size: 16),
+            label: Text(context.l10n.skillsViewAll),
           ),
         ),
       ],
@@ -182,31 +151,20 @@ class _SkillSummaryRow extends StatelessWidget {
                 skill.skillName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 15,
+                style: context.textStyles.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Text(
               context.l10n.commonPercent(skill.progressPercent),
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-              ),
+              style: context.textStyles.labelLarge,
             ),
           ],
         ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: const BorderRadius.all(
-            Radius.circular(10),
-          ),
-          child: LinearProgressIndicator(
-            value: skill.progressPercent / 100,
-            minHeight: 8,
-          ),
-        ),
+        const SizedBox(height: AppSpacing.sm),
+        MenzilimProgressBar(value: skill.progressPercent / 100),
       ],
     );
   }
