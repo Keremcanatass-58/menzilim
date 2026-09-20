@@ -102,27 +102,9 @@ class AuthSplashScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: context.colors.primary,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.explore_outlined,
-                size: 28,
-                color: context.colors.onPrimary,
-              ),
-            ),
+            const MenzilimLogoMark(size: 64, boxed: true),
             const SizedBox(height: AppSpacing.lg),
-            Text(
-              context.l10n.appName,
-              style: context.textStyles.titleLarge?.copyWith(
-                letterSpacing: 0.5,
-              ),
-            ),
+            MenzilimWordmark(style: context.textStyles.headlineSmall),
             const SizedBox(height: AppSpacing.sm),
             Text(
               context.l10n.appTagline,

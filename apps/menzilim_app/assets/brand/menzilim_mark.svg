@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="MENZİLİM">
+  <!--
+    MENZİLİM sembolü: "M" harfinin iç çizgileri, hedefe (bullseye) varan iki
+    yol gibi birleşir. Tek renklidir; kullanıldığı yerde tema rengiyle
+    boyanır (SvgPicture colorFilter).
+  -->
+  <g fill="none" stroke="currentColor" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Sol ayak -->
+    <path d="M13 54 V18" />
+    <!-- Sağ ayak -->
+    <path d="M51 54 V18" />
+    <!-- Hedefe giden yollar -->
+    <path d="M13 18 L24.6 35.6" />
+    <path d="M51 18 L39.4 35.6" />
+    <!-- Hedef halkası -->
+    <circle cx="32" cy="43" r="10.5" stroke-width="3.4" />
+  </g>
+  <!-- Hedefin merkezi -->
+  <circle cx="32" cy="43" r="2.9" fill="currentColor" />
+</svg>

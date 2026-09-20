@@ -345,27 +345,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildHeader() {
     return Row(
       children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: context.colors.primary,
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-          ),
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.explore_outlined,
-            size: 18,
-            color: context.colors.onPrimary,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Text(
-          context.l10n.appName,
-          style: context.textStyles.titleMedium?.copyWith(
-            letterSpacing: 0.5,
-          ),
-        ),
+        const MenzilimLogo(markSize: 32),
         const Spacer(),
         MenzilimChip(
           label: context.l10n.onboardingStep(_currentStep + 1, 5),

@@ -129,6 +129,41 @@ void main() {
     expect(pressed, 1);
   });
 
+  group('Marka', () {
+    testWidgets('logo kilidi sembolü ve MENZİLİM yazısını gösterir',
+        (tester) async {
+      await tester.pumpWidget(_host(child: const MenzilimLogo(markSize: 32)));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MenzilimLogoMark), findsOneWidget);
+      // Marka adı çevrilmez ve Türkçe "İ" korunur.
+      expect(find.text('MENZİLİM'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('slogan istendiğinde gösterilir', (tester) async {
+      await tester.pumpWidget(
+        _host(child: const MenzilimLogo(markSize: 32, showTagline: true)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hedefini belir. Yolunu keşfet.'), findsOneWidget);
+    });
+
+    testWidgets('sembol koyu temada da sorunsuz çizilir', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          brightness: Brightness.dark,
+          child: const MenzilimLogoMark(size: 48, boxed: true),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(MenzilimLogoMark), findsOneWidget);
+    });
+  });
+
   testWidgets('tema uzantısı durum renklerini parlaklığa göre verir',
       (tester) async {
     await tester.pumpWidget(

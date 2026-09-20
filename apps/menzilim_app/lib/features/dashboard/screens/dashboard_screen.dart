@@ -763,40 +763,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-/// Marka alanı. Logo görseli hazır olduğunda yalnızca bu widget değişir.
+/// Uygulama çubuğundaki marka alanı: sembol + MENZİLİM yazısı.
 class BrandMark extends StatelessWidget {
   const BrandMark({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Logo yerleşimi: görsel geldiğinde bu kutunun içine konur.
-        Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            color: context.colors.primary,
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-          ),
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.explore_outlined,
-            size: 18,
-            color: context.colors.onPrimary,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Text(
-          context.l10n.appName,
-          style: context.textStyles.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.4,
-          ),
-        ),
-      ],
-    );
+    return const MenzilimLogo(markSize: 30);
   }
 }
 

@@ -220,52 +220,16 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-/// Giriş/kayıt ekranlarındaki marka alanı. Logo görseli hazır olduğunda
-/// yalnızca bu widget değişir.
+/// Giriş/kayıt ekranlarındaki marka alanı: sembol, yazı ve slogan.
 class AuthBrandMark extends StatelessWidget {
   const AuthBrandMark({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            // Logo yerleşimi.
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: context.colors.primary,
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.explore_outlined,
-                size: 20,
-                color: context.colors.onPrimary,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Flexible(
-              child: Text(
-                context.l10n.appName,
-                style: context.textStyles.titleLarge?.copyWith(
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          context.l10n.appTagline,
-          style: context.textStyles.bodySmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
-        ),
-      ],
+    return MenzilimLogo(
+      markSize: 40,
+      wordmarkStyle: context.textStyles.titleLarge,
+      showTagline: true,
     );
   }
 }

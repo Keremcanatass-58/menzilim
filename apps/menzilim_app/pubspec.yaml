@@ -40,6 +40,7 @@ dependencies:
   shared_preferences: ^2.5.5
   url_launcher: ^6.3.2
   intl: any
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -59,6 +60,11 @@ dev_dependencies:
 flutter:
   # lib/l10n/*.arb dosyalarından AppLocalizations üretir (l10n.yaml).
   generate: true
+
+  # Marka varlıkları tek tek listelenir; klasördeki README paketlenmesin.
+  assets:
+    - assets/brand/menzilim_mark.svg
+    - assets/brand/menzilim_app_icon.svg
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

@@ -131,6 +131,8 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
+                  const Center(child: MenzilimLogoMark(size: 28)),
+                  const SizedBox(height: AppSpacing.sm),
                   Center(
                     child: Text(
                       l10n.appTagline,
