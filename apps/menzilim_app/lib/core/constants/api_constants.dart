@@ -39,6 +39,8 @@ class ApiConstants {
 
   static String get myNews => '$baseUrl/api/news/me';
 
+  static String get mySkillGap => '$baseUrl/api/skills/gap/me';
+
   static String get myProjects => '$baseUrl/api/projects/me';
 
   static String projectDetail(String projectId) =>

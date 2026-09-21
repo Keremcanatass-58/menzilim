@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -93,10 +93,11 @@ public sealed class DailyPlanEndpointsTests : IDisposable
     {
         var token = await RegisterWithProfileAsync(60);
         var plan = await GetPlanAsync(token);
-        var learnId = TaskId(plan, "Learn");
+        // Günün ana görevi artık projenin sıradaki adımıdır.
+        var mainId = TaskId(plan, "Project");
 
         var response = await SendAsync(
-            HttpMethod.Post, $"/api/daily-plan/tasks/{learnId}/complete", token);
+            HttpMethod.Post, $"/api/daily-plan/tasks/{mainId}/complete", token);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<JsonElement>();
@@ -110,16 +111,16 @@ public sealed class DailyPlanEndpointsTests : IDisposable
         Assert.Equal(60, body.GetProperty("totalMinutes").GetInt32());
 
         // Tüm görevler, deterministik sırada.
-        Assert.Equal(new[] { "Learn", "Practice", "Quiz" }, TaskTypes(body));
+        Assert.Equal(new[] { "Project", "Learn", "Quiz" }, TaskTypes(body));
 
         var tasks = body.GetProperty("tasks").EnumerateArray().ToList();
         foreach (var field in new[] { "id", "title", "description", "taskType", "estimatedMinutes", "isCompleted", "completedAt", "contentId" })
             Assert.All(tasks, t => Assert.True(t.TryGetProperty(field, out _), $"eksik görev alanı: {field}"));
 
-        var learn = tasks[0];
-        Assert.True(learn.GetProperty("isCompleted").GetBoolean());
-        Assert.NotEqual(JsonValueKind.Null, learn.GetProperty("completedAt").ValueKind);
-        Assert.Equal(learn.GetProperty("estimatedMinutes").GetInt32(), body.GetProperty("completedMinutes").GetInt32());
+        var main = tasks[0];
+        Assert.True(main.GetProperty("isCompleted").GetBoolean());
+        Assert.NotEqual(JsonValueKind.Null, main.GetProperty("completedAt").ValueKind);
+        Assert.Equal(main.GetProperty("estimatedMinutes").GetInt32(), body.GetProperty("completedMinutes").GetInt32());
         Assert.All(tasks.Skip(1), t => Assert.False(t.GetProperty("isCompleted").GetBoolean()));
     }
 
@@ -128,16 +129,16 @@ public sealed class DailyPlanEndpointsTests : IDisposable
     {
         var token = await RegisterWithProfileAsync(90);
         var plan = await GetPlanAsync(token);
-        Assert.Equal(new[] { "Learn", "Practice", "Quiz", "Review" }, TaskTypes(plan));
+        Assert.Equal(new[] { "Project", "Learn", "Quiz", "Review" }, TaskTypes(plan));
 
-        foreach (var type in new[] { "Learn", "Practice", "Quiz" })
+        foreach (var type in new[] { "Project", "Learn", "Quiz" })
         {
             (await SendAsync(HttpMethod.Post, $"/api/daily-plan/tasks/{TaskId(plan, type)}/complete", token))
                 .EnsureSuccessStatusCode();
 
             var partial = await GetPlanAsync(token);
             Assert.False(partial.GetProperty("isCompleted").GetBoolean());
-            Assert.Equal(new[] { "Learn", "Practice", "Quiz", "Review" }, TaskTypes(partial));
+            Assert.Equal(new[] { "Project", "Learn", "Quiz", "Review" }, TaskTypes(partial));
         }
 
         var last = await SendAsync(
@@ -158,7 +159,7 @@ public sealed class DailyPlanEndpointsTests : IDisposable
         var ownerPlan = await GetPlanAsync(owner);
 
         var response = await SendAsync(
-            HttpMethod.Post, $"/api/daily-plan/tasks/{TaskId(ownerPlan, "Learn")}/complete", intruder);
+            HttpMethod.Post, $"/api/daily-plan/tasks/{TaskId(ownerPlan, "Project")}/complete", intruder);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
 

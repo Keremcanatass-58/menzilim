@@ -1,4 +1,4 @@
-using Menzilim.Application.Interfaces.Repositories;
+﻿using Menzilim.Application.Interfaces.Repositories;
 using Menzilim.Application.Services.DailyPlan;
 using Menzilim.Domain;
 using Xunit;
@@ -187,6 +187,9 @@ public class DailyPlanServiceTests
 
 internal sealed class FakeDailyPlanRepository : IDailyPlanRepository
 {
+    public Task<List<DailyTask>> GetTasksByProjectStepAsync(Guid userProjectStepId) =>
+        Task.FromResult(new List<DailyTask>());
+
     public Menzilim.Domain.DailyPlan? Existing;
     public Menzilim.Domain.DailyPlan? Added;
     public int AddCount;
@@ -268,6 +271,9 @@ internal sealed class FakeQuizRepository : IQuizRepository
 // Skill verisi olmayan kullanıcı: mevcut (skill öncesi) seçim davranışı korunur.
 internal sealed class FakeSkillRepository : ISkillRepository
 {
+    public Task<List<SpecializationSkill>> GetSpecializationSkillsAsync(Guid specializationId) =>
+        Task.FromResult(new List<SpecializationSkill>());
+
     public Task<bool> SpecializationExistsAsync(Guid specializationId) =>
         Task.FromResult(false);
 

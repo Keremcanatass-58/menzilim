@@ -998,4 +998,158 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get onboardingComingSoonHint =>
       'Bu meslek için içerikler hazırlanıyor.';
+
+  @override
+  String get levelNone => 'Henüz başlanmadı';
+
+  @override
+  String get gapStatusReached => 'Hedefe ulaştın';
+
+  @override
+  String get gapStatusDeveloping => 'Gelişiyor';
+
+  @override
+  String get gapStatusNeedsWork => 'Geliştirilmeli';
+
+  @override
+  String get gapStatusNotStarted => 'Henüz başlanmadı';
+
+  @override
+  String get skillGapTitle => 'Hedefine göre beceriler';
+
+  @override
+  String get skillGapSubtitle => 'Mevcut durumun ve yolundaki hedef seviye.';
+
+  @override
+  String get skillGapDashboardTitle => 'Hedefine göre';
+
+  @override
+  String skillGapDeveloping(int count) {
+    return '$count beceri geliştiriliyor';
+  }
+
+  @override
+  String get skillGapAllReached => 'Yolundaki tüm becerilerde hedefe ulaştın.';
+
+  @override
+  String get skillGapCurrentLabel => 'Şu an';
+
+  @override
+  String get skillGapTargetLabel => 'Hedef';
+
+  @override
+  String skillGapProgressExplained(int percent) {
+    return 'İçerik ve quizlerde %$percent ilerleme';
+  }
+
+  @override
+  String get skillGapViewPath => 'Yolumu Gör';
+
+  @override
+  String get skillGapPriorityTitle => 'Öncelikli gelişim';
+
+  @override
+  String get skillGapLoadError => 'Beceri durumun yüklenemedi.';
+
+  @override
+  String get skillGapEmptyTitle =>
+      'Bu uzmanlık için beceri haritası henüz hazır değil.';
+
+  @override
+  String get pathGoalTitle => 'Hedefim';
+
+  @override
+  String get pathJourneyTitle => 'Yolculuğum';
+
+  @override
+  String get pathSkillsTitle => 'Becerilerim';
+
+  @override
+  String get stepDetailTitle => 'Proje Adımı';
+
+  @override
+  String stepDetailOrder(int order) {
+    return 'Projenin $order. adımı';
+  }
+
+  @override
+  String stepDetailOrderOfTotal(int order, int total) {
+    return '$order / $total adım';
+  }
+
+  @override
+  String get stepDetailWhyTitle => 'Bu adım neden önemli?';
+
+  @override
+  String stepDetailWhyBody(String skill) {
+    return 'Bu adımı tamamladığında projen bir parça daha çalışır hale gelir ve $skill becerinde ilerlersin.';
+  }
+
+  @override
+  String get stepDetailWhyBodyGeneric =>
+      'Bu adımı tamamladığında projen bir parça daha çalışır hale gelir.';
+
+  @override
+  String get stepDetailChecklistTitle => 'Yapılacaklar';
+
+  @override
+  String get stepDetailChecklistRead => 'İlgili içeriği oku';
+
+  @override
+  String get stepDetailChecklistApply => 'Adımı projende uygula';
+
+  @override
+  String get stepDetailChecklistVerify => 'Çalıştığını kontrol et';
+
+  @override
+  String get stepDetailContentTitle => 'Öğrenmen gereken içerik';
+
+  @override
+  String get stepDetailQuizTitle => 'Bilgini test et';
+
+  @override
+  String get stepDetailOpenQuiz => 'Quiz\'i Aç';
+
+  @override
+  String get stepDetailSkillLabel => 'İlgili beceri';
+
+  @override
+  String get stepDetailLockedTitle => 'Bu adım henüz açılmadı.';
+
+  @override
+  String get stepDoneTitle => 'Adım tamamlandı.';
+
+  @override
+  String stepDoneProgress(int completed, int total) {
+    return '$completed / $total adım tamamlandı.';
+  }
+
+  @override
+  String get stepDoneUnlocked => 'Sonraki adım açıldı.';
+
+  @override
+  String stepDoneSkill(String skill) {
+    return '$skill becerinde ilerleme kaydettin.';
+  }
+
+  @override
+  String get stepDoneNextLabel => 'Sonraki adım';
+
+  @override
+  String get stepDoneNextCta => 'Sonraki adıma geç';
+
+  @override
+  String get stepDoneProjectFinished =>
+      'Projeni tamamladın. Artık gösterebileceğin bir çıktın var.';
+
+  @override
+  String get stepDoneClose => 'Kapat';
+
+  @override
+  String todayProjectHint(String goal) {
+    return 'Bu adım seni şu hedefe götürüyor: $goal';
+  }
+
+  @override
+  String get taskTypeProject => 'Proje';
 }

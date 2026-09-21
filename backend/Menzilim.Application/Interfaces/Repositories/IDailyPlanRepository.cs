@@ -15,5 +15,8 @@ public interface IDailyPlanRepository
 
     Task<List<Menzilim.Domain.DailyPlan>> GetAllByUserAsync(Guid userId);
 
+    /// <summary>Bir proje adımına bağlı günlük görevler (tüm günler).</summary>
+    Task<List<DailyTask>> GetTasksByProjectStepAsync(Guid userProjectStepId);
+
     Task SaveChangesAsync();
 }

@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text;
 
 using Microsoft.EntityFrameworkCore;
@@ -71,6 +71,7 @@ builder.Services.AddScoped<IContentService, ContentService>();
 builder.Services.AddScoped<IContentRepository, ContentRepository>();
 builder.Services.AddScoped<IContentRecommendationService, ContentRecommendationService>();
 builder.Services.AddScoped<ISkillService, SkillService>();
+builder.Services.AddScoped<ISkillGapService, SkillGapService>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddScoped<IContentProfessionService, ContentProfessionService>();
 builder.Services.AddScoped<IContentProfessionRepository, ContentProfessionRepository>();
@@ -1034,6 +1035,36 @@ app.MapGet(
 // ==============================
 // PROJECTS (LIVING PROJECT)
 // ==============================
+
+app.MapGet(
+    "/api/skills/gap/me",
+    async (
+        ClaimsPrincipal user,
+        ISkillGapService skillGapService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        try
+        {
+            var response = await skillGapService.GetForUserAsync(userId);
+
+            return Results.Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(new
+            {
+                message = ex.Message
+            });
+        }
+    })
+    .RequireAuthorization();
 
 app.MapGet(
     "/api/projects/me",

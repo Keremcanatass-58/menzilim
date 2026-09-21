@@ -14,6 +14,14 @@ public class DailyTask
     // Learn görevi için ilişkilendirilen içerik (opsiyonel).
     public Guid? ContentId { get; set; }
 
+    /// <summary>
+    /// Görev bir Living Project adımından üretildiyse o adım (opsiyonel).
+    /// Adım tamamlanınca bu görev de tamamlanmış sayılır; tersi olmaz.
+    /// </summary>
+    public Guid? UserProjectStepId { get; set; }
+
+    public UserProjectStep? UserProjectStep { get; set; }
+
     public DailyPlan DailyPlan { get; set; } = null!;
     public Content? Content { get; set; }
 }

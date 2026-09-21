@@ -208,6 +208,16 @@ public class MenzilimDbContext : DbContext
             .HasForeignKey(dt => dt.ContentId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        // Görev bir proje adımından üretilebilir. Kullanıcı silinince hem
+        // görevler hem adımlar zaten cascade ile gider; bu bağda veritabanı
+        // eylemi NO ACTION olur (çoklu cascade yolu hatası önlenir), EF
+        // bellekteki referansı temizler.
+        modelBuilder.Entity<DailyTask>()
+            .HasOne(dt => dt.UserProjectStep)
+            .WithMany()
+            .HasForeignKey(dt => dt.UserProjectStepId)
+            .OnDelete(DeleteBehavior.ClientSetNull);
+
         modelBuilder.Entity<NewsItemSkill>()
             .HasOne(ns => ns.NewsItem)
             .WithMany(n => n.Skills)

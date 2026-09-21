@@ -15,14 +15,19 @@ public class UserProjectService : IUserProjectService
     private readonly IUserRepository _userRepository;
     private readonly IUserContentProgressRepository _contentProgressRepository;
 
+    // Adım tamamlanınca ona bağlı günlük görev de tamamlanır.
+    private readonly IDailyPlanRepository? _dailyPlanRepository;
+
     public UserProjectService(
         IUserProjectRepository projectRepository,
         IUserRepository userRepository,
-        IUserContentProgressRepository contentProgressRepository)
+        IUserContentProgressRepository contentProgressRepository,
+        IDailyPlanRepository? dailyPlanRepository = null)
     {
         _projectRepository = projectRepository;
         _userRepository = userRepository;
         _contentProgressRepository = contentProgressRepository;
+        _dailyPlanRepository = dailyPlanRepository;
     }
 
     public async Task<List<UserProjectResponse>> GetMyProjectsAsync(Guid userId)
@@ -108,6 +113,9 @@ public class UserProjectService : IUserProjectService
             // İçerikli adımlar içerik ilerlemesiyle senkron kalır: beceri
             // ilerlemesi ve günlük plan mevcut sistemden hesaplanmaya devam eder.
             await SyncContentProgressAsync(userId, step.LearningItem.ContentId);
+
+            // Adım authoritative kaynaktır: ona bağlı görev de tamamlanır.
+            await SyncDailyTaskAsync(userId, step.Id);
         }
 
         var refreshed = await _projectRepository.GetByIdAsync(project.Id);
@@ -210,6 +218,51 @@ public class UserProjectService : IUserProjectService
         }
 
         await _contentProgressRepository.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Adıma bağlı günlük görevleri tamamlar ve gerekirse planı tamamlanmış
+    /// işaretler. Tersi yapılmaz: görev tamamlanması adımı tamamlamaz.
+    /// </summary>
+    private async Task SyncDailyTaskAsync(Guid userId, Guid stepId)
+    {
+        if (_dailyPlanRepository is null)
+        {
+            return;
+        }
+
+        var tasks = await _dailyPlanRepository.GetTasksByProjectStepAsync(stepId);
+
+        var changed = false;
+
+        foreach (var task in tasks)
+        {
+            // Yalnızca kullanıcının kendi planındaki görevler.
+            if (task.DailyPlan.UserId != userId || task.IsCompleted)
+            {
+                continue;
+            }
+
+            task.IsCompleted = true;
+            task.CompletedAt = DateTime.UtcNow;
+            changed = true;
+        }
+
+        if (!changed)
+        {
+            return;
+        }
+
+        foreach (var plan in tasks
+            .Select(t => t.DailyPlan)
+            .Where(p => p.UserId == userId)
+            .DistinctBy(p => p.Id))
+        {
+            plan.IsCompleted =
+                plan.Tasks.Count > 0 && plan.Tasks.All(t => t.IsCompleted);
+        }
+
+        await _dailyPlanRepository.SaveChangesAsync();
     }
 
     private static UserProjectResponse Map(UserProject project)

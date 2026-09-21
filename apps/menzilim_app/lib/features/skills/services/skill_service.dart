@@ -1,5 +1,6 @@
 import '../../../core/constants/api_constants.dart';
 import '../../../core/network/api_client.dart';
+import '../models/skill_gap_response.dart';
 import '../models/skill_progress_response.dart';
 
 class SkillService {
@@ -22,5 +23,15 @@ class SkillService {
           ),
         )
         .toList();
+  }
+
+  /// Hedef seviyelere göre beceri açığı.
+  Future<SkillGapResponse> getMySkillGap(String token) async {
+    final response = await _apiClient.get(
+      ApiConstants.mySkillGap,
+      token: token,
+    );
+
+    return SkillGapResponse.fromJson(response as Map<String, dynamic>);
   }
 }

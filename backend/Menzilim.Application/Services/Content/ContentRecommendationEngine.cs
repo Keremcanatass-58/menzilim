@@ -142,6 +142,19 @@ public static class ContentRecommendationEngine
         return inTitle || inDescription;
     }
 
+    /// <summary>
+    /// Deneyim seviyesinin görünen karşılığı; ham İngilizce değer kullanıcıya
+    /// gösterilmez.
+    /// </summary>
+    private static string LevelLabel(string level) =>
+        level.Trim().ToLowerInvariant() switch
+        {
+            "beginner" => "Başlangıç",
+            "intermediate" => "Orta",
+            "advanced" => "İleri",
+            _ => level.Trim(),
+        };
+
     private static string Reason(
         int tier,
         bool levelMatch,
@@ -151,7 +164,7 @@ public static class ContentRecommendationEngine
         string? careerGoal)
     {
         var levelSuffix = levelMatch && !string.IsNullOrWhiteSpace(experienceLevel)
-            ? $" {experienceLevel.Trim()} seviyene uygun."
+            ? $" {LevelLabel(experienceLevel!)} seviyene uygun."
             : string.Empty;
 
         switch (tier)

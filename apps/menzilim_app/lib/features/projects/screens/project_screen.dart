@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/design/design_system.dart';
@@ -8,15 +10,23 @@ import '../../../core/theme/app_theme.dart';
 import '../../content/models/content_response.dart';
 import '../../content/screens/discover_screen.dart';
 import '../../content/services/content_service.dart';
+import '../../dashboard/models/dashboard_response.dart';
+import '../../dashboard/services/dashboard_service.dart';
+import '../../skills/models/skill_gap_response.dart';
+import '../../skills/services/skill_service.dart';
+import '../../skills/widgets/skill_gap_list.dart';
 import '../models/user_project.dart';
 import '../services/project_service.dart';
 import '../widgets/path_roadmap.dart';
+import '../widgets/step_completed_sheet.dart';
 
 /// "Yolum" sekmesi: gelişen proje, adımları ve yol haritası.
 class ProjectScreen extends StatefulWidget {
   // Testlerde sahte servisler verilebilir.
   final ProjectService? projectService;
   final ContentService? contentService;
+  final SkillService? skillService;
+  final DashboardService? dashboardService;
 
   /// Sekme değiştirme isteği (ör. boş durumda "Bugüne Dön").
   final VoidCallback? onGoToToday;
@@ -24,12 +34,18 @@ class ProjectScreen extends StatefulWidget {
   /// Proje ilerleyince çağrılır; kabuk diğer sekmeleri tazeler.
   final VoidCallback? onProjectChanged;
 
+  /// Değeri değişince ekran yenilenir (ör. Bugün sekmesinde adım tamamlandı).
+  final int refreshToken;
+
   const ProjectScreen({
     super.key,
     this.projectService,
     this.contentService,
+    this.skillService,
+    this.dashboardService,
     this.onGoToToday,
     this.onProjectChanged,
+    this.refreshToken = 0,
   });
 
   @override
@@ -43,9 +59,17 @@ class _ProjectScreenState extends State<ProjectScreen> {
   late final ContentService _contentService =
       widget.contentService ?? ContentService(ApiClient());
 
+  late final SkillService _skillService =
+      widget.skillService ?? SkillService(ApiClient());
+
+  late final DashboardService _dashboardService =
+      widget.dashboardService ?? DashboardService(ApiClient());
+
   final TokenStorage _tokenStorage = TokenStorage();
 
   UserProject? _project;
+  SkillGapResponse? _skillGap;
+  DashboardResponse? _dashboard;
   bool _isLoading = true;
   String? _errorMessage;
   String? _completingStepId;
@@ -55,6 +79,16 @@ class _ProjectScreenState extends State<ProjectScreen> {
   void initState() {
     super.initState();
     _load();
+  }
+
+  @override
+  void didUpdateWidget(ProjectScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Başka sekmede proje ilerledi: bu ekran da tazelenir.
+    if (oldWidget.refreshToken != widget.refreshToken) {
+      _load();
+    }
   }
 
   Future<void> _load() async {
@@ -67,10 +101,28 @@ class _ProjectScreenState extends State<ProjectScreen> {
 
       final projects = await _projectService.getMyProjects(token);
 
+      // Hedef ve beceri acigi ikincil bilgidir: alinamazsa ekran calisir.
+      DashboardResponse? dashboard;
+      SkillGapResponse? gap;
+
+      try {
+        dashboard = await _dashboardService.getDashboard(token);
+      } catch (_) {
+        // Hedef karti gosterilmez.
+      }
+
+      try {
+        gap = await _skillService.getMySkillGap(token);
+      } catch (_) {
+        // Beceri bolumu gosterilmez.
+      }
+
       if (!mounted) return;
 
       setState(() {
         _project = projects.isEmpty ? null : projects.first;
+        _dashboard = dashboard;
+        _skillGap = gap;
         _isLoading = false;
         _errorMessage = null;
       });
@@ -108,6 +160,18 @@ class _ProjectScreenState extends State<ProjectScreen> {
       });
 
       widget.onProjectChanged?.call();
+
+      await showStepCompletedSheet(
+        context: context,
+        project: updated,
+        completedStepOrder: step.order,
+        skillName: step.skillName,
+      );
+
+      if (!mounted) return;
+
+      // Beceri ilerlemesi degismis olabilir.
+      unawaited(_refreshSkillGap());
     } catch (_) {
       if (!mounted) return;
 
@@ -118,6 +182,24 @@ class _ProjectScreenState extends State<ProjectScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.projectCompleteError)),
       );
+    }
+  }
+
+  Future<void> _refreshSkillGap() async {
+    try {
+      final token = await _tokenStorage.getToken();
+
+      if (token == null || token.isEmpty) return;
+
+      final gap = await _skillService.getMySkillGap(token);
+
+      if (!mounted) return;
+
+      setState(() {
+        _skillGap = gap;
+      });
+    } catch (_) {
+      // Ozet guncellenemezse ekran eski veriyle kalir.
     }
   }
 
@@ -215,8 +297,17 @@ class _ProjectScreenState extends State<ProjectScreen> {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: AppSpacing.screen(constraints.maxWidth),
               children: [
+                // 1) HEDEFIM
+                if (_dashboard != null) ...[
+                  MenzilimSectionHeader(title: l10n.pathGoalTitle),
+                  _GoalCard(dashboard: _dashboard!),
+                  const SizedBox(height: AppSpacing.section),
+                ],
+
+                // 2) YOLCULUGUM
+                MenzilimSectionHeader(title: l10n.pathJourneyTitle),
                 _ProjectHeader(project: project),
-                const SizedBox(height: AppSpacing.section),
+                const SizedBox(height: AppSpacing.lg),
                 MenzilimSectionHeader(title: l10n.projectRoadmapTitle),
                 PathRoadmap(project: project),
                 const SizedBox(height: AppSpacing.section),
@@ -234,6 +325,16 @@ class _ProjectScreenState extends State<ProjectScreen> {
                     ),
                   ),
                 ),
+
+                // 3) BECERILERIM
+                if (_skillGap != null) ...[
+                  const SizedBox(height: AppSpacing.section),
+                  MenzilimSectionHeader(
+                    title: l10n.pathSkillsTitle,
+                    subtitle: l10n.skillGapSubtitle,
+                  ),
+                  SkillGapList(gap: _skillGap!),
+                ],
               ],
             ),
           ),
@@ -446,6 +547,38 @@ class _StepCard extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Yolum ekranindaki "Hedefim": rol ve kariyer hedefi.
+class _GoalCard extends StatelessWidget {
+  final DashboardResponse dashboard;
+
+  const _GoalCard({required this.dashboard});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return MenzilimCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            dashboard.specialization,
+            style: context.textStyles.titleLarge,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            dashboard.careerGoal,
+            style: context.textStyles.bodyMedium?.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
   }

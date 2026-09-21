@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/design/design_system.dart';
+import '../../../core/localization/domain_labels.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_theme.dart';
@@ -26,7 +27,10 @@ import '../../projects/models/user_project.dart';
 import '../../projects/screens/project_screen.dart';
 import '../../projects/services/project_service.dart';
 import '../../projects/widgets/path_roadmap.dart';
+import '../../projects/screens/project_step_detail_screen.dart';
 import '../../projects/widgets/project_card.dart';
+import '../../skills/models/skill_gap_response.dart';
+import '../../skills/widgets/skill_gap_summary.dart';
 import '../../skills/models/skill_progress_response.dart';
 import '../../skills/screens/skills_screen.dart';
 import '../../skills/services/skill_service.dart';
@@ -51,6 +55,9 @@ class DashboardScreen extends StatefulWidget {
   /// Değeri değişince ekran yenilenir (ör. projede adım tamamlandı).
   final int refreshToken;
 
+  /// Bu ekranda proje ilerlediğinde çağrılır; kabuk diğer sekmeleri tazeler.
+  final VoidCallback? onProjectChanged;
+
   const DashboardScreen({
     super.key,
     this.dashboardService,
@@ -63,6 +70,7 @@ class DashboardScreen extends StatefulWidget {
     this.embedded = false,
     this.onNavigate,
     this.refreshToken = 0,
+    this.onProjectChanged,
   });
 
   @override
@@ -127,6 +135,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   UserProject? _project;
   bool _isLoadingProject = true;
 
+  // Hedefe göre beceri durumu (özet olarak gösterilir).
+  SkillGapResponse? _skillGap;
+  bool _isLoadingSkillGap = true;
+
   @override
   void initState() {
     super.initState();
@@ -135,6 +147,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadSkills();
     _loadNews();
     _loadProject();
+    _loadSkillGap();
   }
 
   @override
@@ -146,6 +159,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _loadProject();
       _loadDashboard();
       _loadSkills();
+      _loadSkillGap();
+    }
+  }
+
+  Future<void> _loadSkillGap() async {
+    if (mounted && !_isLoadingSkillGap) {
+      setState(() {
+        _isLoadingSkillGap = true;
+      });
+    }
+
+    try {
+      final token = await _tokenStorage.getToken();
+
+      if (token == null || token.isEmpty) {
+        throw Exception('Oturum bilgisi bulunamadı.');
+      }
+
+      final gap = await _skillService.getMySkillGap(token);
+
+      if (!mounted) return;
+
+      setState(() {
+        _skillGap = gap;
+        _isLoadingSkillGap = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      // Beceri özeti alınamazsa dashboard çalışmaya devam eder.
+      setState(() {
+        _skillGap = null;
+        _isLoadingSkillGap = false;
+      });
     }
   }
 
@@ -438,12 +485,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _onTaskTap(DailyTaskResponse task) {
-    if (_taskOpensContent(task)) {
+    if (task.isProjectStep) {
+      _openProjectStep(task);
+    } else if (_taskOpensContent(task)) {
       _openContentById(task.contentId!, task: task);
     } else if (task.taskType.toLowerCase() == 'quiz') {
       _openQuiz(task);
     } else {
       _completeTask(task);
+    }
+  }
+
+  /// Projeye bağlı görev: adımın detayı açılır. Adım verisi yüklenmemişse
+  /// önce proje tazelenir.
+  Future<void> _openProjectStep(DailyTaskResponse task) async {
+    var project = _project;
+
+    if (project == null ||
+        !project.steps.any((s) => s.id == task.userProjectStepId)) {
+      await _loadProject();
+      project = _project;
+    }
+
+    if (!mounted || project == null) return;
+
+    final step = project.steps
+        .where((s) => s.id == task.userProjectStepId)
+        .firstOrNull;
+
+    if (step == null) {
+      // Adım bulunamazsa görev eski davranışla tamamlanır.
+      _completeTask(task);
+      return;
+    }
+
+    final changed = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => ProjectStepDetailScreen(
+          project: project!,
+          step: step,
+          quizId: task.quizId,
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+
+    if (changed == true) {
+      widget.onProjectChanged?.call();
+
+      await Future.wait([
+        _loadProject(),
+        _loadDashboard(),
+        _loadSkills(),
+        _loadSkillGap(),
+      ]);
     }
   }
 
@@ -725,6 +821,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       _loadSkills(),
                       _loadNews(),
                       _loadProject(),
+                      _loadSkillGap(),
                     ]);
                   },
                   // Tüm bölümler kurulsun (lazy liste değil): dashboard tek
@@ -745,7 +842,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         // 1) BUGÜN
                         MenzilimEntrance(
                           order: 1,
-                          child: _buildTodaySection(dailyPlan),
+                          child: _buildTodaySection(dailyPlan, dashboard),
                         ),
                         const SizedBox(height: AppSpacing.md),
 
@@ -793,7 +890,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   /// BUGÜN: tek güçlü aksiyon. Ana görev öne çıkar, kalanlar altında kalır.
-  Widget _buildTodaySection(DailyPlanResponse dailyPlan) {
+  Widget _buildTodaySection(
+    DailyPlanResponse dailyPlan,
+    DashboardResponse dashboard,
+  ) {
     final l10n = context.l10n;
     final tasks = dailyPlan.tasks;
 
@@ -842,6 +942,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             opensContent: _taskOpensContent(mainTask),
             emphasized: true,
             actionLabel: l10n.todayStart,
+            // Proje adımıysa hangi adım olduğu ve hedefe katkısı gösterilir.
+            projectStepOrder: mainTask.projectStepOrder,
+            skillName: mainTask.skillName,
+            footnote: mainTask.isProjectStep
+                ? l10n.todayProjectHint(dashboard.careerGoal)
+                : null,
             onTap: () => _onTaskTap(mainTask),
           ),
         if (rest.isNotEmpty) ...[
@@ -921,6 +1027,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         if (_project != null) ...[
           PathRoadmap(project: _project!),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        if (!_isLoadingSkillGap && _skillGap != null) ...[
+          SkillGapSummary(
+            gap: _skillGap!,
+            onViewPath: _openPath,
+          ),
           const SizedBox(height: AppSpacing.md),
         ],
         DashboardSkillsSummary(
@@ -1282,6 +1395,11 @@ class _TaskCard extends StatelessWidget {
   final bool emphasized;
   final String? actionLabel;
 
+  /// Proje adımıysa: kaçıncı adım, hangi beceri ve hedefe katkısı.
+  final int? projectStepOrder;
+  final String? skillName;
+  final String? footnote;
+
   const _TaskCard({
     required this.icon,
     required this.taskType,
@@ -1294,6 +1412,9 @@ class _TaskCard extends StatelessWidget {
     this.opensContent = false,
     this.emphasized = false,
     this.actionLabel,
+    this.projectStepOrder,
+    this.skillName,
+    this.footnote,
   });
 
   MenzilimChipTone get _tone => switch (taskType.toLowerCase()) {
@@ -1304,15 +1425,7 @@ class _TaskCard extends StatelessWidget {
   };
 
   String _typeLabel(BuildContext context) {
-    final l10n = context.l10n;
-
-    return switch (taskType.toLowerCase()) {
-      'learn' => l10n.taskTypeLearn,
-      'practice' => l10n.taskTypePractice,
-      'quiz' => l10n.taskTypeQuiz,
-      'review' => l10n.taskTypeReview,
-      _ => taskType,
-    };
+    return context.taskTypeLabel(taskType);
   }
 
   @override
@@ -1368,6 +1481,19 @@ class _TaskCard extends StatelessWidget {
                         ),
                         icon: Icons.schedule_outlined,
                       ),
+                      if (projectStepOrder != null)
+                        MenzilimChip(
+                          label: context.l10n.stepDetailOrder(
+                            projectStepOrder!,
+                          ),
+                          icon: Icons.flag_outlined,
+                        ),
+                      if (skillName != null)
+                        MenzilimChip(
+                          label: skillName!,
+                          icon: Icons.bolt_outlined,
+                          tone: MenzilimChipTone.secondary,
+                        ),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.md),
@@ -1385,6 +1511,15 @@ class _TaskCard extends StatelessWidget {
                       color: colors.onSurfaceVariant,
                     ),
                   ),
+                  if (footnote != null) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      footnote!,
+                      style: context.textStyles.bodySmall?.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                   if (emphasized && !completed && actionLabel != null) ...[
                     const SizedBox(height: AppSpacing.lg),
                     MenzilimButton(

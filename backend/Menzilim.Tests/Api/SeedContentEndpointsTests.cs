@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -115,7 +115,7 @@ public sealed class SeedContentEndpointsTests : IDisposable
     [InlineData("Backend", "A tour of the C# language", "SQL Tutorial")]
     [InlineData("Full Stack", "JavaScript Guide", "TypeScript Handbook")]
     [InlineData("Mobile", "Introduction to Dart", "Your first Flutter app")]
-    public async Task DailyPlan_60Minutes_HasLearnPracticeQuiz_WithSpecializationContent(
+    public async Task DailyPlan_60Minutes_HasProjectLearnQuiz_WithSpecializationContent(
         string specialization,
         string expectedLearnTitle,
         string expectedPracticeTitle)
@@ -124,39 +124,44 @@ public sealed class SeedContentEndpointsTests : IDisposable
 
         var tasks = await GetPlanTasksAsync(token);
 
+        // Günün ana görevi projenin sıradaki adımıdır; öğrenme ve test korunur.
         Assert.Equal(
-            new[] { "Learn", "Practice", "Quiz" },
+            new[] { "Project", "Learn", "Quiz" },
             tasks.Select(t => t.GetProperty("taskType").GetString()));
 
-        var learnContentId = ContentIdOf(tasks[0]);
-        var practiceContentId = ContentIdOf(tasks[1]);
+        var learnContentId = ContentIdOf(tasks[1]);
 
         Assert.NotNull(learnContentId);
-        Assert.NotNull(practiceContentId);
-        Assert.NotEqual(learnContentId, practiceContentId);
         Assert.Null(ContentIdOf(tasks[2]));
 
-        // Seçilen içerikler kullanıcının uzmanlık skill'lerine bağlı.
+        // Seçilen içerik kullanıcının uzmanlık skill'lerine bağlı.
         var specContent = await ContentIdsLinkedToSpecializationAsync(specialization);
         Assert.Contains(learnContentId!.Value, specContent);
-        Assert.Contains(practiceContentId!.Value, specContent);
 
         await using var db = _factory.CreateDbContext();
         Assert.Equal(expectedLearnTitle, (await db.Contents.FindAsync(learnContentId))!.Title);
-        Assert.Equal(expectedPracticeTitle, (await db.Contents.FindAsync(practiceContentId))!.Title);
+
+        // İkinci sıradaki içerik (eski Practice seçimi) hâlâ uzmanlığa bağlıdır.
+        Assert.Contains(
+            (await db.Contents.SingleAsync(c => c.Title == expectedPracticeTitle)).Id,
+            specContent);
     }
 
     [Fact]
-    public async Task DailyPlan_30Minutes_HasLearnWithContent()
+    public async Task DailyPlan_30Minutes_HasProjectAndQuiz()
     {
         var token = await RegisterWithProfileAsync("Backend", 30);
 
         var tasks = await GetPlanTasksAsync(token);
 
+        // Kısa günde plan kısalır: proje adımı + test.
         Assert.Equal(
-            new[] { "Learn", "Quiz" },
+            new[] { "Project", "Quiz" },
             tasks.Select(t => t.GetProperty("taskType").GetString()));
-        Assert.NotNull(ContentIdOf(tasks[0]));
+
+        Assert.Equal(
+            30,
+            tasks.Sum(t => t.GetProperty("estimatedMinutes").GetInt32()));
     }
 
     [Theory]

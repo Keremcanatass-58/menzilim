@@ -58,6 +58,14 @@ class DailyTaskResponse {
   // seçtiği quiz. Yoksa QuizScreen varsayılan aktif quiz'i açar.
   final String? quizId;
 
+  // Görev Living Project adımından üretildiyse dolu olur.
+  final String? userProjectStepId;
+  final String? userProjectId;
+  final String? projectName;
+  final int? projectStepOrder;
+  final int? projectTotalSteps;
+  final String? skillName;
+
   DailyTaskResponse({
     required this.id,
     required this.title,
@@ -68,7 +76,17 @@ class DailyTaskResponse {
     required this.completedAt,
     this.contentId,
     this.quizId,
+    this.userProjectStepId,
+    this.userProjectId,
+    this.projectName,
+    this.projectStepOrder,
+    this.projectTotalSteps,
+    this.skillName,
   });
+
+  /// Görev bir proje adımına bağlı mı?
+  bool get isProjectStep =>
+      userProjectStepId != null && userProjectStepId!.isNotEmpty;
 
   factory DailyTaskResponse.fromJson(Map<String, dynamic> json) {
     return DailyTaskResponse(
@@ -84,6 +102,18 @@ class DailyTaskResponse {
           : DateTime.tryParse(json['completedAt'].toString()),
       contentId: json['contentId']?.toString(),
       quizId: json['quizId']?.toString(),
+      userProjectStepId: _text(json['userProjectStepId']),
+      userProjectId: _text(json['userProjectId']),
+      projectName: _text(json['projectName']),
+      projectStepOrder: (json['projectStepOrder'] as num?)?.toInt(),
+      projectTotalSteps: (json['projectTotalSteps'] as num?)?.toInt(),
+      skillName: _text(json['skillName']),
     );
   }
+}
+
+String? _text(Object? value) {
+  final text = value?.toString();
+
+  return text == null || text.isEmpty ? null : text;
 }

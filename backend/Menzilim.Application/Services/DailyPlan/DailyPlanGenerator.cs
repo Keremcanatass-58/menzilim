@@ -25,6 +25,22 @@ public class DailyPlanGenerationContext
     public Guid? PracticeContentId { get; init; }
     public string? PracticeContentTitle { get; init; }
     public string? PracticeFocusSkillName { get; init; }
+
+    // Living Project'in sıradaki (Available) adımı; varsa günün ana görevi
+    // bu adımdır. Yoksa plan eskisi gibi Learn ile başlar.
+    public Guid? ProjectStepId { get; init; }
+    public string? ProjectStepTitle { get; init; }
+    public string? ProjectStepDescription { get; init; }
+    public int ProjectStepOrder { get; init; }
+    public int ProjectTotalSteps { get; init; }
+    public int ProjectStepMinutes { get; init; }
+    public string? ProjectName { get; init; }
+    public Guid? ProjectStepContentId { get; init; }
+    public string? ProjectStepSkillName { get; init; }
+
+    public bool HasProjectStep =>
+        ProjectStepId is not null &&
+        !string.IsNullOrWhiteSpace(ProjectStepTitle);
 }
 
 public class GeneratedTask
@@ -34,6 +50,9 @@ public class GeneratedTask
     public required string TaskType { get; init; }
     public required int EstimatedMinutes { get; init; }
     public Guid? ContentId { get; init; }
+
+    /// <summary>Görev bir proje adımından üretildiyse o adım.</summary>
+    public Guid? UserProjectStepId { get; init; }
 }
 
 /// <summary>
@@ -44,6 +63,9 @@ public static class DailyPlanGenerator
 {
     public const int DefaultMinutes = 60;
     public const int MinMinutes = 10;
+
+    /// <summary>Bir göreve ayrılabilecek en kısa süre.</summary>
+    public const int MinSlotMinutes = 5;
 
     public static string BuildPlanTitle(DailyPlanGenerationContext context)
     {
@@ -85,13 +107,40 @@ public static class DailyPlanGenerator
             slots.Add(("Review", 4));
         }
 
-        var durations = Distribute(
-            minutes,
-            slots.Select(s => s.Weight).ToList());
+        // Proje adımı varsa günün ana görevi odur: en başa alınır ve
+        // "uygulama" görevinin yerini tutar (asıl uygulama projede yapılır).
+        // Öğrenme ve test görevleri korunur.
+        if (context.HasProjectStep)
+        {
+            // Kısa günde plan iki görevdir: proje adımı + test. Uzun günlerde
+            // "uygulama" görevi düşer; öğrenme ve test korunur.
+            var replaced = minutes <= 40 ? "Learn" : "Practice";
+            var index = slots.FindIndex(slot => slot.Type == replaced);
+
+            if (index >= 0)
+            {
+                slots.RemoveAt(index);
+            }
+
+            slots.Insert(0, ("Project", 5));
+        }
+
+        var durations = context.HasProjectStep
+            ? DistributeWithFixedFirst(
+                minutes,
+                slots.Select(s => s.Weight).ToList(),
+                context.ProjectStepMinutes)
+            : Distribute(minutes, slots.Select(s => s.Weight).ToList());
 
         var tasks = new List<GeneratedTask>();
         for (var i = 0; i < slots.Count; i++)
         {
+            // Süresi sıfıra düşen görev plana eklenmez (kısa günlerde olur).
+            if (durations[i] <= 0)
+            {
+                continue;
+            }
+
             tasks.Add(BuildTask(slots[i].Type, durations[i], focus, context));
         }
 
@@ -155,6 +204,45 @@ public static class DailyPlanGenerator
         return allocation;
     }
 
+    /// <summary>
+    /// İlk göreve (proje adımı) kendi tahmini süresini verir; kalan süreyi
+    /// diğer görevlere ağırlıklarına göre böler. Toplam hiçbir zaman günlük
+    /// süreyi aşmaz. Kalan süre yetmiyorsa plan yalnızca proje adımından oluşur.
+    /// </summary>
+    private static List<int> DistributeWithFixedFirst(
+        int total,
+        List<int> weights,
+        int firstDesiredMinutes)
+    {
+        var otherCount = weights.Count - 1;
+
+        if (otherCount <= 0)
+        {
+            return new List<int> { total };
+        }
+
+        var maxForFirst = total - otherCount * MinSlotMinutes;
+
+        if (maxForFirst < MinSlotMinutes)
+        {
+            // Gün çok kısa: tek görev, proje adımı.
+            var single = new List<int> { total };
+            single.AddRange(Enumerable.Repeat(0, otherCount));
+
+            return single;
+        }
+
+        var desired = firstDesiredMinutes <= 0 ? total / weights.Count : firstDesiredMinutes;
+        var first = Math.Clamp(desired, MinSlotMinutes, maxForFirst);
+
+        var rest = Distribute(total - first, weights.Skip(1).ToList());
+
+        var result = new List<int> { first };
+        result.AddRange(rest);
+
+        return result;
+    }
+
     private static GeneratedTask BuildTask(
         string type,
         int minutes,
@@ -171,6 +259,17 @@ public static class DailyPlanGenerator
 
         return type switch
         {
+            "Project" => new GeneratedTask
+            {
+                TaskType = "Project",
+                // Başlık doğrudan adımın başlığıdır: kullanıcı ne yapacağını
+                // düşünmeden görür.
+                Title = context.ProjectStepTitle!.Trim(),
+                Description = BuildProjectDescription(context),
+                EstimatedMinutes = minutes,
+                ContentId = context.ProjectStepContentId,
+                UserProjectStepId = context.ProjectStepId,
+            },
             "Learn" => new GeneratedTask
             {
                 TaskType = "Learn",
@@ -230,6 +329,43 @@ public static class DailyPlanGenerator
             : $"{context.PracticeFocusSkillName.Trim()} becerin için \"{title}\" içeriği üzerinden küçük bir uygulama gerçekleştir.";
     }
 
+    /// <summary>
+    /// Deneyim seviyesinin görünen karşılığı. Ham İngilizce değer kullanıcıya
+    /// gösterilmez.
+    /// </summary>
+    private static string LevelLabel(string level) =>
+        level.Trim().ToLowerInvariant() switch
+        {
+            "beginner" => "Başlangıç",
+            "intermediate" => "Orta",
+            "advanced" => "İleri",
+            _ => level.Trim(),
+        };
+
+    /// <summary>
+    /// Proje adımı görevinin açıklaması: adımın kendi açıklaması ve hangi
+    /// projeye ait olduğu. Hedef cümlesini istemci ayrıca gösterir.
+    /// </summary>
+    private static string BuildProjectDescription(
+        DailyPlanGenerationContext context)
+    {
+        var parts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(context.ProjectStepDescription))
+        {
+            parts.Add(context.ProjectStepDescription!.Trim());
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.ProjectName))
+        {
+            parts.Add($"\"{context.ProjectName!.Trim()}\" projesinin bir adımı.");
+        }
+
+        return parts.Count == 0
+            ? "Projenin sıradaki adımı."
+            : string.Join(" ", parts);
+    }
+
     private static string BuildLearnDescription(
         DailyPlanGenerationContext context,
         string goal)
@@ -256,7 +392,7 @@ public static class DailyPlanGenerator
 
         if (!string.IsNullOrWhiteSpace(context.ExperienceLevel))
         {
-            return $"{context.ExperienceLevel.Trim()} seviyene uygun: {basePart}";
+            return $"{LevelLabel(context.ExperienceLevel)} seviyene uygun: {basePart}";
         }
 
         return basePart;

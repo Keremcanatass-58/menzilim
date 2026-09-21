@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/design/design_system.dart';
+import '../../../core/localization/domain_labels.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
@@ -141,7 +142,9 @@ class _PathIntroScreenState extends State<PathIntroScreen> {
                                   icon: Icons.alt_route,
                                 ),
                                 MenzilimChip(
-                                  label: dashboard.experienceLevel,
+                                  label: context.skillLevelLabel(
+                                    dashboard.experienceLevel,
+                                  ),
                                   icon: Icons.stairs_outlined,
                                 ),
                                 MenzilimChip(

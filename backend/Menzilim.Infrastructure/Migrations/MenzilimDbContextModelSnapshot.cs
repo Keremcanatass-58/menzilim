@@ -190,11 +190,16 @@ namespace Menzilim.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("UserProjectStepId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ContentId");
 
                     b.HasIndex("DailyPlanId");
+
+                    b.HasIndex("UserProjectStepId");
 
                     b.ToTable("DailyTasks");
                 });
@@ -542,6 +547,10 @@ namespace Menzilim.Infrastructure.Migrations
 
                     b.Property<Guid>("SpecializationId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TargetLevel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -900,9 +909,15 @@ namespace Menzilim.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Menzilim.Domain.UserProjectStep", "UserProjectStep")
+                        .WithMany()
+                        .HasForeignKey("UserProjectStepId");
+
                     b.Navigation("Content");
 
                     b.Navigation("DailyPlan");
+
+                    b.Navigation("UserProjectStep");
                 });
 
             modelBuilder.Entity("Menzilim.Domain.LearningItem", b =>

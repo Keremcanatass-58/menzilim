@@ -568,5 +568,112 @@
   "quizReviewTitle": "Yanlış yaptığın sorular",
   "quizReviewAllCorrect": "Tüm soruları doğru bildin.",
   "onboardingComingSoon": "Yakında",
-  "onboardingComingSoonHint": "Bu meslek için içerikler hazırlanıyor."
+  "onboardingComingSoonHint": "Bu meslek için içerikler hazırlanıyor.",
+  "levelNone": "Henüz başlanmadı",
+  "gapStatusReached": "Hedefe ulaştın",
+  "gapStatusDeveloping": "Gelişiyor",
+  "gapStatusNeedsWork": "Geliştirilmeli",
+  "gapStatusNotStarted": "Henüz başlanmadı",
+  "skillGapTitle": "Hedefine göre beceriler",
+  "skillGapSubtitle": "Mevcut durumun ve yolundaki hedef seviye.",
+  "skillGapDashboardTitle": "Hedefine göre",
+  "skillGapDeveloping": "{count} beceri geliştiriliyor",
+  "@skillGapDeveloping": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "skillGapAllReached": "Yolundaki tüm becerilerde hedefe ulaştın.",
+  "skillGapCurrentLabel": "Şu an",
+  "skillGapTargetLabel": "Hedef",
+  "skillGapProgressExplained": "İçerik ve quizlerde %{percent} ilerleme",
+  "@skillGapProgressExplained": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "skillGapViewPath": "Yolumu Gör",
+  "skillGapPriorityTitle": "Öncelikli gelişim",
+  "skillGapLoadError": "Beceri durumun yüklenemedi.",
+  "skillGapEmptyTitle": "Bu uzmanlık için beceri haritası henüz hazır değil.",
+  "pathGoalTitle": "Hedefim",
+  "pathJourneyTitle": "Yolculuğum",
+  "pathSkillsTitle": "Becerilerim",
+  "stepDetailTitle": "Proje Adımı",
+  "stepDetailOrder": "Projenin {order}. adımı",
+  "@stepDetailOrder": {
+    "placeholders": {
+      "order": {
+        "type": "int"
+      }
+    }
+  },
+  "stepDetailOrderOfTotal": "{order} / {total} adım",
+  "@stepDetailOrderOfTotal": {
+    "placeholders": {
+      "order": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "stepDetailWhyTitle": "Bu adım neden önemli?",
+  "stepDetailWhyBody": "Bu adımı tamamladığında projen bir parça daha çalışır hale gelir ve {skill} becerinde ilerlersin.",
+  "@stepDetailWhyBody": {
+    "placeholders": {
+      "skill": {
+        "type": "String"
+      }
+    }
+  },
+  "stepDetailWhyBodyGeneric": "Bu adımı tamamladığında projen bir parça daha çalışır hale gelir.",
+  "stepDetailChecklistTitle": "Yapılacaklar",
+  "stepDetailChecklistRead": "İlgili içeriği oku",
+  "stepDetailChecklistApply": "Adımı projende uygula",
+  "stepDetailChecklistVerify": "Çalıştığını kontrol et",
+  "stepDetailContentTitle": "Öğrenmen gereken içerik",
+  "stepDetailQuizTitle": "Bilgini test et",
+  "stepDetailOpenQuiz": "Quiz'i Aç",
+  "stepDetailSkillLabel": "İlgili beceri",
+  "stepDetailLockedTitle": "Bu adım henüz açılmadı.",
+  "stepDoneTitle": "Adım tamamlandı.",
+  "stepDoneProgress": "{completed} / {total} adım tamamlandı.",
+  "@stepDoneProgress": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "stepDoneUnlocked": "Sonraki adım açıldı.",
+  "stepDoneSkill": "{skill} becerinde ilerleme kaydettin.",
+  "@stepDoneSkill": {
+    "placeholders": {
+      "skill": {
+        "type": "String"
+      }
+    }
+  },
+  "stepDoneNextLabel": "Sonraki adım",
+  "stepDoneNextCta": "Sonraki adıma geç",
+  "stepDoneProjectFinished": "Projeni tamamladın. Artık gösterebileceğin bir çıktın var.",
+  "stepDoneClose": "Kapat",
+  "todayProjectHint": "Bu adım seni şu hedefe götürüyor: {goal}",
+  "@todayProjectHint": {
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "taskTypeProject": "Proje"
 }

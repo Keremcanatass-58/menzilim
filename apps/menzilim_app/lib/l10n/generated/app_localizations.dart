@@ -1849,6 +1849,276 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu meslek için içerikler hazırlanıyor.'**
   String get onboardingComingSoonHint;
+
+  /// No description provided for @levelNone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz başlanmadı'**
+  String get levelNone;
+
+  /// No description provided for @gapStatusReached.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedefe ulaştın'**
+  String get gapStatusReached;
+
+  /// No description provided for @gapStatusDeveloping.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gelişiyor'**
+  String get gapStatusDeveloping;
+
+  /// No description provided for @gapStatusNeedsWork.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geliştirilmeli'**
+  String get gapStatusNeedsWork;
+
+  /// No description provided for @gapStatusNotStarted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz başlanmadı'**
+  String get gapStatusNotStarted;
+
+  /// No description provided for @skillGapTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedefine göre beceriler'**
+  String get skillGapTitle;
+
+  /// No description provided for @skillGapSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevcut durumun ve yolundaki hedef seviye.'**
+  String get skillGapSubtitle;
+
+  /// No description provided for @skillGapDashboardTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedefine göre'**
+  String get skillGapDashboardTitle;
+
+  /// No description provided for @skillGapDeveloping.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} beceri geliştiriliyor'**
+  String skillGapDeveloping(int count);
+
+  /// No description provided for @skillGapAllReached.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yolundaki tüm becerilerde hedefe ulaştın.'**
+  String get skillGapAllReached;
+
+  /// No description provided for @skillGapCurrentLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şu an'**
+  String get skillGapCurrentLabel;
+
+  /// No description provided for @skillGapTargetLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedef'**
+  String get skillGapTargetLabel;
+
+  /// No description provided for @skillGapProgressExplained.
+  ///
+  /// In tr, this message translates to:
+  /// **'İçerik ve quizlerde %{percent} ilerleme'**
+  String skillGapProgressExplained(int percent);
+
+  /// No description provided for @skillGapViewPath.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yolumu Gör'**
+  String get skillGapViewPath;
+
+  /// No description provided for @skillGapPriorityTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öncelikli gelişim'**
+  String get skillGapPriorityTitle;
+
+  /// No description provided for @skillGapLoadError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Beceri durumun yüklenemedi.'**
+  String get skillGapLoadError;
+
+  /// No description provided for @skillGapEmptyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu uzmanlık için beceri haritası henüz hazır değil.'**
+  String get skillGapEmptyTitle;
+
+  /// No description provided for @pathGoalTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedefim'**
+  String get pathGoalTitle;
+
+  /// No description provided for @pathJourneyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yolculuğum'**
+  String get pathJourneyTitle;
+
+  /// No description provided for @pathSkillsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Becerilerim'**
+  String get pathSkillsTitle;
+
+  /// No description provided for @stepDetailTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Proje Adımı'**
+  String get stepDetailTitle;
+
+  /// No description provided for @stepDetailOrder.
+  ///
+  /// In tr, this message translates to:
+  /// **'Projenin {order}. adımı'**
+  String stepDetailOrder(int order);
+
+  /// No description provided for @stepDetailOrderOfTotal.
+  ///
+  /// In tr, this message translates to:
+  /// **'{order} / {total} adım'**
+  String stepDetailOrderOfTotal(int order, int total);
+
+  /// No description provided for @stepDetailWhyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adım neden önemli?'**
+  String get stepDetailWhyTitle;
+
+  /// No description provided for @stepDetailWhyBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adımı tamamladığında projen bir parça daha çalışır hale gelir ve {skill} becerinde ilerlersin.'**
+  String stepDetailWhyBody(String skill);
+
+  /// No description provided for @stepDetailWhyBodyGeneric.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adımı tamamladığında projen bir parça daha çalışır hale gelir.'**
+  String get stepDetailWhyBodyGeneric;
+
+  /// No description provided for @stepDetailChecklistTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapılacaklar'**
+  String get stepDetailChecklistTitle;
+
+  /// No description provided for @stepDetailChecklistRead.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlgili içeriği oku'**
+  String get stepDetailChecklistRead;
+
+  /// No description provided for @stepDetailChecklistApply.
+  ///
+  /// In tr, this message translates to:
+  /// **'Adımı projende uygula'**
+  String get stepDetailChecklistApply;
+
+  /// No description provided for @stepDetailChecklistVerify.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çalıştığını kontrol et'**
+  String get stepDetailChecklistVerify;
+
+  /// No description provided for @stepDetailContentTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öğrenmen gereken içerik'**
+  String get stepDetailContentTitle;
+
+  /// No description provided for @stepDetailQuizTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bilgini test et'**
+  String get stepDetailQuizTitle;
+
+  /// No description provided for @stepDetailOpenQuiz.
+  ///
+  /// In tr, this message translates to:
+  /// **'Quiz\'i Aç'**
+  String get stepDetailOpenQuiz;
+
+  /// No description provided for @stepDetailSkillLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlgili beceri'**
+  String get stepDetailSkillLabel;
+
+  /// No description provided for @stepDetailLockedTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adım henüz açılmadı.'**
+  String get stepDetailLockedTitle;
+
+  /// No description provided for @stepDoneTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Adım tamamlandı.'**
+  String get stepDoneTitle;
+
+  /// No description provided for @stepDoneProgress.
+  ///
+  /// In tr, this message translates to:
+  /// **'{completed} / {total} adım tamamlandı.'**
+  String stepDoneProgress(int completed, int total);
+
+  /// No description provided for @stepDoneUnlocked.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonraki adım açıldı.'**
+  String get stepDoneUnlocked;
+
+  /// No description provided for @stepDoneSkill.
+  ///
+  /// In tr, this message translates to:
+  /// **'{skill} becerinde ilerleme kaydettin.'**
+  String stepDoneSkill(String skill);
+
+  /// No description provided for @stepDoneNextLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonraki adım'**
+  String get stepDoneNextLabel;
+
+  /// No description provided for @stepDoneNextCta.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonraki adıma geç'**
+  String get stepDoneNextCta;
+
+  /// No description provided for @stepDoneProjectFinished.
+  ///
+  /// In tr, this message translates to:
+  /// **'Projeni tamamladın. Artık gösterebileceğin bir çıktın var.'**
+  String get stepDoneProjectFinished;
+
+  /// No description provided for @stepDoneClose.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapat'**
+  String get stepDoneClose;
+
+  /// No description provided for @todayProjectHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adım seni şu hedefe götürüyor: {goal}'**
+  String todayProjectHint(String goal);
+
+  /// No description provided for @taskTypeProject.
+  ///
+  /// In tr, this message translates to:
+  /// **'Proje'**
+  String get taskTypeProject;
 }
 
 class _AppLocalizationsDelegate

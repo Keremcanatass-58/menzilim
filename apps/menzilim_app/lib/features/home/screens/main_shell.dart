@@ -45,10 +45,12 @@ class _MainShellState extends State<MainShell> {
             embedded: true,
             onNavigate: _select,
             refreshToken: _projectVersion,
+            onProjectChanged: () => setState(() => _projectVersion++),
           ),
           ProjectScreen(
             onGoToToday: () => _select(0),
             onProjectChanged: () => setState(() => _projectVersion++),
+            refreshToken: _projectVersion,
           ),
           // Bu ekranlar kendi AppBar'larını taşır; kabuk içinde geri düğmesi
           // otomatik olarak çıkmaz (yığında alt route yok).

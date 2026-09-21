@@ -1,4 +1,4 @@
-using Menzilim.Application.DTOs.Progress;
+﻿using Menzilim.Application.DTOs.Progress;
 using Menzilim.Application.DTOs.Skills;
 using Menzilim.Application.Interfaces.Repositories;
 using Menzilim.Application.Interfaces.Skills;
@@ -256,6 +256,9 @@ public class ProgressServiceTests
 
     private class MockSkillRepository : ISkillRepository
     {
+    public Task<List<SpecializationSkill>> GetSpecializationSkillsAsync(Guid specializationId) =>
+        Task.FromResult(new List<SpecializationSkill>());
+
         private List<Skill> _skills = new();
         private List<ContentSkill> _contentLinks = new();
         private List<Domain.Quiz> _quizzes = new();
@@ -317,6 +320,9 @@ public class ProgressServiceTests
 
     private class MockDailyPlanRepository : IDailyPlanRepository
     {
+    public Task<List<DailyTask>> GetTasksByProjectStepAsync(Guid userProjectStepId) =>
+        Task.FromResult(new List<DailyTask>());
+
         private Domain.DailyPlan? _todayPlan;
         private List<Domain.DailyPlan> _allPlans = new();
 

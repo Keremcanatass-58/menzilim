@@ -1,5 +1,7 @@
 using Menzilim.Application.DTOs.DailyPlan;
+using Menzilim.Application.DTOs.Projects;
 using Menzilim.Application.DTOs.Skills;
+using Menzilim.Application.Interfaces.Projects;
 using Menzilim.Application.Interfaces.DailyPlan;
 using Menzilim.Application.Interfaces.Repositories;
 using Menzilim.Application.Services.Skills;
@@ -19,13 +21,17 @@ public class DailyPlanService : IDailyPlanService
     private readonly IContentRepository _contentRepository;
     private readonly ISkillRepository _skillRepository;
 
+    // Projesi olmayan kullanıcılarda null kalır; plan eskisi gibi üretilir.
+    private readonly IUserProjectService? _userProjectService;
+
     public DailyPlanService(
         IDailyPlanRepository dailyPlanRepository,
         IUserRepository userRepository,
         IUserContentProgressRepository contentProgressRepository,
         IQuizRepository quizRepository,
         IContentRepository contentRepository,
-        ISkillRepository skillRepository)
+        ISkillRepository skillRepository,
+        IUserProjectService? userProjectService = null)
     {
         _dailyPlanRepository = dailyPlanRepository;
         _userRepository = userRepository;
@@ -33,6 +39,7 @@ public class DailyPlanService : IDailyPlanService
         _quizRepository = quizRepository;
         _contentRepository = contentRepository;
         _skillRepository = skillRepository;
+        _userProjectService = userProjectService;
     }
 
     public async Task<DailyPlanResponse> GetTodayAsync(
@@ -130,6 +137,8 @@ public class DailyPlanService : IDailyPlanService
         var learn = selections.ElementAtOrDefault(0);
         var practice = selections.ElementAtOrDefault(1);
 
+        var project = await FindNextProjectStepAsync(userId);
+
         return new DailyPlanGenerationContext
         {
             ProfessionName = profile?.Profession?.Name ?? string.Empty,
@@ -149,7 +158,50 @@ public class DailyPlanService : IDailyPlanService
             PracticeContentId = practice?.ContentId,
             PracticeContentTitle = practice?.Title,
             PracticeFocusSkillName = practice?.FocusSkillName,
+            ProjectStepId = project?.Step.Id,
+            ProjectStepTitle = project?.Step.Title,
+            ProjectStepDescription = project?.Step.Description,
+            ProjectStepOrder = project?.Step.Order ?? 0,
+            ProjectTotalSteps = project?.Project.TotalSteps ?? 0,
+            ProjectStepMinutes = project?.Step.EstimatedMinutes ?? 0,
+            ProjectName = project?.Project.Name,
+            ProjectStepContentId = project?.Step.ContentId,
+            ProjectStepSkillName = project?.Step.SkillName,
         };
+    }
+
+    /// <summary>
+    /// Kullanıcının aktif projesindeki sıradaki (Available) adım. Proje henüz
+    /// oluşmadıysa servis onu burada oluşturur; böylece kullanıcı Yolum
+    /// sekmesini hiç açmasa da günün ana görevi proje adımı olur. Proje ya da
+    /// açık adım yoksa null döner ve plan eskisi gibi üretilir.
+    /// </summary>
+    private async Task<(UserProjectStepResponse Step, UserProjectResponse Project)?>
+        FindNextProjectStepAsync(Guid userId)
+    {
+        if (_userProjectService is null)
+        {
+            return null;
+        }
+
+        List<UserProjectResponse> projects;
+
+        try
+        {
+            projects = await _userProjectService.GetMyProjectsAsync(userId);
+        }
+        catch (KeyNotFoundException)
+        {
+            // Profil yoksa plan zaten kişiselleştirilemez.
+            return null;
+        }
+
+        foreach (var project in projects.Where(p => p.NextStep is not null))
+        {
+            return (project.NextStep!, project);
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -269,6 +321,7 @@ public class DailyPlanService : IDailyPlanService
                     EstimatedMinutes = task.EstimatedMinutes,
                     IsCompleted = false,
                     ContentId = task.ContentId,
+                    UserProjectStepId = task.UserProjectStepId,
                 });
         }
 
@@ -278,7 +331,7 @@ public class DailyPlanService : IDailyPlanService
     // DailyTask'ta sıra kolonu yok; veritabanı görevleri sırasız döndürebilir.
     // Kullanıcı sırası DailyPlanGenerator'ın görev tipleriyle aynıdır.
     private static readonly string[] TaskTypeOrder =
-        { "Learn", "Practice", "Quiz", "Review" };
+        { "Project", "Learn", "Practice", "Quiz", "Review" };
 
     private static int TaskTypeRank(string taskType)
     {
@@ -308,7 +361,13 @@ public class DailyPlanService : IDailyPlanService
                 IsCompleted = task.IsCompleted,
                 CompletedAt = task.CompletedAt,
                 ContentId = task.ContentId,
-                QuizId = IsQuizTask(task.TaskType) ? quizId : null
+                QuizId = IsQuizTask(task.TaskType) ? quizId : null,
+                UserProjectStepId = task.UserProjectStepId,
+                UserProjectId = task.UserProjectStep?.UserProjectId,
+                ProjectName = task.UserProjectStep?.UserProject?.Name,
+                ProjectStepOrder = task.UserProjectStep?.Order,
+                ProjectTotalSteps = task.UserProjectStep?.UserProject?.Steps.Count,
+                SkillName = task.UserProjectStep?.LearningItem?.Skill?.Name,
             })
             .ToList();
 

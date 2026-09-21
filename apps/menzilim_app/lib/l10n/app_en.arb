@@ -315,5 +315,112 @@
   "quizReviewTitle": "Questions you missed",
   "quizReviewAllCorrect": "You answered every question correctly.",
   "onboardingComingSoon": "Coming soon",
-  "onboardingComingSoonHint": "Content for this field is on the way."
+  "onboardingComingSoonHint": "Content for this field is on the way.",
+  "levelNone": "Not started yet",
+  "gapStatusReached": "Target reached",
+  "gapStatusDeveloping": "Developing",
+  "gapStatusNeedsWork": "Needs work",
+  "gapStatusNotStarted": "Not started yet",
+  "skillGapTitle": "Skills for your goal",
+  "skillGapSubtitle": "Where you are and the level your path aims for.",
+  "skillGapDashboardTitle": "Toward your goal",
+  "skillGapDeveloping": "{count} skills in progress",
+  "@skillGapDeveloping": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "skillGapAllReached": "You reached the target in every skill on your path.",
+  "skillGapCurrentLabel": "Now",
+  "skillGapTargetLabel": "Target",
+  "skillGapProgressExplained": "{percent}% progress in content and quizzes",
+  "@skillGapProgressExplained": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "skillGapViewPath": "See My Path",
+  "skillGapPriorityTitle": "Focus next",
+  "skillGapLoadError": "Your skill status could not be loaded.",
+  "skillGapEmptyTitle": "The skill map for this specialization isn't ready yet.",
+  "pathGoalTitle": "My Goal",
+  "pathJourneyTitle": "My Journey",
+  "pathSkillsTitle": "My Skills",
+  "stepDetailTitle": "Project Step",
+  "stepDetailOrder": "Step {order} of the project",
+  "@stepDetailOrder": {
+    "placeholders": {
+      "order": {
+        "type": "int"
+      }
+    }
+  },
+  "stepDetailOrderOfTotal": "Step {order} of {total}",
+  "@stepDetailOrderOfTotal": {
+    "placeholders": {
+      "order": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "stepDetailWhyTitle": "Why does this step matter?",
+  "stepDetailWhyBody": "Finishing this step makes your project a bit more real and moves your {skill} skill forward.",
+  "@stepDetailWhyBody": {
+    "placeholders": {
+      "skill": {
+        "type": "String"
+      }
+    }
+  },
+  "stepDetailWhyBodyGeneric": "Finishing this step makes your project a bit more real.",
+  "stepDetailChecklistTitle": "What to do",
+  "stepDetailChecklistRead": "Read the related content",
+  "stepDetailChecklistApply": "Apply the step in your project",
+  "stepDetailChecklistVerify": "Check that it works",
+  "stepDetailContentTitle": "Content to study",
+  "stepDetailQuizTitle": "Test your knowledge",
+  "stepDetailOpenQuiz": "Open Quiz",
+  "stepDetailSkillLabel": "Related skill",
+  "stepDetailLockedTitle": "This step isn't unlocked yet.",
+  "stepDoneTitle": "Step completed.",
+  "stepDoneProgress": "{completed} of {total} steps completed.",
+  "@stepDoneProgress": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "stepDoneUnlocked": "The next step is unlocked.",
+  "stepDoneSkill": "You made progress in {skill}.",
+  "@stepDoneSkill": {
+    "placeholders": {
+      "skill": {
+        "type": "String"
+      }
+    }
+  },
+  "stepDoneNextLabel": "Next step",
+  "stepDoneNextCta": "Go to the next step",
+  "stepDoneProjectFinished": "You completed your project. You now have something to show.",
+  "stepDoneClose": "Close",
+  "todayProjectHint": "This step takes you toward: {goal}",
+  "@todayProjectHint": {
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "taskTypeProject": "Project"
 }

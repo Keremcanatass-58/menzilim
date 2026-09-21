@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/auth/auth_scope.dart';
 import '../../../core/design/design_system.dart';
+import '../../../core/localization/domain_labels.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/token_storage.dart';
@@ -228,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _InfoRow(
                       icon: Icons.stairs_outlined,
                       label: l10n.profileLevel,
-                      value: dashboard.experienceLevel,
+                      value: context.skillLevelLabel(dashboard.experienceLevel),
                     ),
                     const Divider(),
                     _InfoRow(

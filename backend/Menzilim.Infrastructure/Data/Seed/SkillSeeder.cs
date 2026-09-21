@@ -113,6 +113,32 @@ public static class SkillSeeder
             },
         };
 
+    /// <summary>
+    /// MENZİLİM öğrenme yolundaki hedef seviye. Uzmanlığın çekirdek becerileri
+    /// <see cref="DefaultTargetLevel"/> hedefler; destekleyici beceriler için
+    /// hedef burada düşürülür. Bu seviyeler bir işe alım vaadi değildir.
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, string> SkillTargetLevels =
+        new Dictionary<string, string>
+        {
+            // Yol boyunca kullanılan, uzmanlaşma gerektirmeyen destek becerileri.
+            ["Git ve Versiyon Kontrolü"] = SkillLevels.Beginner,
+            ["Web Uygulama Güvenliği"] = SkillLevels.Beginner,
+            ["Mobil Arayüz Tasarımı"] = SkillLevels.Beginner,
+            ["Excel ve Tablolama"] = SkillLevels.Beginner,
+            ["Doğrusal Cebir"] = SkillLevels.Beginner,
+            ["Kriptografi Temelleri"] = SkillLevels.Beginner,
+            ["MLOps ve Model Dağıtımı"] = SkillLevels.Beginner,
+        };
+
+    /// <summary>Hedefi ayrıca belirtilmeyen beceriler için hedef seviye.</summary>
+    public const string DefaultTargetLevel = SkillLevels.Intermediate;
+
+    public static string TargetLevelFor(string skillName) =>
+        SkillTargetLevels.TryGetValue(skillName, out var level)
+            ? level
+            : DefaultTargetLevel;
+
     // İçerik başlığı → skill adı. Yalnızca başlık/açıklamada açıkça geçen,
     // doğrulanmış eşleştirmeler eklenir.
     public static readonly IReadOnlyList<(string ContentTitle, string SkillName)> ContentSkillMappings =
@@ -170,11 +196,30 @@ public static class SkillSeeder
             .Where(s => specializationNames.Contains(s.Name))
             .ToListAsync();
 
-        var existingLinks = (await db.SpecializationSkills
-                .Select(ss => new { ss.SpecializationId, ss.SkillId })
-                .ToListAsync())
+        var existingLinkRows = await db.SpecializationSkills.ToListAsync();
+
+        var existingLinks = existingLinkRows
             .Select(l => (l.SpecializationId, l.SkillId))
             .ToHashSet();
+
+        // Daha önce eklenmiş bağlarda hedef seviye güncel tutulur.
+        var skillNameById = skillsByName.Values
+            .ToDictionary(s => s.Id, s => s.Name);
+
+        foreach (var link in existingLinkRows)
+        {
+            if (!skillNameById.TryGetValue(link.SkillId, out var name))
+            {
+                continue;
+            }
+
+            var target = TargetLevelFor(name);
+
+            if (link.TargetLevel != target)
+            {
+                link.TargetLevel = target;
+            }
+        }
 
         foreach (var specialization in specializations)
         {
@@ -198,6 +243,7 @@ public static class SkillSeeder
                     Id = Guid.NewGuid(),
                     SpecializationId = specialization.Id,
                     SkillId = skillId,
+                    TargetLevel = TargetLevelFor(skillName),
                 });
             }
         }

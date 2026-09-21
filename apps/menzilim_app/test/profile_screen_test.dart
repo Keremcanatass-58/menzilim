@@ -138,7 +138,9 @@ void main() {
     expect(find.text('kullanici@menzilim.test'), findsOneWidget);
     expect(find.text('Yazılım Geliştirici'), findsOneWidget);
     expect(find.text('Backend'), findsOneWidget);
-    expect(find.text('Beginner'), findsOneWidget);
+    // Ham seviye değeri değil, yerelleştirilmiş karşılığı gösterilir.
+    expect(find.text('Beginner'), findsNothing);
+    expect(find.text('Başlangıç'), findsOneWidget);
     expect(find.text('60 dakika'), findsOneWidget);
     expect(find.text('Backend geliştirici olmak'), findsOneWidget);
 

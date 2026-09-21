@@ -32,6 +32,17 @@ public class SkillRepository : ISkillRepository
             .ToListAsync();
     }
 
+    public async Task<List<SpecializationSkill>> GetSpecializationSkillsAsync(
+        Guid specializationId)
+    {
+        return await _dbContext.SpecializationSkills
+            .AsNoTracking()
+            .Where(ss =>
+                ss.SpecializationId == specializationId &&
+                ss.Skill.IsActive)
+            .ToListAsync();
+    }
+
     public async Task<List<ContentSkill>> GetActiveContentLinksAsync(
         IReadOnlyCollection<Guid> skillIds)
     {

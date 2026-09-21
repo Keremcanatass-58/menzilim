@@ -1050,4 +1050,160 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboardingComingSoonHint =>
       'Content for this field is on the way.';
+
+  @override
+  String get levelNone => 'Not started yet';
+
+  @override
+  String get gapStatusReached => 'Target reached';
+
+  @override
+  String get gapStatusDeveloping => 'Developing';
+
+  @override
+  String get gapStatusNeedsWork => 'Needs work';
+
+  @override
+  String get gapStatusNotStarted => 'Not started yet';
+
+  @override
+  String get skillGapTitle => 'Skills for your goal';
+
+  @override
+  String get skillGapSubtitle =>
+      'Where you are and the level your path aims for.';
+
+  @override
+  String get skillGapDashboardTitle => 'Toward your goal';
+
+  @override
+  String skillGapDeveloping(int count) {
+    return '$count skills in progress';
+  }
+
+  @override
+  String get skillGapAllReached =>
+      'You reached the target in every skill on your path.';
+
+  @override
+  String get skillGapCurrentLabel => 'Now';
+
+  @override
+  String get skillGapTargetLabel => 'Target';
+
+  @override
+  String skillGapProgressExplained(int percent) {
+    return '$percent% progress in content and quizzes';
+  }
+
+  @override
+  String get skillGapViewPath => 'See My Path';
+
+  @override
+  String get skillGapPriorityTitle => 'Focus next';
+
+  @override
+  String get skillGapLoadError => 'Your skill status could not be loaded.';
+
+  @override
+  String get skillGapEmptyTitle =>
+      'The skill map for this specialization isn\'t ready yet.';
+
+  @override
+  String get pathGoalTitle => 'My Goal';
+
+  @override
+  String get pathJourneyTitle => 'My Journey';
+
+  @override
+  String get pathSkillsTitle => 'My Skills';
+
+  @override
+  String get stepDetailTitle => 'Project Step';
+
+  @override
+  String stepDetailOrder(int order) {
+    return 'Step $order of the project';
+  }
+
+  @override
+  String stepDetailOrderOfTotal(int order, int total) {
+    return 'Step $order of $total';
+  }
+
+  @override
+  String get stepDetailWhyTitle => 'Why does this step matter?';
+
+  @override
+  String stepDetailWhyBody(String skill) {
+    return 'Finishing this step makes your project a bit more real and moves your $skill skill forward.';
+  }
+
+  @override
+  String get stepDetailWhyBodyGeneric =>
+      'Finishing this step makes your project a bit more real.';
+
+  @override
+  String get stepDetailChecklistTitle => 'What to do';
+
+  @override
+  String get stepDetailChecklistRead => 'Read the related content';
+
+  @override
+  String get stepDetailChecklistApply => 'Apply the step in your project';
+
+  @override
+  String get stepDetailChecklistVerify => 'Check that it works';
+
+  @override
+  String get stepDetailContentTitle => 'Content to study';
+
+  @override
+  String get stepDetailQuizTitle => 'Test your knowledge';
+
+  @override
+  String get stepDetailOpenQuiz => 'Open Quiz';
+
+  @override
+  String get stepDetailSkillLabel => 'Related skill';
+
+  @override
+  String get stepDetailLockedTitle => 'This step isn\'t unlocked yet.';
+
+  @override
+  String get stepDoneTitle => 'Step completed.';
+
+  @override
+  String stepDoneProgress(int completed, int total) {
+    return '$completed of $total steps completed.';
+  }
+
+  @override
+  String get stepDoneUnlocked => 'The next step is unlocked.';
+
+  @override
+  String stepDoneSkill(String skill) {
+    return 'You made progress in $skill.';
+  }
+
+  @override
+  String get stepDoneNextLabel => 'Next step';
+
+  @override
+  String get stepDoneNextCta => 'Go to the next step';
+
+  @override
+  String get stepDoneProjectFinished =>
+      'You completed your project. You now have something to show.';
+
+  @override
+  String get stepDoneClose => 'Close';
+
+  @override
+  String todayProjectHint(String goal) {
+    return 'This step takes you toward: $goal';
+  }
+
+  @override
+  String get taskTypeProject => 'Project';
 }

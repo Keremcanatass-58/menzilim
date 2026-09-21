@@ -24,4 +24,12 @@ public class DailyTaskResponse
 
     // Yalnızca Quiz görevlerinde dolu: kullanıcının uzmanlığına uygun quiz.
     public Guid? QuizId { get; set; }
+
+    // Görev bir Living Project adımından üretildiyse dolu olur.
+    public Guid? UserProjectStepId { get; set; }
+    public Guid? UserProjectId { get; set; }
+    public string? ProjectName { get; set; }
+    public int? ProjectStepOrder { get; set; }
+    public int? ProjectTotalSteps { get; set; }
+    public string? SkillName { get; set; }
 }
