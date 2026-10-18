@@ -32,4 +32,23 @@ class ProjectService {
 
     return UserProject.fromJson(response as Map<String, dynamic>);
   }
+
+  /// Adımın çıktısını (bağlantı ve not) kaydeder; ikisi de boş bırakılabilir.
+  Future<UserProject> updateStepEvidence(
+    String token,
+    String stepId, {
+    String? evidenceUrl,
+    String? note,
+  }) async {
+    final response = await _apiClient.put(
+      ApiConstants.projectStepEvidence(stepId),
+      token: token,
+      body: {
+        'evidenceUrl': evidenceUrl,
+        'note': note,
+      },
+    );
+
+    return UserProject.fromJson(response as Map<String, dynamic>);
+  }
 }

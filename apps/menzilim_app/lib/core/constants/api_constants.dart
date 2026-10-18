@@ -48,4 +48,11 @@ class ApiConstants {
 
   static String completeProjectStep(String stepId) =>
       '$baseUrl/api/projects/me/steps/$stepId/complete';
+
+  static String projectStepEvidence(String stepId) =>
+      '$baseUrl/api/projects/me/steps/$stepId/evidence';
+
+  static String get myStreak => '$baseUrl/api/progress/streak/me';
+
+  static String get profileTimeZone => '$baseUrl/api/profile/timezone';
 }

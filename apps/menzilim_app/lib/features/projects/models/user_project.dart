@@ -11,6 +11,8 @@ class UserProject {
   final int totalMinutes;
   final UserProjectStep? nextStep;
   final List<UserProjectStep> steps;
+  final DateTime? startedAt;
+  final DateTime? completedAt;
 
   const UserProject({
     required this.id,
@@ -23,7 +25,21 @@ class UserProject {
     required this.totalMinutes,
     required this.nextStep,
     required this.steps,
+    this.startedAt,
+    this.completedAt,
   });
+
+  /// Özette gösterilecek beceriler (tekrarsız, sırayla).
+  List<String> get usedSkills => {
+        for (final step in steps)
+          if (step.skillName != null) step.skillName!,
+      }.toList();
+
+  List<UserProjectStep> get completedStepList =>
+      steps.where((step) => step.isCompleted).toList();
+
+  List<UserProjectStep> get evidenceSteps =>
+      steps.where((step) => step.hasEvidence).toList();
 
   bool get isCompleted => status == 'Completed';
 
@@ -47,6 +63,12 @@ class UserProject {
           ? null
           : UserProjectStep.fromJson(next as Map<String, dynamic>),
       steps: steps,
+      startedAt: json['startedAt'] == null
+          ? null
+          : DateTime.tryParse(json['startedAt'].toString()),
+      completedAt: json['completedAt'] == null
+          ? null
+          : DateTime.tryParse(json['completedAt'].toString()),
     );
   }
 }
@@ -62,6 +84,16 @@ class UserProjectStep {
   final String? contentTitle;
   final String? skillName;
 
+  /// Adımın becerisine bağlı quiz (yoksa null).
+  final String? quizId;
+  final String? quizTitle;
+
+  /// Kullanıcının eklediği çıktı.
+  final String? evidenceUrl;
+  final String? note;
+
+  final DateTime? completedAt;
+
   const UserProjectStep({
     required this.id,
     required this.order,
@@ -72,7 +104,14 @@ class UserProjectStep {
     required this.contentId,
     required this.contentTitle,
     required this.skillName,
+    this.quizId,
+    this.quizTitle,
+    this.evidenceUrl,
+    this.note,
+    this.completedAt,
   });
+
+  bool get hasEvidence => evidenceUrl != null && evidenceUrl!.isNotEmpty;
 
   bool get isCompleted => status == 'Completed';
 
@@ -93,6 +132,13 @@ class UserProjectStep {
       contentId: contentId == null || contentId.isEmpty ? null : contentId,
       contentTitle: json['contentTitle']?.toString(),
       skillName: json['skillName']?.toString(),
+      quizId: _text(json['quizId']),
+      quizTitle: _text(json['quizTitle']),
+      evidenceUrl: _text(json['evidenceUrl']),
+      note: _text(json['note']),
+      completedAt: json['completedAt'] == null
+          ? null
+          : DateTime.tryParse(json['completedAt'].toString()),
     );
   }
 }
@@ -102,4 +148,10 @@ int? _asInt(Object? value) {
   if (value is num) return value.toInt();
 
   return int.tryParse(value?.toString() ?? '');
+}
+
+String? _text(Object? value) {
+  final text = value?.toString();
+
+  return text == null || text.isEmpty ? null : text;
 }

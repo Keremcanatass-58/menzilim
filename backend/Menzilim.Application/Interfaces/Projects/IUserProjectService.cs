@@ -1,4 +1,4 @@
-using Menzilim.Application.DTOs.Projects;
+﻿using Menzilim.Application.DTOs.Projects;
 
 namespace Menzilim.Application.Interfaces.Projects;
 
@@ -18,4 +18,14 @@ public interface IUserProjectService
     /// tamamlanabilir durumda değilse InvalidOperationException.
     /// </summary>
     Task<UserProjectResponse?> CompleteStepAsync(Guid userId, Guid stepId);
+
+    /// <summary>
+    /// Adımın çıktısını (bağlantı ve not) günceller. Adım kullanıcıya ait
+    /// değilse null; bağlantı geçersizse InvalidOperationException.
+    /// Tamamlama koşulu değildir: her durumda eklenebilir.
+    /// </summary>
+    Task<UserProjectResponse?> UpdateStepEvidenceAsync(
+        Guid userId,
+        Guid stepId,
+        UpdateStepEvidenceRequest request);
 }

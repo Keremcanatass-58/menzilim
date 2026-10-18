@@ -1,4 +1,4 @@
-namespace Menzilim.Application.DTOs.Projects;
+﻿namespace Menzilim.Application.DTOs.Projects;
 
 public class UserProjectStepResponse
 {
@@ -28,4 +28,9 @@ public class UserProjectStepResponse
     public string? EvidenceUrl { get; set; }
 
     public string? Note { get; set; }
+
+    /// <summary>Adımın becerisine bağlı quiz (yoksa null).</summary>
+    public Guid? QuizId { get; set; }
+
+    public string? QuizTitle { get; set; }
 }

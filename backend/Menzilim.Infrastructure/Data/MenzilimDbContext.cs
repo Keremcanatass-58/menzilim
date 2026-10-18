@@ -58,6 +58,10 @@ public class MenzilimDbContext : DbContext
             .HasForeignKey(p => p.SpecializationId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<UserProfile>()
+            .Property(p => p.TimeZoneOffsetMinutes)
+            .HasDefaultValue(UserTimeZone.DefaultOffsetMinutes);
+
         modelBuilder.Entity<Specialization>()
             .HasOne(s => s.Profession)
             .WithMany(p => p.Specializations)

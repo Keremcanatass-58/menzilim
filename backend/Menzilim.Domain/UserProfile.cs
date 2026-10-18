@@ -1,4 +1,4 @@
-namespace Menzilim.Domain;
+﻿namespace Menzilim.Domain;
 
 public class UserProfile
 {
@@ -15,6 +15,12 @@ public class UserProfile
     public string CareerGoal { get; set; } = string.Empty;
 
     public int DailyLearningMinutes { get; set; }
+
+    /// <summary>
+    /// Kullanıcının UTC farkı (dakika). Gün sınırı bununla hesaplanır;
+    /// istemci bildirmediyse Türkiye saati (UTC+3) varsayılır.
+    /// </summary>
+    public int TimeZoneOffsetMinutes { get; set; } = UserTimeZone.DefaultOffsetMinutes;
 
     public DateTime UpdatedAt { get; set; }
 

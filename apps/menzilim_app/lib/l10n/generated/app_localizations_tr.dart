@@ -1152,4 +1152,135 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get taskTypeProject => 'Proje';
+
+  @override
+  String get evidenceTitle => 'Kanıt / çıktı';
+
+  @override
+  String get evidenceSubtitle =>
+      'Bu adımda ne yaptın? İstersen sonra da ekleyebilirsin.';
+
+  @override
+  String get evidenceUrlLabel => 'Çalışmanın bağlantısı';
+
+  @override
+  String get evidenceUrlHint => 'https://github.com/kullanici/proje';
+
+  @override
+  String get evidenceNoteLabel => 'Kısa not';
+
+  @override
+  String get evidenceNoteHint => 'Ne yaptığını birkaç cümleyle yaz.';
+
+  @override
+  String get evidenceSave => 'Kaydet';
+
+  @override
+  String get evidenceSaved => 'Çıktın kaydedildi.';
+
+  @override
+  String get evidenceSaveError => 'Çıktı kaydedilemedi.';
+
+  @override
+  String get evidenceInvalidUrl =>
+      'Bağlantı http:// veya https:// ile başlamalı.';
+
+  @override
+  String get evidenceOpen => 'Çıktıyı Gör';
+
+  @override
+  String get evidenceAdd => 'Kanıt ekle';
+
+  @override
+  String get evidenceOpenError => 'Bağlantı açılamadı.';
+
+  @override
+  String get stepFlowLearn => 'Öğren';
+
+  @override
+  String get stepFlowCheck => 'Kontrol et';
+
+  @override
+  String get stepFlowApply => 'Uygula';
+
+  @override
+  String get stepQuizEmpty => 'Bu adım için henüz quiz bulunmuyor.';
+
+  @override
+  String get projectCompletedBanner => 'Proje tamamlandı';
+
+  @override
+  String get projectCompletedPortfolioHint =>
+      'Artık bu projeyi portföyüne ekleyebilirsin.';
+
+  @override
+  String get projectOpenSummary => 'Proje Özeti';
+
+  @override
+  String get projectBackToProject => 'Projeye Dön';
+
+  @override
+  String get summaryTitle => 'Proje Özeti';
+
+  @override
+  String get summaryWhatIDidTitle => 'Ne yaptım?';
+
+  @override
+  String get summarySkillsTitle => 'Kullanılan beceriler';
+
+  @override
+  String get summaryStepsTitle => 'Tamamlanan adımlar';
+
+  @override
+  String get summaryEvidenceTitle => 'Kanıtlar';
+
+  @override
+  String get summaryEvidenceEmpty =>
+      'Henüz kanıt eklemedin. Adımlara çalışmanın bağlantısını ekleyebilirsin.';
+
+  @override
+  String get summaryLearningTitle => 'Öğrenme özeti';
+
+  @override
+  String summaryLearningBody(int count) {
+    return '$count adım tamamladın ve bu becerilerde ilerleme kaydettin.';
+  }
+
+  @override
+  String get summaryStartedAt => 'Başlangıç';
+
+  @override
+  String get summaryCompletedAt => 'Tamamlanma';
+
+  @override
+  String get summaryPlannedDuration => 'Planlanan süre';
+
+  @override
+  String get summaryElapsedDays => 'Geçen süre';
+
+  @override
+  String summaryDays(int count) {
+    return '$count gün';
+  }
+
+  @override
+  String get summaryInProgressTitle => 'Proje henüz tamamlanmadı.';
+
+  @override
+  String get summaryInProgressHint =>
+      'Adımları tamamladıkça özetin zenginleşir.';
+
+  @override
+  String streakDays(int count) {
+    return '$count günlük seri';
+  }
+
+  @override
+  String get streakContinueToday => 'Bugün serini devam ettir.';
+
+  @override
+  String get streakStartToday => 'Bugün serini başlat.';
+
+  @override
+  String get streakActiveToday => 'Bugün aktifsin.';
 }

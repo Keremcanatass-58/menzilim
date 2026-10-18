@@ -4,6 +4,7 @@ import '../../../core/design/design_system.dart';
 import '../../../core/localization/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 import '../models/user_project.dart';
+import '../screens/project_summary_screen.dart';
 
 /// Adım tamamlandığında gösterilen kısa başarı geri bildirimi.
 /// "Sonraki adıma geç" seçilirse o adım döner, aksi halde null.
@@ -105,8 +106,30 @@ class _StepCompletedSheet extends StatelessWidget {
           if (project.isCompleted) ...[
             const SizedBox(height: AppSpacing.lg),
             Text(
-              l10n.stepDoneProjectFinished,
-              style: context.textStyles.bodyLarge,
+              l10n.projectCompletedTitle,
+              style: context.textStyles.titleMedium,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              l10n.projectCompletedPortfolioHint,
+              style: context.textStyles.bodyMedium?.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            MenzilimButton(
+              label: l10n.projectOpenSummary,
+              icon: Icons.workspace_premium_outlined,
+              onPressed: () {
+                // Sayfayı kapat, ardından özet ekranını aç.
+                Navigator.of(context).pop();
+
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ProjectSummaryScreen(project: project),
+                  ),
+                );
+              },
             ),
           ] else if (next != null) ...[
             const SizedBox(height: AppSpacing.lg),
@@ -145,7 +168,11 @@ class _StepCompletedSheet extends StatelessWidget {
             alignment: Alignment.center,
             child: TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.stepDoneClose),
+              child: Text(
+                project.isCompleted
+                    ? l10n.projectBackToProject
+                    : l10n.stepDoneClose,
+              ),
             ),
           ),
         ],

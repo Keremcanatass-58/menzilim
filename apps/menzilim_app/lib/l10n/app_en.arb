@@ -422,5 +422,66 @@
       }
     }
   },
-  "taskTypeProject": "Project"
+  "taskTypeProject": "Project",
+  "evidenceTitle": "Proof of work",
+  "evidenceSubtitle": "What did you do in this step? You can add this later too.",
+  "evidenceUrlLabel": "Link to your work",
+  "evidenceUrlHint": "https://github.com/username/project",
+  "evidenceNoteLabel": "Short note",
+  "evidenceNoteHint": "Describe what you did in a couple of sentences.",
+  "evidenceSave": "Save",
+  "evidenceSaved": "Your work was saved.",
+  "evidenceSaveError": "Your work could not be saved.",
+  "evidenceInvalidUrl": "The link must start with http:// or https://.",
+  "evidenceOpen": "Open Output",
+  "evidenceAdd": "Add proof",
+  "evidenceOpenError": "The link could not be opened.",
+  "stepFlowLearn": "Learn",
+  "stepFlowCheck": "Check",
+  "stepFlowApply": "Apply",
+  "stepQuizEmpty": "There is no quiz for this step yet.",
+  "projectCompletedBanner": "Project completed",
+  "projectCompletedPortfolioHint": "You can add this project to your portfolio now.",
+  "projectOpenSummary": "Project Summary",
+  "projectBackToProject": "Back to Project",
+  "summaryTitle": "Project Summary",
+  "summaryWhatIDidTitle": "What I did",
+  "summarySkillsTitle": "Skills used",
+  "summaryStepsTitle": "Completed steps",
+  "summaryEvidenceTitle": "Proof of work",
+  "summaryEvidenceEmpty": "No proof added yet. You can attach links to your work on each step.",
+  "summaryLearningTitle": "Learning summary",
+  "summaryLearningBody": "You completed {count} steps and made progress in these skills.",
+  "@summaryLearningBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryStartedAt": "Started",
+  "summaryCompletedAt": "Completed",
+  "summaryPlannedDuration": "Planned time",
+  "summaryElapsedDays": "Elapsed",
+  "summaryDays": "{count} days",
+  "@summaryDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryInProgressTitle": "This project isn't finished yet.",
+  "summaryInProgressHint": "Your summary grows as you complete steps.",
+  "streakDays": "{count}-day streak",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakContinueToday": "Keep your streak today.",
+  "streakStartToday": "Start your streak today.",
+  "streakActiveToday": "You're active today."
 }

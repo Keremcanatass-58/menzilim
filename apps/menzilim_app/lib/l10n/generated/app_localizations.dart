@@ -2119,6 +2119,246 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Proje'**
   String get taskTypeProject;
+
+  /// No description provided for @evidenceTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt / çıktı'**
+  String get evidenceTitle;
+
+  /// No description provided for @evidenceSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adımda ne yaptın? İstersen sonra da ekleyebilirsin.'**
+  String get evidenceSubtitle;
+
+  /// No description provided for @evidenceUrlLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çalışmanın bağlantısı'**
+  String get evidenceUrlLabel;
+
+  /// No description provided for @evidenceUrlHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'https://github.com/kullanici/proje'**
+  String get evidenceUrlHint;
+
+  /// No description provided for @evidenceNoteLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısa not'**
+  String get evidenceNoteLabel;
+
+  /// No description provided for @evidenceNoteHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ne yaptığını birkaç cümleyle yaz.'**
+  String get evidenceNoteHint;
+
+  /// No description provided for @evidenceSave.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydet'**
+  String get evidenceSave;
+
+  /// No description provided for @evidenceSaved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıktın kaydedildi.'**
+  String get evidenceSaved;
+
+  /// No description provided for @evidenceSaveError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıktı kaydedilemedi.'**
+  String get evidenceSaveError;
+
+  /// No description provided for @evidenceInvalidUrl.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı http:// veya https:// ile başlamalı.'**
+  String get evidenceInvalidUrl;
+
+  /// No description provided for @evidenceOpen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıktıyı Gör'**
+  String get evidenceOpen;
+
+  /// No description provided for @evidenceAdd.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıt ekle'**
+  String get evidenceAdd;
+
+  /// No description provided for @evidenceOpenError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı açılamadı.'**
+  String get evidenceOpenError;
+
+  /// No description provided for @stepFlowLearn.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öğren'**
+  String get stepFlowLearn;
+
+  /// No description provided for @stepFlowCheck.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kontrol et'**
+  String get stepFlowCheck;
+
+  /// No description provided for @stepFlowApply.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygula'**
+  String get stepFlowApply;
+
+  /// No description provided for @stepQuizEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu adım için henüz quiz bulunmuyor.'**
+  String get stepQuizEmpty;
+
+  /// No description provided for @projectCompletedBanner.
+  ///
+  /// In tr, this message translates to:
+  /// **'Proje tamamlandı'**
+  String get projectCompletedBanner;
+
+  /// No description provided for @projectCompletedPortfolioHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Artık bu projeyi portföyüne ekleyebilirsin.'**
+  String get projectCompletedPortfolioHint;
+
+  /// No description provided for @projectOpenSummary.
+  ///
+  /// In tr, this message translates to:
+  /// **'Proje Özeti'**
+  String get projectOpenSummary;
+
+  /// No description provided for @projectBackToProject.
+  ///
+  /// In tr, this message translates to:
+  /// **'Projeye Dön'**
+  String get projectBackToProject;
+
+  /// No description provided for @summaryTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Proje Özeti'**
+  String get summaryTitle;
+
+  /// No description provided for @summaryWhatIDidTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ne yaptım?'**
+  String get summaryWhatIDidTitle;
+
+  /// No description provided for @summarySkillsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanılan beceriler'**
+  String get summarySkillsTitle;
+
+  /// No description provided for @summaryStepsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanan adımlar'**
+  String get summaryStepsTitle;
+
+  /// No description provided for @summaryEvidenceTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanıtlar'**
+  String get summaryEvidenceTitle;
+
+  /// No description provided for @summaryEvidenceEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz kanıt eklemedin. Adımlara çalışmanın bağlantısını ekleyebilirsin.'**
+  String get summaryEvidenceEmpty;
+
+  /// No description provided for @summaryLearningTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öğrenme özeti'**
+  String get summaryLearningTitle;
+
+  /// No description provided for @summaryLearningBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} adım tamamladın ve bu becerilerde ilerleme kaydettin.'**
+  String summaryLearningBody(int count);
+
+  /// No description provided for @summaryStartedAt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç'**
+  String get summaryStartedAt;
+
+  /// No description provided for @summaryCompletedAt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanma'**
+  String get summaryCompletedAt;
+
+  /// No description provided for @summaryPlannedDuration.
+  ///
+  /// In tr, this message translates to:
+  /// **'Planlanan süre'**
+  String get summaryPlannedDuration;
+
+  /// No description provided for @summaryElapsedDays.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçen süre'**
+  String get summaryElapsedDays;
+
+  /// No description provided for @summaryDays.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} gün'**
+  String summaryDays(int count);
+
+  /// No description provided for @summaryInProgressTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Proje henüz tamamlanmadı.'**
+  String get summaryInProgressTitle;
+
+  /// No description provided for @summaryInProgressHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Adımları tamamladıkça özetin zenginleşir.'**
+  String get summaryInProgressHint;
+
+  /// No description provided for @streakDays.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} günlük seri'**
+  String streakDays(int count);
+
+  /// No description provided for @streakContinueToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün serini devam ettir.'**
+  String get streakContinueToday;
+
+  /// No description provided for @streakStartToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün serini başlat.'**
+  String get streakStartToday;
+
+  /// No description provided for @streakActiveToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün aktifsin.'**
+  String get streakActiveToday;
 }
 
 class _AppLocalizationsDelegate

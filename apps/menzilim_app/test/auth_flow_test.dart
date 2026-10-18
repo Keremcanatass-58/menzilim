@@ -25,14 +25,11 @@ import 'core/auth/auth_controller_test.dart' show fakeJwt;
 class _FakeOnboardingService extends OnboardingService {
   /// Onboarding kaydedildikten sonra değişebilir.
   bool hasProfileResult;
-  final Object? error;
 
-  _FakeOnboardingService({this.hasProfileResult = true, this.error})
-      : super(ApiClient());
+  _FakeOnboardingService({this.hasProfileResult = true}) : super(ApiClient());
 
   @override
   Future<bool> hasProfile(String token) async {
-    if (error != null) throw error!;
     return hasProfileResult;
   }
 }

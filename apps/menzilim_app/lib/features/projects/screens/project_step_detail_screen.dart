@@ -11,7 +11,9 @@ import '../../content/services/content_service.dart';
 import '../../quiz/screens/quiz_screen.dart';
 import '../models/user_project.dart';
 import '../services/project_service.dart';
+import '../../news/services/news_link_opener.dart';
 import '../widgets/step_completed_sheet.dart';
+import '../widgets/step_evidence_sheet.dart';
 
 /// Günün ana görevinin (proje adımı) detayı: ne yapılacağı, neden önemli
 /// olduğu, destekleyici içerik ve tamamlama.
@@ -157,10 +159,65 @@ class _ProjectStepDetailScreenState extends State<ProjectStepDetailScreen> {
     }
   }
 
+  String? get _quizId => _step.quizId ?? widget.quizId;
+
   Future<void> _openQuiz() async {
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => QuizScreen(quizId: widget.quizId)),
+      MaterialPageRoute(builder: (_) => QuizScreen(quizId: _quizId)),
     );
+  }
+
+  /// Kanıt formu: bağlantı ve not kaydedilir, ekran güncellenir.
+  Future<void> _editEvidence() async {
+    final updated = await showStepEvidenceSheet(
+      context: context,
+      step: _step,
+      onSave: (url, note) async {
+        final token = await _tokenStorage.getToken();
+
+        if (token == null || token.isEmpty) {
+          throw Exception('Oturum bilgisi bulunamadı.');
+        }
+
+        return _projectService.updateStepEvidence(
+          token,
+          _step.id,
+          evidenceUrl: url,
+          note: note,
+        );
+      },
+    );
+
+    if (!mounted || updated == null) return;
+
+    setState(() {
+      _project = updated;
+      _step = updated.steps.firstWhere(
+        (s) => s.id == _step.id,
+        orElse: () => _step,
+      );
+      _changed = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.evidenceSaved)),
+    );
+  }
+
+  Future<void> _openEvidence() async {
+    final url = _step.evidenceUrl;
+
+    if (url == null) return;
+
+    final uri = Uri.tryParse(url);
+
+    if (uri == null || !await openNewsLinkExternally(uri)) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.evidenceOpenError)),
+      );
+    }
   }
 
   @override
@@ -278,6 +335,7 @@ class _ProjectStepDetailScreenState extends State<ProjectStepDetailScreen> {
                       const SizedBox(height: AppSpacing.section),
                       MenzilimSectionHeader(
                         title: l10n.stepDetailContentTitle,
+                        subtitle: l10n.stepFlowLearn,
                       ),
                       MenzilimCard(
                         onTap: _openContent,
@@ -313,16 +371,57 @@ class _ProjectStepDetailScreenState extends State<ProjectStepDetailScreen> {
                       ),
                     ],
 
-                    if (widget.quizId != null) ...[
-                      const SizedBox(height: AppSpacing.section),
-                      MenzilimSectionHeader(title: l10n.stepDetailQuizTitle),
+                    const SizedBox(height: AppSpacing.section),
+                    MenzilimSectionHeader(
+                      title: l10n.stepDetailQuizTitle,
+                      subtitle: l10n.stepFlowCheck,
+                    ),
+                    if (_quizId != null)
                       MenzilimButton(
-                        label: l10n.stepDetailOpenQuiz,
+                        label: _step.quizTitle ?? l10n.stepDetailOpenQuiz,
                         icon: Icons.quiz_outlined,
                         variant: MenzilimButtonVariant.secondary,
                         onPressed: _openQuiz,
+                      )
+                    else
+                      MenzilimInlineEmpty(message: l10n.stepQuizEmpty),
+
+                    // Kanıt / çıktı
+                    const SizedBox(height: AppSpacing.section),
+                    MenzilimSectionHeader(
+                      title: l10n.evidenceTitle,
+                      subtitle: l10n.evidenceSubtitle,
+                      actionLabel: _step.hasEvidence ? l10n.evidenceAdd : null,
+                      onAction: _step.hasEvidence ? _editEvidence : null,
+                    ),
+                    if (_step.hasEvidence)
+                      MenzilimCard(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (_step.note != null) ...[
+                              Text(
+                                _step.note!,
+                                style: context.textStyles.bodyMedium,
+                              ),
+                              const SizedBox(height: AppSpacing.md),
+                            ],
+                            MenzilimButton(
+                              label: l10n.evidenceOpen,
+                              icon: Icons.open_in_new,
+                              variant: MenzilimButtonVariant.secondary,
+                              onPressed: _openEvidence,
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      MenzilimInlineEmpty(
+                        message: l10n.evidenceSubtitle,
+                        actionLabel: l10n.evidenceAdd,
+                        onAction: _editEvidence,
                       ),
-                    ],
 
                     const SizedBox(height: AppSpacing.section),
                     if (_step.isLocked)
@@ -331,11 +430,19 @@ class _ProjectStepDetailScreenState extends State<ProjectStepDetailScreen> {
                         hint: l10n.projectStepLockedHint,
                       )
                     else if (!_step.isCompleted)
-                      MenzilimButton(
-                        label: l10n.projectStepCompleteAction,
-                        icon: Icons.check,
-                        isLoading: _isCompleting,
-                        onPressed: _complete,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          MenzilimSectionHeader(
+                            title: l10n.stepFlowApply,
+                          ),
+                          MenzilimButton(
+                            label: l10n.projectStepCompleteAction,
+                            icon: Icons.check,
+                            isLoading: _isCompleting,
+                            onPressed: _complete,
+                          ),
+                        ],
                       ),
                   ],
                 ),

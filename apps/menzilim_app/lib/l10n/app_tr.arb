@@ -675,5 +675,66 @@
       }
     }
   },
-  "taskTypeProject": "Proje"
+  "taskTypeProject": "Proje",
+  "evidenceTitle": "Kanıt / çıktı",
+  "evidenceSubtitle": "Bu adımda ne yaptın? İstersen sonra da ekleyebilirsin.",
+  "evidenceUrlLabel": "Çalışmanın bağlantısı",
+  "evidenceUrlHint": "https://github.com/kullanici/proje",
+  "evidenceNoteLabel": "Kısa not",
+  "evidenceNoteHint": "Ne yaptığını birkaç cümleyle yaz.",
+  "evidenceSave": "Kaydet",
+  "evidenceSaved": "Çıktın kaydedildi.",
+  "evidenceSaveError": "Çıktı kaydedilemedi.",
+  "evidenceInvalidUrl": "Bağlantı http:// veya https:// ile başlamalı.",
+  "evidenceOpen": "Çıktıyı Gör",
+  "evidenceAdd": "Kanıt ekle",
+  "evidenceOpenError": "Bağlantı açılamadı.",
+  "stepFlowLearn": "Öğren",
+  "stepFlowCheck": "Kontrol et",
+  "stepFlowApply": "Uygula",
+  "stepQuizEmpty": "Bu adım için henüz quiz bulunmuyor.",
+  "projectCompletedBanner": "Proje tamamlandı",
+  "projectCompletedPortfolioHint": "Artık bu projeyi portföyüne ekleyebilirsin.",
+  "projectOpenSummary": "Proje Özeti",
+  "projectBackToProject": "Projeye Dön",
+  "summaryTitle": "Proje Özeti",
+  "summaryWhatIDidTitle": "Ne yaptım?",
+  "summarySkillsTitle": "Kullanılan beceriler",
+  "summaryStepsTitle": "Tamamlanan adımlar",
+  "summaryEvidenceTitle": "Kanıtlar",
+  "summaryEvidenceEmpty": "Henüz kanıt eklemedin. Adımlara çalışmanın bağlantısını ekleyebilirsin.",
+  "summaryLearningTitle": "Öğrenme özeti",
+  "summaryLearningBody": "{count} adım tamamladın ve bu becerilerde ilerleme kaydettin.",
+  "@summaryLearningBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryStartedAt": "Başlangıç",
+  "summaryCompletedAt": "Tamamlanma",
+  "summaryPlannedDuration": "Planlanan süre",
+  "summaryElapsedDays": "Geçen süre",
+  "summaryDays": "{count} gün",
+  "@summaryDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryInProgressTitle": "Proje henüz tamamlanmadı.",
+  "summaryInProgressHint": "Adımları tamamladıkça özetin zenginleşir.",
+  "streakDays": "{count} günlük seri",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakContinueToday": "Bugün serini devam ettir.",
+  "streakStartToday": "Bugün serini başlat.",
+  "streakActiveToday": "Bugün aktifsin."
 }

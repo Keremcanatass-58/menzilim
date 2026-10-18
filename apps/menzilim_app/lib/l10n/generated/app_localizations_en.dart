@@ -1206,4 +1206,136 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taskTypeProject => 'Project';
+
+  @override
+  String get evidenceTitle => 'Proof of work';
+
+  @override
+  String get evidenceSubtitle =>
+      'What did you do in this step? You can add this later too.';
+
+  @override
+  String get evidenceUrlLabel => 'Link to your work';
+
+  @override
+  String get evidenceUrlHint => 'https://github.com/username/project';
+
+  @override
+  String get evidenceNoteLabel => 'Short note';
+
+  @override
+  String get evidenceNoteHint =>
+      'Describe what you did in a couple of sentences.';
+
+  @override
+  String get evidenceSave => 'Save';
+
+  @override
+  String get evidenceSaved => 'Your work was saved.';
+
+  @override
+  String get evidenceSaveError => 'Your work could not be saved.';
+
+  @override
+  String get evidenceInvalidUrl =>
+      'The link must start with http:// or https://.';
+
+  @override
+  String get evidenceOpen => 'Open Output';
+
+  @override
+  String get evidenceAdd => 'Add proof';
+
+  @override
+  String get evidenceOpenError => 'The link could not be opened.';
+
+  @override
+  String get stepFlowLearn => 'Learn';
+
+  @override
+  String get stepFlowCheck => 'Check';
+
+  @override
+  String get stepFlowApply => 'Apply';
+
+  @override
+  String get stepQuizEmpty => 'There is no quiz for this step yet.';
+
+  @override
+  String get projectCompletedBanner => 'Project completed';
+
+  @override
+  String get projectCompletedPortfolioHint =>
+      'You can add this project to your portfolio now.';
+
+  @override
+  String get projectOpenSummary => 'Project Summary';
+
+  @override
+  String get projectBackToProject => 'Back to Project';
+
+  @override
+  String get summaryTitle => 'Project Summary';
+
+  @override
+  String get summaryWhatIDidTitle => 'What I did';
+
+  @override
+  String get summarySkillsTitle => 'Skills used';
+
+  @override
+  String get summaryStepsTitle => 'Completed steps';
+
+  @override
+  String get summaryEvidenceTitle => 'Proof of work';
+
+  @override
+  String get summaryEvidenceEmpty =>
+      'No proof added yet. You can attach links to your work on each step.';
+
+  @override
+  String get summaryLearningTitle => 'Learning summary';
+
+  @override
+  String summaryLearningBody(int count) {
+    return 'You completed $count steps and made progress in these skills.';
+  }
+
+  @override
+  String get summaryStartedAt => 'Started';
+
+  @override
+  String get summaryCompletedAt => 'Completed';
+
+  @override
+  String get summaryPlannedDuration => 'Planned time';
+
+  @override
+  String get summaryElapsedDays => 'Elapsed';
+
+  @override
+  String summaryDays(int count) {
+    return '$count days';
+  }
+
+  @override
+  String get summaryInProgressTitle => 'This project isn\'t finished yet.';
+
+  @override
+  String get summaryInProgressHint =>
+      'Your summary grows as you complete steps.';
+
+  @override
+  String streakDays(int count) {
+    return '$count-day streak';
+  }
+
+  @override
+  String get streakContinueToday => 'Keep your streak today.';
+
+  @override
+  String get streakStartToday => 'Start your streak today.';
+
+  @override
+  String get streakActiveToday => 'You\'re active today.';
 }

@@ -30,10 +30,12 @@ using Menzilim.Application.Interfaces.AI;
 using Menzilim.Application.DTOs.AICoach;
 using Menzilim.Application.Interfaces.AICoach;
 using Menzilim.Application.Services.AICoach;
+using Menzilim.Application.DTOs.Progress;
 using Menzilim.Application.Interfaces.Progress;
 using Menzilim.Application.Services.Progress;
 using Menzilim.Application.Interfaces.News;
 using Menzilim.Application.Services.News;
+using Menzilim.Application.DTOs.Projects;
 using Menzilim.Application.Interfaces.Projects;
 using Menzilim.Application.Services.Projects;
 using Menzilim.Infrastructure.Configuration;
@@ -81,6 +83,8 @@ builder.Services.AddScoped<IQuizService, QuizService>();
 builder.Services.AddScoped<IQuizRepository, QuizRepository>();
 builder.Services.AddScoped<IAICoachService, AICoachService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
+builder.Services.AddScoped<IStreakService, StreakService>();
+builder.Services.AddScoped<IUserProgressRepository, UserProgressRepository>();
 builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
 builder.Services.AddScoped<IUserProjectService, UserProjectService>();
@@ -1033,6 +1037,77 @@ app.MapGet(
     .RequireAuthorization();
 
 // ==============================
+// STREAK (CONTINUITY)
+// ==============================
+
+app.MapGet(
+    "/api/progress/streak/me",
+    async (
+        ClaimsPrincipal user,
+        IStreakService streakService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        try
+        {
+            var response = await streakService.GetForUserAsync(userId);
+
+            return Results.Ok(response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(new
+            {
+                message = ex.Message
+            });
+        }
+    })
+    .RequireAuthorization();
+
+app.MapPut(
+    "/api/profile/timezone",
+    async (
+        UpdateTimeZoneRequest request,
+        ClaimsPrincipal user,
+        IStreakService streakService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        try
+        {
+            var offset = await streakService.UpdateTimeZoneAsync(
+                userId,
+                request.OffsetMinutes);
+
+            return Results.Ok(new
+            {
+                timeZoneOffsetMinutes = offset
+            });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(new
+            {
+                message = ex.Message
+            });
+        }
+    })
+    .RequireAuthorization();
+
+
+// ==============================
 // PROJECTS (LIVING PROJECT)
 // ==============================
 
@@ -1124,6 +1199,50 @@ app.MapGet(
         }
 
         return Results.Ok(response);
+    })
+    .RequireAuthorization();
+
+app.MapPut(
+    "/api/projects/me/steps/{stepId:guid}/evidence",
+    async (
+        Guid stepId,
+        UpdateStepEvidenceRequest request,
+        ClaimsPrincipal user,
+        IUserProjectService projectService) =>
+    {
+        var userIdClaim =
+            user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        try
+        {
+            var response = await projectService.UpdateStepEvidenceAsync(
+                userId,
+                stepId,
+                request);
+
+            // Başkasının adımı da bulunamadı sayılır.
+            if (response is null)
+            {
+                return Results.NotFound(new
+                {
+                    message = "Adım bulunamadı."
+                });
+            }
+
+            return Results.Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.BadRequest(new
+            {
+                message = ex.Message
+            });
+        }
     })
     .RequireAuthorization();
 

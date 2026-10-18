@@ -18,16 +18,21 @@ public class UserProjectService : IUserProjectService
     // Adım tamamlanınca ona bağlı günlük görev de tamamlanır.
     private readonly IDailyPlanRepository? _dailyPlanRepository;
 
+    // Adımın becerisine bağlı quiz'i bulmak icin (yoksa quiz gösterilmez).
+    private readonly ISkillRepository? _skillRepository;
+
     public UserProjectService(
         IUserProjectRepository projectRepository,
         IUserRepository userRepository,
         IUserContentProgressRepository contentProgressRepository,
-        IDailyPlanRepository? dailyPlanRepository = null)
+        IDailyPlanRepository? dailyPlanRepository = null,
+        ISkillRepository? skillRepository = null)
     {
         _projectRepository = projectRepository;
         _userRepository = userRepository;
         _contentProgressRepository = contentProgressRepository;
         _dailyPlanRepository = dailyPlanRepository;
+        _skillRepository = skillRepository;
     }
 
     public async Task<List<UserProjectResponse>> GetMyProjectsAsync(Guid userId)
@@ -36,9 +41,11 @@ public class UserProjectService : IUserProjectService
 
         var projects = await _projectRepository.GetByUserAsync(userId);
 
+        var quizzes = await LoadQuizzesBySkillAsync(projects);
+
         return projects
             .OrderBy(p => p.CreatedAt)
-            .Select(Map)
+            .Select(project => Map(project, quizzes))
             .ToList();
     }
 
@@ -54,7 +61,7 @@ public class UserProjectService : IUserProjectService
             return null;
         }
 
-        return Map(project);
+        return Map(project, await LoadQuizzesBySkillAsync(new[] { project }));
     }
 
     public async Task<UserProjectResponse?> CompleteStepAsync(
@@ -120,7 +127,102 @@ public class UserProjectService : IUserProjectService
 
         var refreshed = await _projectRepository.GetByIdAsync(project.Id);
 
-        return refreshed is null ? null : Map(refreshed);
+        if (refreshed is null)
+        {
+            return null;
+        }
+
+        return Map(refreshed, await LoadQuizzesBySkillAsync(new[] { refreshed }));
+    }
+
+    public async Task<UserProjectResponse?> UpdateStepEvidenceAsync(
+        Guid userId,
+        Guid stepId,
+        UpdateStepEvidenceRequest request)
+    {
+        var step = await _projectRepository.GetStepWithProjectAsync(stepId);
+
+        if (step is null || step.UserProject.UserId != userId)
+        {
+            return null;
+        }
+
+        var url = Normalize(request.EvidenceUrl);
+
+        if (url is not null && !IsValidEvidenceUrl(url))
+        {
+            throw new InvalidOperationException(
+                "Bağlantı http:// veya https:// ile başlamalı.");
+        }
+
+        step.EvidenceUrl = url;
+        step.Note = Normalize(request.Note);
+
+        await _projectRepository.SaveChangesAsync();
+
+        var refreshed = await _projectRepository.GetByIdAsync(step.UserProjectId);
+
+        if (refreshed is null)
+        {
+            return null;
+        }
+
+        return Map(refreshed, await LoadQuizzesBySkillAsync(new[] { refreshed }));
+    }
+
+    private static string? Normalize(string? value)
+    {
+        var trimmed = value?.Trim();
+
+        return string.IsNullOrEmpty(trimmed) ? null : trimmed;
+    }
+
+    /// <summary>Mutlak http/https bağlantısı mı?</summary>
+    private static bool IsValidEvidenceUrl(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            return false;
+        }
+
+        return uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps;
+    }
+
+    /// <summary>
+    /// Adımların becerilerine bağlı aktif quiz'ler. Yalnızca adımın kendi
+    /// becerisiyle eşleşen quiz döner; alakasız quiz gösterilmez.
+    /// </summary>
+    private async Task<IReadOnlyDictionary<Guid, Menzilim.Domain.Quiz>>
+        LoadQuizzesBySkillAsync(IReadOnlyCollection<UserProject> projects)
+    {
+        var empty = new Dictionary<Guid, Menzilim.Domain.Quiz>();
+
+        if (_skillRepository is null)
+        {
+            return empty;
+        }
+
+        var skillIds = projects
+            .SelectMany(p => p.Steps)
+            .Select(s => s.LearningItem?.SkillId)
+            .Where(id => id is not null)
+            .Select(id => id!.Value)
+            .Distinct()
+            .ToList();
+
+        if (skillIds.Count == 0)
+        {
+            return empty;
+        }
+
+        var quizzes = await _skillRepository.GetActiveQuizzesAsync(skillIds);
+
+        return quizzes
+            .Where(q => q.SkillId is not null)
+            .GroupBy(q => q.SkillId!.Value)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderBy(q => q.Title, StringComparer.Ordinal).First());
     }
 
     /// <summary>
@@ -265,11 +367,13 @@ public class UserProjectService : IUserProjectService
         await _dailyPlanRepository.SaveChangesAsync();
     }
 
-    private static UserProjectResponse Map(UserProject project)
+    private static UserProjectResponse Map(
+        UserProject project,
+        IReadOnlyDictionary<Guid, Menzilim.Domain.Quiz> quizzesBySkill)
     {
         var steps = project.Steps
             .OrderBy(s => s.Order)
-            .Select(MapStep)
+            .Select(step => MapStep(step, quizzesBySkill))
             .ToList();
 
         var completed = steps
@@ -297,9 +401,18 @@ public class UserProjectService : IUserProjectService
         };
     }
 
-    private static UserProjectStepResponse MapStep(UserProjectStep step)
+    private static UserProjectStepResponse MapStep(
+        UserProjectStep step,
+        IReadOnlyDictionary<Guid, Menzilim.Domain.Quiz> quizzesBySkill)
     {
         var item = step.LearningItem;
+
+        Menzilim.Domain.Quiz? quiz = null;
+
+        if (item?.SkillId is not null)
+        {
+            quizzesBySkill.TryGetValue(item.SkillId.Value, out quiz);
+        }
 
         return new UserProjectStepResponse
         {
@@ -315,7 +428,9 @@ public class UserProjectService : IUserProjectService
             SkillName = item?.Skill?.Name,
             CompletedAt = step.CompletedAt,
             EvidenceUrl = step.EvidenceUrl,
-            Note = step.Note
+            Note = step.Note,
+            QuizId = quiz?.Id,
+            QuizTitle = quiz?.Title,
         };
     }
 }

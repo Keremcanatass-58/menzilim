@@ -205,7 +205,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
     final currentQuestion = questions[_currentIndex];
     final isLastQuestion = _currentIndex == questions.length - 1;
-    final selectedOption = _selectedAnswers[currentQuestion.IdKey];
+    final selectedOption = _selectedAnswers[currentQuestion.idKey];
     final hasAnswered = selectedOption != null && selectedOption.isNotEmpty;
 
     final options = [
@@ -276,7 +276,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 isSelected: isSelected,
                 onTap: _isSubmitting
                     ? null
-                    : () => _onOptionSelected(currentQuestion.IdKey, key),
+                    : () => _onOptionSelected(currentQuestion.idKey, key),
               ),
             );
           }),
@@ -557,5 +557,5 @@ class _QuizOption extends StatelessWidget {
 }
 
 extension on QuestionResponse {
-  String get IdKey => id;
+  String get idKey => id;
 }

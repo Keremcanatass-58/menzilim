@@ -678,6 +678,10 @@ namespace Menzilim.Infrastructure.Migrations
                     b.Property<Guid>("SpecializationId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("TimeZoneOffsetMinutes")
+                        .HasDefaultValue(180)
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
