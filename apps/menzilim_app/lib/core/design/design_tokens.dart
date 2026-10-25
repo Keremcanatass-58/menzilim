@@ -12,7 +12,7 @@ class AppSpacing {
   static const double xxl = 32;
 
   /// Bölümler arası boşluk.
-  static const double section = 40;
+  static const double section = 32;
 
   /// Ekran kenar boşlukları (dar ekranda daha küçük).
   static const EdgeInsets screenCompact = EdgeInsets.fromLTRB(20, 20, 20, 40);
@@ -27,12 +27,12 @@ class AppRadius {
 
   static const double sm = 10;
   static const double md = 14;
-  static const double lg = 20;
-  static const double xl = 28;
+  static const double lg = 8;
+  static const double xl = 12;
   static const double pill = 999;
 
   static final BorderRadius cardRadius = BorderRadius.circular(lg);
-  static final BorderRadius fieldRadius = BorderRadius.circular(md);
+  static final BorderRadius fieldRadius = BorderRadius.circular(10);
   static final BorderRadius pillRadius = BorderRadius.circular(pill);
 }
 

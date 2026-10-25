@@ -229,7 +229,10 @@ void main() {
       await tester.enterText(fields.at(0), 'yeni@menzilim.test');
       await tester.enterText(fields.at(1), 'Test1234!');
       await tester.enterText(fields.at(2), 'Test1234!');
-      await tester.tap(find.text('Hesap Oluştur'));
+      final registerButton = find.text('Hesap Oluştur');
+      await tester.ensureVisible(registerButton);
+      await tester.pumpAndSettle();
+      await tester.tap(registerButton);
       await tester.pumpAndSettle();
 
       expect(auth.isAuthenticated, isTrue);

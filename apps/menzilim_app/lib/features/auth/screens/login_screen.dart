@@ -59,10 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await _authService.login(
-        LoginRequest(
-          email: email,
-          password: password,
-        ),
+        LoginRequest(email: email, password: password),
       );
 
       if (!mounted) return;
@@ -89,29 +86,20 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _openRegisterScreen() {
     // push kullanılır: bu ekranı AuthGate gösteriyor, pushReplacement onu
     // yığından siler ve kayıt sonrası yönlendirme yapılamaz.
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const RegisterScreen(),
-      ),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const RegisterScreen()));
   }
 
   void _openSettings() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const SettingsScreen(),
-      ),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
   }
 
   @override
@@ -125,92 +113,100 @@ class _LoginScreenState extends State<LoginScreen> {
             child: SingleChildScrollView(
               padding: AppSpacing.screen(constraints.maxWidth),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 440),
+                constraints: const BoxConstraints(maxWidth: 480),
                 child: MenzilimEntrance(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Expanded(child: AuthBrandMark()),
-                          // Giriş yapmadan da dil/tema seçilebilsin.
-                          IconButton(
-                            tooltip: l10n.settingsTitle,
-                            onPressed: _openSettings,
-                            icon: const Icon(Icons.settings_outlined),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.section),
-                      Text(
-                        l10n.loginTitle,
-                        style: context.textStyles.headlineLarge,
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(
-                        l10n.loginSubtitle,
-                        style: context.textStyles.bodyLarge?.copyWith(
-                          color: context.colors.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xxl),
-                      TextField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: l10n.emailLabel,
-                          hintText: l10n.emailHint,
-                          prefixIcon: const Icon(Icons.email_outlined),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      TextField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        onSubmitted: (_) => _login(),
-                        decoration: InputDecoration(
-                          labelText: l10n.passwordLabel,
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
+                  child: MenzilimCard(
+                    padding: EdgeInsets.all(
+                      constraints.maxWidth < 480
+                          ? AppSpacing.lg
+                          : AppSpacing.xxl,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Expanded(child: AuthBrandMark()),
+                            // Giriş yapmadan da dil/tema seçilebilsin.
+                            IconButton(
+                              tooltip: l10n.settingsTitle,
+                              onPressed: _openSettings,
+                              icon: const Icon(Icons.settings_outlined),
                             ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.section),
+                        Text(
+                          l10n.loginTitle,
+                          style: context.textStyles.headlineLarge,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          l10n.loginSubtitle,
+                          style: context.textStyles.bodyLarge?.copyWith(
+                            color: context.colors.onSurfaceVariant,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.xl),
-                      MenzilimButton(
-                        label: l10n.loginButton,
-                        isLoading: _isLoading,
-                        onPressed: _login,
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              l10n.loginNoAccount,
-                              style: context.textStyles.bodyMedium?.copyWith(
-                                color: context.colors.onSurfaceVariant,
+                        const SizedBox(height: AppSpacing.xxl),
+                        TextField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: l10n.emailLabel,
+                            hintText: l10n.emailHint,
+                            prefixIcon: const Icon(Icons.email_outlined),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        TextField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          onSubmitted: (_) => _login(),
+                          decoration: InputDecoration(
+                            labelText: l10n.passwordLabel,
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
                               ),
                             ),
                           ),
-                          TextButton(
-                            onPressed:
-                                _isLoading ? null : _openRegisterScreen,
-                            child: Text(l10n.registerButton),
-                          ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        MenzilimButton(
+                          label: l10n.loginButton,
+                          isLoading: _isLoading,
+                          onPressed: _login,
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                l10n.loginNoAccount,
+                                style: context.textStyles.bodyMedium?.copyWith(
+                                  color: context.colors.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: _isLoading
+                                  ? null
+                                  : _openRegisterScreen,
+                              child: Text(l10n.registerButton),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

@@ -2,25 +2,71 @@ import 'package:flutter/material.dart';
 
 import '../design/design_tokens.dart';
 
-/// Uygulamanın açık/koyu temaları. Renkler tek bir seed'den türetilen
-/// ColorScheme üzerinden gelir; ekranlar sabit renk yerine
-/// `Theme.of(context).colorScheme` ve [AppStatusColors] kullanır.
-/// İleride yapılacak premium tasarım bu dosyadan yönetilebilir.
+/// MENZİLİM'in renk, tipografi ve bileşen dili.
 class AppTheme {
   AppTheme._();
 
-  /// Material 3'ün varsayılan seed'i: açık tema önceki görünümü korur.
-  static const Color seedColor = Color(0xFF6750A4);
+  static const Color seedColor = Color(0xFF176B5B);
 
   static ThemeData light() => _build(Brightness.light);
 
   static ThemeData dark() => _build(Brightness.dark);
 
   static ThemeData _build(Brightness brightness) {
-    final colors = ColorScheme.fromSeed(
-      seedColor: seedColor,
-      brightness: brightness,
-    );
+    final colors = brightness == Brightness.light
+        ? ColorScheme.fromSeed(seedColor: seedColor).copyWith(
+            primary: const Color(0xFF176B5B),
+            onPrimary: Colors.white,
+            primaryContainer: const Color(0xFFD8EEE8),
+            onPrimaryContainer: const Color(0xFF103B34),
+            secondary: const Color(0xFF9A512F),
+            onSecondary: Colors.white,
+            secondaryContainer: const Color(0xFFF5E3D9),
+            onSecondaryContainer: const Color(0xFF4A281A),
+            tertiary: const Color(0xFF3F5F9A),
+            onTertiary: Colors.white,
+            tertiaryContainer: const Color(0xFFE1E9F7),
+            onTertiaryContainer: const Color(0xFF1D3155),
+            surface: const Color(0xFFF5F7F6),
+            onSurface: const Color(0xFF182321),
+            surfaceContainerLowest: const Color(0xFFFFFFFF),
+            surfaceContainerLow: const Color(0xFFFFFFFF),
+            surfaceContainer: const Color(0xFFEEF2F0),
+            surfaceContainerHigh: const Color(0xFFE7ECE9),
+            surfaceContainerHighest: const Color(0xFFDDE5E1),
+            onSurfaceVariant: const Color(0xFF52615D),
+            outline: const Color(0xFF7D8B86),
+            outlineVariant: const Color(0xFFD5DEDA),
+            surfaceTint: const Color(0xFF176B5B),
+          )
+        : ColorScheme.fromSeed(
+            seedColor: seedColor,
+            brightness: brightness,
+          ).copyWith(
+            primary: const Color(0xFF80CBB8),
+            onPrimary: const Color(0xFF073B32),
+            primaryContainer: const Color(0xFF19483F),
+            onPrimaryContainer: const Color(0xFFD8EEE8),
+            secondary: const Color(0xFFE5A27F),
+            onSecondary: const Color(0xFF4A281A),
+            secondaryContainer: const Color(0xFF573629),
+            onSecondaryContainer: const Color(0xFFF5E3D9),
+            tertiary: const Color(0xFFA8BCE8),
+            onTertiary: const Color(0xFF1D3155),
+            tertiaryContainer: const Color(0xFF2D4168),
+            onTertiaryContainer: const Color(0xFFE1E9F7),
+            surface: const Color(0xFF111A18),
+            onSurface: const Color(0xFFE7EFEC),
+            surfaceContainerLowest: const Color(0xFF0C1312),
+            surfaceContainerLow: const Color(0xFF18221F),
+            surfaceContainer: const Color(0xFF1D2925),
+            surfaceContainerHigh: const Color(0xFF26332F),
+            surfaceContainerHighest: const Color(0xFF303E39),
+            onSurfaceVariant: const Color(0xFFB5C2BD),
+            outline: const Color(0xFF879791),
+            outlineVariant: const Color(0xFF3C4A44),
+            surfaceTint: const Color(0xFF80CBB8),
+          );
 
     final base = ThemeData(
       useMaterial3: true,
@@ -44,9 +90,10 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         centerTitle: false,
+        toolbarHeight: 68,
         titleTextStyle: text.titleLarge?.copyWith(
           fontWeight: FontWeight.w700,
-          letterSpacing: -0.3,
+          letterSpacing: 0,
         ),
       ),
       cardTheme: CardThemeData(
@@ -131,6 +178,19 @@ class AppTheme {
           text.labelMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
       ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: colors.surfaceContainerLow,
+        indicatorColor: colors.primaryContainer,
+        selectedIconTheme: IconThemeData(color: colors.onPrimaryContainer),
+        unselectedIconTheme: IconThemeData(color: colors.onSurfaceVariant),
+        selectedLabelTextStyle: text.labelMedium?.copyWith(
+          color: colors.primary,
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelTextStyle: text.labelMedium?.copyWith(
+          color: colors.onSurfaceVariant,
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: colors.surfaceContainerLow,
@@ -150,10 +210,63 @@ class AppTheme {
           borderRadius: AppRadius.fieldRadius,
           borderSide: BorderSide(color: colors.primary, width: 1.5),
         ),
+        floatingLabelStyle: TextStyle(color: colors.primary),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: colors.surfaceContainerHighest,
+        side: BorderSide.none,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.pillRadius),
+        labelStyle: text.labelMedium?.copyWith(
+          color: colors.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          textStyle: WidgetStatePropertyAll(
+            text.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          foregroundColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? colors.onPrimaryContainer
+                : colors.onSurfaceVariant,
+          ),
+          backgroundColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? colors.primaryContainer
+                : colors.surfaceContainerLow,
+          ),
+          side: WidgetStatePropertyAll(
+            BorderSide(color: colors.outlineVariant),
+          ),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: AppRadius.fieldRadius),
+          ),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: colors.surfaceContainerLow,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppRadius.fieldRadius,
+          side: BorderSide(color: colors.outlineVariant),
+        ),
+        titleTextStyle: text.titleLarge?.copyWith(
+          color: colors.onSurface,
+          fontWeight: FontWeight.w700,
+        ),
+        contentTextStyle: text.bodyMedium?.copyWith(
+          color: colors.onSurfaceVariant,
+        ),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.fieldRadius),
+        backgroundColor: colors.inverseSurface,
+        contentTextStyle: text.bodyMedium?.copyWith(
+          color: colors.onInverseSurface,
+        ),
       ),
       splashFactory: InkSparkle.splashFactory,
     );
@@ -165,23 +278,23 @@ class AppTheme {
     return base.copyWith(
       displaySmall: base.displaySmall?.copyWith(
         fontWeight: FontWeight.w700,
-        letterSpacing: -1,
+        letterSpacing: 0,
       ),
       headlineLarge: base.headlineLarge?.copyWith(
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.8,
+        letterSpacing: 0,
       ),
       headlineMedium: base.headlineMedium?.copyWith(
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.6,
+        letterSpacing: 0,
       ),
       headlineSmall: base.headlineSmall?.copyWith(
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.4,
+        letterSpacing: 0,
       ),
       titleLarge: base.titleLarge?.copyWith(
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.3,
+        letterSpacing: 0,
       ),
       titleMedium: base.titleMedium?.copyWith(fontWeight: FontWeight.w600),
       bodyLarge: base.bodyLarge?.copyWith(height: 1.45),
@@ -212,12 +325,12 @@ class AppStatusColors extends ThemeExtension<AppStatusColors> {
   });
 
   static const AppStatusColors light = AppStatusColors(
-    success: Color(0xFF2E7D32),
-    successContainer: Color(0xFFE8F5E9),
-    warning: Color(0xFFE65100),
-    warningContainer: Color(0xFFFFF3E0),
-    info: Color(0xFF1565C0),
-    infoContainer: Color(0xFFE3F2FD),
+    success: Color(0xFF176B5B),
+    successContainer: Color(0xFFD8EEE8),
+    warning: Color(0xFF9A512F),
+    warningContainer: Color(0xFFF5E3D9),
+    info: Color(0xFF3F5F9A),
+    infoContainer: Color(0xFFE1E9F7),
   );
 
   static const AppStatusColors dark = AppStatusColors(
@@ -254,9 +367,17 @@ class AppStatusColors extends ThemeExtension<AppStatusColors> {
 
     return AppStatusColors(
       success: Color.lerp(success, other.success, t)!,
-      successContainer: Color.lerp(successContainer, other.successContainer, t)!,
+      successContainer: Color.lerp(
+        successContainer,
+        other.successContainer,
+        t,
+      )!,
       warning: Color.lerp(warning, other.warning, t)!,
-      warningContainer: Color.lerp(warningContainer, other.warningContainer, t)!,
+      warningContainer: Color.lerp(
+        warningContainer,
+        other.warningContainer,
+        t,
+      )!,
       info: Color.lerp(info, other.info, t)!,
       infoContainer: Color.lerp(infoContainer, other.infoContainer, t)!,
     );

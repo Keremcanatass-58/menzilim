@@ -175,4 +175,21 @@ void main() {
     expect(context.statusColors, AppStatusColors.dark);
     expect(AppSettingsController.supportedLocales, hasLength(2));
   });
+
+  test('premium temalar farklı, okunaklı paletler ve sıkı başlık aralığı taşır', () {
+    final light = AppTheme.light();
+    final dark = AppTheme.dark();
+
+    expect(light.colorScheme.primary, const Color(0xFF176B5B));
+    expect(light.colorScheme.surface, const Color(0xFFF5F7F6));
+    expect(dark.colorScheme.surface, const Color(0xFF111A18));
+    expect(light.textTheme.headlineLarge?.letterSpacing, 0);
+    expect(light.cardTheme.shape, isA<RoundedRectangleBorder>());
+    expect(
+      (light.cardTheme.shape! as RoundedRectangleBorder)
+          .borderRadius
+          .resolve(TextDirection.ltr),
+      BorderRadius.circular(8),
+    );
+  });
 }

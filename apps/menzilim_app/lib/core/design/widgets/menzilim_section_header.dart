@@ -29,7 +29,7 @@ class MenzilimSectionHeader extends StatelessWidget {
       title,
       style: context.textStyles.titleLarge?.copyWith(
         fontWeight: FontWeight.w700,
-        letterSpacing: -0.4,
+        letterSpacing: 0,
       ),
     );
 
@@ -53,10 +53,7 @@ class MenzilimSectionHeader extends StatelessWidget {
                   ),
                 ),
               if (actionLabel != null && onAction != null)
-                TextButton(
-                  onPressed: onAction,
-                  child: Text(actionLabel!),
-                ),
+                TextButton(onPressed: onAction, child: Text(actionLabel!)),
             ],
           ),
           if (subtitle != null) ...[
